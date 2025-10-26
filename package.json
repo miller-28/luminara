@@ -1,0 +1,13 @@
+{
+  "name": "luminara",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "ofetch": "^1.4.1"
+  }
+}
