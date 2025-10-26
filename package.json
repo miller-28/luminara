@@ -1,13 +1,51 @@
 {
   "name": "luminara",
   "version": "0.0.1",
+  "description": "Tiny, extensible browser-only HTTP client (React-friendly) built on ofetch",
   "type": "module",
+  "module": "./src/index.js",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "import": "./src/index.js"
+    }
   },
   "sideEffects": false,
+  "license": "MIT",
+  "keywords": [
+    "fetch",
+    "http",
+    "client",
+    "browser",
+    "react",
+    "ofetch",
+    "interceptors",
+    "retry",
+    "debounce"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miller-28/react-luminara.git"
+  },
+  "bugs": {
+    "url": "https://github.com/miller-28/react-luminara/issues"
+  },
+  "homepage": "https://github.com/miller-28/react-luminara#readme",
   "dependencies": {
     "ofetch": "^1.4.1"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Edge versions",
+    "last 2 Safari versions"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

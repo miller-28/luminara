@@ -1,13 +1,12 @@
 # 🌌 Luminara
 
 **Luminara** is a tiny, extensible HTTP client built on top of [ofetch](https://github.com/unjs/ofetch).  
-It works seamlessly in both **React (browser)** and **Node.js** environments, providing a minimal yet powerful foundation for data fetching — with built-in plugin support for retries, debouncing, interceptors, and more.
+It works with **React (browser)**, providing a minimal yet powerful foundation for data fetching — with built-in plugin support for retries, debouncing, interceptors, and more.
 
 ---
 
 ## ✨ Features
 
-- 🌍 Universal — works in Browser, Node.js, and Serverless environments  
 - ⚡ Based on modern native `fetch` (via `ofetch`)  
 - 🔌 Plugin architecture (add retries, interceptors, rate-limiters, etc.)  
 - 💎 Tiny footprint (~1KB + ofetch)  
@@ -21,21 +20,7 @@ It works seamlessly in both **React (browser)** and **Node.js** environments, pr
 ```bash
 # npm
 npm install luminara
-
-# or yarn
-yarn add luminara
-
-# or pnpm
-pnpm add luminara
 ```
-
-> **Requirements:**  
-> Node.js **v18+** or any modern browser.  
-> For Node < 18, add `undici` and polyfill global fetch:
-> ```js
-> import { fetch } from "undici";
-> globalThis.fetch = fetch;
-> ```
 
 ---
 
