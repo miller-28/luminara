@@ -1,3 +1,9 @@
+# Ignore local sandbox and other local development artifacts
+/sandbox/
+.env.local
+.DS_Store
+node_modules/
+dist/
 node_modules
 .git
 .github

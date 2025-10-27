@@ -37,7 +37,7 @@ export class LuminaraClient {
                 for (const p of this.plugins) if (p.onError) await p.onError(err, current);
                 throw err;
            }
-        }
+    }
 
     get(url, opts = {}) { 
         return this.request({ ...opts, url, method: "GET" }); 
