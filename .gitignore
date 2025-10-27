@@ -1,14 +1,12 @@
-# Ignore local sandbox and other local development artifacts
-/sandbox/
+# Ignore local development artifacts (keep sandbox committed to repo)
 .env.local
 .DS_Store
 node_modules/
 dist/
-node_modules
+coverage
+.env.local
+.DS_Store
 .git
 .github
 .vscode
 *.log
-test
-tests
-coverage
