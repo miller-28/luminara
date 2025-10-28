@@ -2,6 +2,8 @@ import { ofetch } from "ofetch";
 import { createBackoffHandler } from "../core/backoff.js";
 
 export function OfetchDriver(config = {}) {
+	// Store global configuration
+	const globalConfig = { ...config };
 
 	// Customize ofetch instance once; users/plugins can hook via Luminara.
 	const ofetchInstance = ofetch.create({
@@ -15,11 +17,14 @@ export function OfetchDriver(config = {}) {
 
 	return {
 		async request(opts) {
+			// Merge global config with per-request options (per-request takes priority)
+			const mergedOpts = { ...globalConfig, ...opts };
+			
 			const { 
 				url, method = "GET", headers, query, body, signal, 
 				timeout, retry, retryDelay, retryStatusCodes,
 				backoffType, backoffMaxDelay
-			} = opts;
+			} = mergedOpts;
 			
 			// Map Luminara's options to ofetch's options
 			const ofetchOptions = { method, headers, query, body, signal };

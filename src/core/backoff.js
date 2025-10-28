@@ -14,7 +14,12 @@ export const backoffStrategies = {
 	},
 	fibonacci: (retryCount, retryDelay = 1000) => {
 		// Fibonacci sequence: 1s, 1s, 2s, 3s, 5s, 8s...
-		const calculateFibonacci = (num) => num <= 1 ? 1 : calculateFibonacci(num - 1) + calculateFibonacci(num - 2);
+		const calculateFibonacci = (num) => {
+			if (num <= 0) return 0;
+			if (num === 1) return 1;
+			if (num === 2) return 1;
+			return calculateFibonacci(num - 1) + calculateFibonacci(num - 2);
+		};
 		return calculateFibonacci(retryCount) * retryDelay;
 	},
 	jitter: (retryCount, retryDelay = 1000) => {
@@ -38,25 +43,25 @@ export function createBackoffHandler(backoffType, baseDelay = 1000, backoffMaxDe
 		return null;
 	}
 
-	// Track the original retry count and current attempt
+	// Track the original retry count to calculate attempt number
 	let originalRetryCount = null;
-	let currentAttempt = 0;
 
 	// Return a function that matches ofetch's retryDelay signature:
-	// (context: FetchContext) => number
+	// (context: { request, options, response, error }) => number
 	return (context) => {
-		// On first call, save the original retry count
+		// On first call, save the original retry count from the first call
 		if (originalRetryCount === null) {
-			originalRetryCount = context.options.retry || 0;
+			// Since retry decrements, we can infer the original count
+			// If this is the first retry call, we need to add 1 to get the original
+			originalRetryCount = context.options.retry + 1;
 		}
 
 		// Calculate which attempt this is
-		// ofetch decrements retry count, so we can calculate the attempt number
-		const remainingRetries = context.options.retry || 0;
-		const retryAttempt = originalRetryCount - remainingRetries;
+		// ofetch decrements retry count, so: attempt = original - current
+		const currentRetryCount = context.options.retry;
+		const attemptNumber = originalRetryCount - currentRetryCount;
 		
-		const calculatedDelay = strategy(retryAttempt, baseDelay, backoffMaxDelay);
-		console.log(`[Luminara ${backoffType}] Retry attempt ${retryAttempt}/${originalRetryCount} after ${calculatedDelay}ms`);
+		const calculatedDelay = strategy(attemptNumber, baseDelay, backoffMaxDelay);
 		return calculatedDelay;
 	};
 }

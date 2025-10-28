@@ -28,7 +28,7 @@ export class LuminaraClient {
 			// 3) run all onSuccess
 			for (const plug of this.plugins) {
 				if (plug.onSuccess) 
-					response = await plug.onSuccess(response);
+					response = await plug.onSuccess(response, currentRequest);
 			}
 			return response;
 		} catch (error) {
