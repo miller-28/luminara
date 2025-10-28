@@ -1,6 +1,6 @@
 {
   "name": "luminara",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight, plugin-based HTTP client with retry strategies, backoff algorithms, and interceptors. Built on ofetch for modern browsers.",
   "type": "module",
   "module": "./src/index.js",
