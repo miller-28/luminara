@@ -1,7 +1,7 @@
 {
   "name": "luminara",
   "version": "0.1.0",
-  "description": "Tiny, extensible browser-only HTTP client (React-friendly) built on ofetch",
+  "description": "Lightweight, plugin-based HTTP client with retry strategies, backoff algorithms, and interceptors. Built on ofetch for modern browsers.",
   "type": "module",
   "module": "./src/index.js",
   "main": "./src/index.js",
@@ -12,16 +12,31 @@
   },
   "sideEffects": false,
   "license": "MIT",
+  "author": {
+    "name": "Jonathan Miller",
+    "email": "jonathan@miller28.com",
+    "url": "https://www.linkedin.com/in/miller28/"
+  },
   "keywords": [
     "fetch",
     "http",
+    "http-client",
+    "ajax",
     "client",
     "browser",
     "react",
     "ofetch",
     "interceptors",
     "retry",
-    "debounce"
+    "backoff",
+    "exponential-backoff",
+    "fibonacci",
+    "jitter",
+    "plugins",
+    "middleware",
+    "timeout",
+    "abort",
+    "promise"
   ],
   "repository": {
     "type": "git",
@@ -35,6 +50,7 @@
     "ofetch": "^1.5.0"
   },
   "files": [
+    "sandbox",
     "src",
     "README.md",
     "LICENSE"
