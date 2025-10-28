@@ -48,8 +48,8 @@ console.log(response.data);
 
 // POST JSON
 await api.postJson("https://api.example.com/posts", {
-	title: "Hello Luminara",
-	content: "A beautiful HTTP client"
+  title: "Hello Luminara",
+  content: "A beautiful HTTP client"
 });
 
 // GET Text
@@ -57,8 +57,8 @@ const textResponse = await api.getText("https://example.com");
 
 // POST Form Data
 await api.postForm("https://api.example.com/upload", {
-	name: "John",
-	email: "john@example.com"
+  name: "John",
+  email: "john@example.com"
 });
 ```
 
@@ -66,13 +66,13 @@ await api.postForm("https://api.example.com/upload", {
 
 ```js
 const api = createLuminara({
-	baseURL: "https://api.example.com",
-	timeout: 10000,
-	retry: 3,
-	retryDelay: 1000,
-	headers: {
-		"Authorization": "Bearer YOUR_TOKEN"
-	}
+  baseURL: "https://api.example.com",
+  timeout: 10000,
+  retry: 3,
+  retryDelay: 1000,
+  headers: {
+    "Authorization": "Bearer YOUR_TOKEN"
+  }
 });
 ```
 
@@ -87,9 +87,9 @@ Fixed delay between retries.
 
 ```js
 const api = createLuminara({
-	retry: 5,
-	retryDelay: 1000,
-	backoffType: 'linear'
+  retry: 5,
+  retryDelay: 1000,
+  backoffType: 'linear'
 });
 ```
 
@@ -98,9 +98,9 @@ Delays grow exponentially (base × 2^n).
 
 ```js
 const api = createLuminara({
-	retry: 5,
-	retryDelay: 200,
-	backoffType: 'exponential'
+  retry: 5,
+  retryDelay: 200,
+  backoffType: 'exponential'
 });
 // Delays: 200ms, 400ms, 800ms, 1600ms, 3200ms
 ```
@@ -110,10 +110,10 @@ Exponential growth with a maximum delay cap.
 
 ```js
 const api = createLuminara({
-	retry: 5,
-	retryDelay: 300,
-	backoffType: 'exponentialCapped',
-	backoffMaxDelay: 3000
+  retry: 5,
+  retryDelay: 300,
+  backoffType: 'exponentialCapped',
+  backoffMaxDelay: 3000
 });
 ```
 
@@ -122,9 +122,9 @@ Delays follow the Fibonacci sequence.
 
 ```js
 const api = createLuminara({
-	retry: 8,
-	retryDelay: 200,
-	backoffType: 'fibonacci'
+  retry: 8,
+  retryDelay: 200,
+  backoffType: 'fibonacci'
 });
 // Delays: 200ms, 200ms, 400ms, 600ms, 1000ms, 1600ms...
 ```
@@ -134,9 +134,9 @@ Randomized delays to prevent thundering herd.
 
 ```js
 const api = createLuminara({
-	retry: 3,
-	retryDelay: 500,
-	backoffType: 'jitter'
+  retry: 3,
+  retryDelay: 500,
+  backoffType: 'jitter'
 });
 ```
 
@@ -145,10 +145,10 @@ Combines exponential growth with randomization.
 
 ```js
 const api = createLuminara({
-	retry: 4,
-	retryDelay: 300,
-	backoffType: 'exponentialJitter',
-	backoffMaxDelay: 5000
+  retry: 4,
+  retryDelay: 300,
+  backoffType: 'exponentialJitter',
+  backoffMaxDelay: 5000
 });
 ```
 
@@ -158,12 +158,12 @@ For full control, provide a custom retry function:
 
 ```js
 const api = createLuminara({
-	retry: 4,
-	retryDelay: (context) => {
-		const attempt = context.options.retry || 0;
-		console.log(`Retry attempt ${attempt}`);
-		return 150; // Custom delay in milliseconds
-	}
+  retry: 4,
+  retryDelay: (context) => {
+    const attempt = context.options.retry || 0;
+    console.log(`Retry attempt ${attempt}`);
+    return 150; // Custom delay in milliseconds
+  }
 });
 ```
 
@@ -171,9 +171,9 @@ const api = createLuminara({
 
 ```js
 const api = createLuminara({
-	retry: 3,
-	retryDelay: 500,
-	retryStatusCodes: [408, 429, 500, 502, 503]
+  retry: 3,
+  retryDelay: 500,
+  retryStatusCodes: [408, 429, 500, 502, 503]
 });
 ```
 
@@ -189,18 +189,18 @@ Modify requests before they're sent:
 
 ```js
 api.use({
-	onRequest(request) {
-		console.log('📤 Sending:', request.method, request.url);
-		
-		// Add custom headers
-		request.headers = {
-			...(request.headers || {}),
-			'X-Custom-Header': 'Luminara',
-			'Authorization': `Bearer ${getToken()}`
-		};
-		
-		return request;
-	}
+  onRequest(request) {
+    console.log('📤 Sending:', request.method, request.url);
+    
+    // Add custom headers
+    request.headers = {
+      ...(request.headers || {}),
+      'X-Custom-Header': 'Luminara',
+      'Authorization': `Bearer ${getToken()}`
+    };
+    
+    return request;
+  }
 });
 ```
 
@@ -210,15 +210,15 @@ Transform responses after they arrive:
 
 ```js
 api.use({
-	onSuccess(response) {
-		console.log('📥 Received:', response.status);
-		
-		// Add metadata
-		response.data.timestamp = new Date().toISOString();
-		response.data.transformed = true;
-		
-		return response;
-	}
+  onSuccess(response) {
+    console.log('📥 Received:', response.status);
+    
+    // Add metadata
+    response.data.timestamp = new Date().toISOString();
+    response.data.transformed = true;
+    
+    return response;
+  }
 });
 ```
 
@@ -228,13 +228,13 @@ Handle errors globally:
 
 ```js
 api.use({
-	onError(error, request) {
-		console.error('❌ Request failed:', request.url);
-		console.error('Error:', error.message);
-		
-		// Log to analytics service
-		analytics.trackError(error);
-	}
+  onError(error, request) {
+    console.error('❌ Request failed:', request.url);
+    console.error('Error:', error.message);
+    
+    // Log to analytics service
+    analytics.trackError(error);
+  }
 });
 ```
 
@@ -245,33 +245,33 @@ Chain multiple plugins for complex workflows:
 ```js
 // Authentication plugin
 api.use({
-	onRequest(req) {
-		req.headers = { ...req.headers, 'Authorization': `Bearer ${token}` };
-		return req;
-	}
+  onRequest(req) {
+    req.headers = { ...req.headers, 'Authorization': `Bearer ${token}` };
+    return req;
+  }
 });
 
 // Logging plugin
 api.use({
-	onRequest(req) {
-		console.log('→', req.method, req.url);
-		return req;
-	},
-	onSuccess(res) {
-		console.log('✓', res.status);
-		return res;
-	}
+  onRequest(req) {
+    console.log('→', req.method, req.url);
+    return req;
+  },
+  onSuccess(res) {
+    console.log('✓', res.status);
+    return res;
+  }
 });
 
 // Analytics plugin
 api.use({
-	onSuccess(res) {
-		analytics.track('api_success', { url: res.url });
-		return res;
-	},
-	onError(err, req) {
-		analytics.track('api_error', { url: req.url, error: err.message });
-	}
+  onSuccess(res) {
+    analytics.track('api_success', { url: res.url });
+    return res;
+  },
+  onError(err, req) {
+    analytics.track('api_error', { url: req.url, error: err.message });
+  }
 });
 ```
 
@@ -283,7 +283,7 @@ api.use({
 
 ```js
 const api = createLuminara({
-	timeout: 5000 // 5 seconds
+  timeout: 5000 // 5 seconds
 });
 
 // Will throw timeout error if request takes longer than 5s
@@ -297,18 +297,18 @@ const controller = new AbortController();
 
 // Start request
 const promise = api.get('https://api.example.com/long-task', {
-	signal: controller.signal
+  signal: controller.signal
 });
 
 // Abort after 2 seconds
 setTimeout(() => controller.abort(), 2000);
 
 try {
-	await promise;
+  await promise;
 } catch (error) {
-	if (error.name === 'AbortError') {
-		console.log('Request was cancelled');
-	}
+  if (error.name === 'AbortError') {
+    console.log('Request was cancelled');
+  }
 }
 ```
 
@@ -322,26 +322,26 @@ Replace the default ofetch driver with your own implementation:
 import { LuminaraClient } from "luminara";
 
 const customDriver = () => ({
-	async request(options) {
-		const { url, method = 'GET', headers, body, signal } = options;
-		
-		const response = await fetch(url, {
-			method,
-			headers,
-			body: body ? JSON.stringify(body) : undefined,
-			signal
-		});
-		
-		const contentType = response.headers.get('content-type') || '';
-		const isJson = contentType.includes('application/json');
-		const data = isJson ? await response.json() : await response.text();
-		
-		return {
-			status: response.status,
-			headers: response.headers,
-			data
-		};
-	}
+  async request(options) {
+    const { url, method = 'GET', headers, body, signal } = options;
+    
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal
+    });
+    
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await response.json() : await response.text();
+    
+    return {
+      status: response.status,
+      headers: response.headers,
+      data
+    };
+  }
 });
 
 const api = new LuminaraClient(customDriver());
@@ -391,44 +391,44 @@ import { useEffect, useState } from "react";
 import { createLuminara } from "luminara";
 
 const api = createLuminara({
-	baseURL: "https://api.example.com",
-	retry: 3,
-	retryDelay: 1000,
-	backoffType: "exponential"
+  baseURL: "https://api.example.com",
+  retry: 3,
+  retryDelay: 1000,
+  backoffType: "exponential"
 });
 
 // Add global error handling
 api.use({
-	onError(error) {
-		console.error("API Error:", error.message);
-	}
+  onError(error) {
+    console.error("API Error:", error.message);
+  }
 });
 
 export default function UsersList() {
-	const [users, setUsers] = useState([]);
-	const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		api.getJson("/users")
-			.then(res => {
-				setUsers(res.data);
-				setLoading(false);
-			})
-			.catch(err => {
-				console.error(err);
-				setLoading(false);
-			});
-	}, []);
+  useEffect(() => {
+    api.getJson("/users")
+      .then(res => {
+        setUsers(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
 
-	if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
 
-	return (
-		<ul>
-			{users.map(user => (
-				<li key={user.id}>{user.name}</li>
-			))}
-		</ul>
-	);
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
