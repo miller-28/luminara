@@ -1,23 +1,51 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Luminara Sandbox</title>
-    <style>
-      body { font-family: system-ui, Arial, sans-serif; padding: 24px; }
-      pre { background:#f6f8fa; padding:12px; border-radius:6px; }
-    </style>
-  </head>
-  <body>
-    <h1>Luminara — Sandbox / POC</h1>
-    <p>This page demonstrates a tiny usage POC for the <code>luminara</code> package.
-    Open this file with a simple static server (for example <code>npx serve sandbox</code> or use your editor's Live Server).
-    </p>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Luminara Sandbox - Interactive Demo</title>
+		<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌌</text></svg>">
+		<link rel="stylesheet" href="styles.css">
+		<script type="importmap">
+			{
+				"imports": {
+					"ofetch": "https://esm.sh/ofetch@1.4.1"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<span class="emoji">🌌</span>
+				<h1>Luminara</h1>
+				<p>A lightweight, plugin-based HTTP client for modern web applications built on ofetch</p>
+			</div>
 
-    <button id="run">Run demo</button>
-    <pre id="out">Click "Run demo" to execute a sample request and see the response here.</pre>
+		<div class="philosophy">
+			<h2>💡 Philosophy</h2>
+			<p><strong>Simple by Design:</strong> Like light traveling through space, Luminara embraces simplicity. A thin wrapper around ofetch with a powerful plugin system.</p>
+			<p><strong>Separation of Concerns:</strong> Drivers handle communication, extensions live in core. Clean architecture, clear boundaries, harmonious design.</p>
+			<p><strong>Developer-Friendly:</strong> Descriptive names, clear APIs, self-documenting code. Built with mindfulness for those who craft with intention.</p>
+			<p><strong>Interactive Sandbox:</strong> Explore 21 examples across 8 features. Run tests individually or together. Live retry logging, backoff strategies, plugins, and custom drivers—all at your fingertips.</p>
+			<p><strong>Illuminating the Path:</strong> Just as stars guide travelers, Luminara guides your HTTP requests with grace, reliability, and cosmic precision. ✨</p>
+		</div>
 
-    <script type="module" src="./main.js"></script>
-  </body>
+		<div class="content">
+				<div class="global-controls">
+					<button class="btn" id="run-all">▶️ Run All Examples</button>
+					<button class="btn" id="clear-all">🗑️ Clear All</button>
+				</div>
+
+				<div id="examples-container"></div>
+			</div>
+
+			<div class="footer">
+				Crafted with intention by <a href="mailto:jonathan@miller28.com">Jonathan Miller</a> • <a href="https://www.linkedin.com/in/miller28/" target="_blank" rel="noopener noreferrer">LinkedIn</a> ✨ • Open Source • MIT License • May your requests flow like starlight
+			</div>
+		</div>
+
+		<script type="module" src="./main.js"></script>
+	</body>
 </html>
+

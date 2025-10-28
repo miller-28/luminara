@@ -1,136 +1,145 @@
-/**
- * @typedef {import('./driver.js').LuminaraRequest} LuminaraRequest
- * @typedef {import('./driver.js').LuminaraResponse} LuminaraResponse
- * @typedef {import('./driver.js').LuminaraDriver} LuminaraDriver
- */
-
-/**
- * @typedef {Object} LuminaraPlugin
- * @property {(req: LuminaraRequest) => (Promise<LuminaraRequest>|LuminaraRequest)} [onRequest]
- * @property {<T>(res: LuminaraResponse) => (Promise<LuminaraResponse>|LuminaraResponse)} [onSuccess]
- * @property {(err: any, req: LuminaraRequest) => (Promise<void>|void)} [onError]
- */
+import { OfetchDriver } from "../drivers/ofetch.js";
 
 export class LuminaraClient {
 
-    /** @param {LuminaraDriver} driver @param {LuminaraPlugin[]} [plugins] */
-    constructor(driver, plugins = []) {
-        this.driver = driver;
-        this.plugins = plugins;
-    }
+	constructor(driver = OfetchDriver(), plugins = []) {
+		this.driver = driver;
+		this.plugins = plugins;
+	}
 
-    /** @param {LuminaraPlugin} plugin */
-    use(plugin) { 
-        this.plugins.push(plugin); 
-        return this; 
-    }
+	use(plugin) {
+		this.plugins.push(plugin); 
+		return this; 
+	}
 
-    /** @param {LuminaraRequest} req */
-    async request(req) {
-        // 1) run all onRequest
-        let current = req;
-        for (const p of this.plugins) {
-            if (p.onRequest) current = await p.onRequest(current);
-        }
+	async request(req) {
 
-        // 2) call driver once
-        try {
-            let res = await this.driver.request(current);
+		// 1) run all onRequest
+		let currentRequest = req;
+		for (const plug of this.plugins) {
+			if (plug.onRequest) 
+				currentRequest = await plug.onRequest(currentRequest);
+		}
 
-            // 3) run all onSuccess
-            for (const p of this.plugins) {
-                if (p.onSuccess) res = await p.onSuccess(res);
-            }
-            return res;
-        } catch (err) {
-            // 4) run all onError
-            for (const p of this.plugins) {
-                if (p.onError) await p.onError(err, current);
-            }
-            throw err;
-        }
-    }
+		// 2) call driver once
+		try {
+			let response = await this.driver.request(currentRequest);
 
-    // -------- Core verbs --------
-    get(url, opts = {})     { return this.request({ ...opts, url, method: "GET" }); }
-    post(url, body, opts={}){ return this.request({ ...opts, url, method: "POST", body }); }
-    put(url, body, opts = {})   { return this.request({ ...opts, url, method: "PUT", body }); }
-    patch(url, body, opts = {}) { return this.request({ ...opts, url, method: "PATCH", body }); }
-    del(url, opts = {})         { return this.request({ ...opts, url, method: "DELETE" }); }
-    head(url, opts = {})        { return this.request({ ...opts, url, method: "HEAD" }); }
-    options(url, opts = {})     { return this.request({ ...opts, url, method: "OPTIONS" }); }
+			// 3) run all onSuccess
+			for (const plug of this.plugins) {
+				if (plug.onSuccess) 
+					response = await plug.onSuccess(response);
+			}
+			return response;
+		} catch (error) {
+			// 4) run all onError
+			for (const plug of this.plugins) {
+				if (plug.onError) await plug.onError(error, currentRequest);
+			}
+			throw error;
+		}
+	}
 
-    // -------- Typed GET helpers (response content) --------
-    getText(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'text/plain', 'text'));
-    }
-    getJson(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'application/json', 'json'));
-    }
-    getXml(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'application/xml, text/xml, application/soap+xml', 'xml'));
-    }
-    getHtml(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'text/html', 'html'));
-    }
-    getBlob(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, '*/*', 'blob'));
-    }
-    getArrayBuffer(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'application/octet-stream', 'arrayBuffer'));
-    }
-    // NDJSON: expect driver to stream/iterate, or return text and split lines upstream
-    getNDJSON(url, opts = {}) {
-        return this.get(url, this.#withAccept(opts, 'application/x-ndjson', 'ndjson'));
-    }
+	// -------- Core verbs --------
+	get(url, options = {}) {
+		return this.request({ ...options, url, method: "GET" });
+	}
+	
+	post(url, body, options = {}) {
+		return this.request({ ...options, url, method: "POST", body });
+	}
+	
+	put(url, body, options = {}) {
+		return this.request({ ...options, url, method: "PUT", body });
+	}
+	
+	patch(url, body, options = {}) {
+		return this.request({ ...options, url, method: "PATCH", body });
+	}
+	
+	del(url, options = {}) {
+		return this.request({ ...options, url, method: "DELETE" });
+	}
+	
+	head(url, options = {}) {
+		return this.request({ ...options, url, method: "HEAD" });
+	}
+	
+	options(url, options = {}) {
+		return this.request({ ...options, url, method: "OPTIONS" });
+	}
 
-    // -------- Typed POST/PUT/PATCH helpers (request content) --------
-    postJson(url, data, opts = {}) {
-        return this.post(url, JSON.stringify(data), this.#withType(opts, 'application/json', 'json'));
-    }
-    putJson(url, data, opts = {}) {
-        return this.put(url, JSON.stringify(data), this.#withType(opts, 'application/json', 'json'));
-    }
-    patchJson(url, data, opts = {}) {
-        return this.patch(url, JSON.stringify(data), this.#withType(opts, 'application/json', 'json'));
-    }
+	// -------- Typed GET helpers (response content) --------
+	getText(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'text/plain', 'text'));
+	}
+	getJson(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'application/json', 'json'));
+	}
+	getXml(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'application/xml, text/xml, application/soap+xml', 'xml'));
+	}
+	getHtml(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'text/html', 'html'));
+	}
+	getBlob(url, options = {}) {
+		return this.get(url, this.#withAccept(options, '*/*', 'blob'));
+	}
+	getArrayBuffer(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'application/octet-stream', 'arrayBuffer'));
+	}
+	// NDJSON: expect driver to stream/iterate, or return text and split lines upstream
+	getNDJSON(url, options = {}) {
+		return this.get(url, this.#withAccept(options, 'application/x-ndjson', 'ndjson'));
+	}
 
-    postText(url, text, opts = {}) {
-        return this.post(url, String(text), this.#withType(opts, 'text/plain', 'text'));
-    }
+	// -------- Typed POST/PUT/PATCH helpers (request content) --------
+	postJson(url, data, options = {}) {
+		return this.post(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
+	}
+	putJson(url, data, options = {}) {
+		return this.put(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
+	}
+	patchJson(url, data, options = {}) {
+		return this.patch(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
+	}
 
-    postForm(url, data, opts = {}) {
-        const body = data instanceof URLSearchParams ? data : new URLSearchParams(data);
-        // note: URLSearchParams auto-encodes; body will be used directly
-        return this.post(url, body, this.#withType(opts, 'application/x-www-form-urlencoded', 'text'));
-    }
+	postText(url, text, options = {}) {
+		return this.post(url, String(text), this.#withType(options, 'text/plain', 'text'));
+	}
 
-    postMultipart(url, formData, opts = {}) {
-        // Important: do NOT set Content-Type; browser sets boundary for FormData.
-        const { headers = {}, responseType } = opts;
-        const safe = { ...opts, headers: { ...headers }, responseType: responseType ?? 'json' };
-        return this.post(url, formData, safe);
-    }
+	postForm(url, data, options = {}) {
+		const body = data instanceof URLSearchParams ? data : new URLSearchParams(data);
+		// note: URLSearchParams auto-encodes; body will be used directly
+		return this.post(url, body, this.#withType(options, 'application/x-www-form-urlencoded', 'text'));
+	}
 
-    // SOAP 1.1/1.2 helper (XML envelope)
-    postSoap(url, xmlString, opts = {}) {
-        const { headers = {} } = opts;
-        // If user provided SOAPAction, keep it; else omit.
-        const hasSoap12 = String(headers['Content-Type'] || '').includes('application/soap+xml');
-        const type = hasSoap12 ? 'application/soap+xml' : 'text/xml';
-        return this.post(url, xmlString, this.#withType(opts, type, 'xml'));
-    }
+	postMultipart(url, formData, options = {}) {
+		// Important: do NOT set Content-Type; browser sets boundary for FormData.
+		const { headers = {}, responseType } = options;
+		const safeOptions = { ...options, headers: { ...headers }, responseType: responseType ?? 'json' };
+		return this.post(url, formData, safeOptions);
+	}
 
-    // -------- Private helpers --------
-    #withAccept(opts, accept, responseType) {
-        const headers = { ...(opts.headers || {}) };
-        if (!headers['Accept']) headers['Accept'] = accept;
-        return { ...opts, headers, responseType: opts.responseType ?? responseType };
-    }
+	// SOAP 1.1/1.2 helper (XML envelope)
+	postSoap(url, xmlString, options = {}) {
+		const { headers = {} } = options;
+		// If user provided SOAPAction, keep it; else omit.
+		const hasSoap12 = String(headers['Content-Type'] || '').includes('application/soap+xml');
+		const type = hasSoap12 ? 'application/soap+xml' : 'text/xml';
+		return this.post(url, xmlString, this.#withType(options, type, 'xml'));
+	}
 
-    #withType(opts, contentType, defaultResponseType) {
-        const headers = { ...(opts.headers || {}) };
-        if (!headers['Content-Type']) headers['Content-Type'] = contentType;
-        return { ...opts, headers, responseType: opts.responseType ?? defaultResponseType };
-    }
+	// -------- Private helpers --------
+	#withAccept(options, accept, responseType) {
+		const headers = { ...(options.headers || {}) };
+		if (!headers['Accept']) headers['Accept'] = accept;
+		return { ...options, headers, responseType: options.responseType ?? responseType };
+	}
+
+	#withType(options, contentType, defaultResponseType) {
+		const headers = { ...(options.headers || {}) };
+		if (!headers['Content-Type']) headers['Content-Type'] = contentType;
+		return { ...options, headers, responseType: options.responseType ?? defaultResponseType };
+	}
 }

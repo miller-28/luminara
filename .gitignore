@@ -8,5 +8,5 @@ coverage
 .DS_Store
 .git
 .github
-.vscode
 *.log
+.vscode/chrome-debug-profile/

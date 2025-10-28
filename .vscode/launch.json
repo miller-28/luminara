@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug Luminara Sandbox",
+            "url": "http://localhost:2880/sandbox/",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "serve-sandbox",
+            "userDataDir": true,
+            "runtimeArgs": [
+                "--remote-debugging-port=9222",
+                "--user-data-dir=${workspaceFolder}/.vscode/chrome-debug-profile"
+            ],
+            "sourceMaps": true,
+            "trace": true
+        }
+    ]
+}
