@@ -1,0 +1,142 @@
+# Luminara Testing Environment
+
+This testing environment programmatically validates all Luminara features as they would be used in real React applications.
+
+## 🧪 Test Structure
+
+```
+test/
+├── package.json           # Test environment dependencies
+├── testRunner.js          # Main test runner
+├── testUtils.js           # Shared testing utilities
+├── mockServer.js          # HTTP test server for controlled responses
+├── tests/
+│   ├── basic.test.js      # Basic HTTP operations
+│   ├── retry.test.js      # Retry logic validation
+│   ├── backoff.test.js    # All backoff strategies
+│   ├── plugins.test.js    # Plugin system tests
+│   ├── timeout.test.js    # Timeout and abort scenarios
+│   ├── drivers.test.js    # Custom driver tests
+│   └── reactSimulation.test.js  # React-like usage patterns
+└── README.md              # This file
+```
+
+## 🚀 Quick Start
+
+```bash
+# Install test dependencies
+cd test
+npm install
+
+# Run all tests
+npm test
+
+# Run specific test suites
+npm run test:basic
+npm run test:retry
+npm run test:backoff
+npm run test:plugins
+npm run test:timeout
+npm run test:drivers
+npm run test:react-simulation
+
+# Watch mode for development
+npm run test:watch
+```
+
+## ✅ Test Coverage
+
+### Basic HTTP Operations
+- GET/POST/PUT/PATCH/DELETE methods
+- JSON/Text/Form data handling
+- Base URL configuration
+- Query parameters
+- Custom headers
+
+### Retry & Backoff Strategies
+- Linear backoff timing validation
+- Exponential backoff growth patterns
+- Fibonacci sequence verification
+- Jitter randomization bounds
+- Exponential jitter combinations
+- Custom retry handlers
+- Status code filtering
+
+### Plugin System
+- Request interceptors
+- Response transformers
+- Error handlers
+- Plugin chaining
+- Context passing
+
+### Timeout & Abort
+- Timeout enforcement
+- AbortController integration
+- Request cancellation
+- Cleanup behavior
+
+### Custom Drivers
+- Driver interface compliance
+- Request/response mapping
+- Error handling
+- Signal propagation
+
+### React Simulation
+- useEffect patterns
+- State management
+- Error boundaries
+- Component lifecycle
+- Concurrent requests
+
+## 🎯 Features
+
+- **Programmatic Testing**: Validates actual behavior, not just API contracts
+- **React Simulation**: Tests patterns commonly used in React applications
+- **Mock Server**: Controlled HTTP responses for predictable testing
+- **Timing Validation**: Ensures backoff strategies work as expected
+- **Error Scenarios**: Tests failure cases and recovery
+- **Performance Monitoring**: Measures request timing and resource usage
+- **Real Package Import**: Tests the actual built package, not source files
+
+## 📊 Test Output
+
+Tests provide detailed output including:
+- ✅ Pass/fail status with descriptive messages
+- ⏱️ Timing measurements for backoff validation
+- 📈 Performance metrics
+- 🐛 Error details with stack traces
+- 📋 Summary statistics
+
+## 🔧 Configuration
+
+Tests can be configured via environment variables:
+- `TEST_TIMEOUT=10000` - Global test timeout (default: 10s)
+- `MOCK_SERVER_PORT=3001` - Mock server port (default: 3001)
+- `VERBOSE=true` - Enable verbose logging
+- `SKIP_SLOW=true` - Skip long-running tests
+
+## 🎭 Mock Server
+
+The included mock server provides:
+- Configurable delays for timeout testing
+- Status code control for retry testing
+- Request counting for backoff validation
+- CORS headers for browser compatibility
+- JSON/Text/Form response types
+
+## 🔄 Continuous Testing
+
+Ideal for:
+- Pre-commit hooks
+- CI/CD pipelines
+- Development workflow
+- Release validation
+- Performance regression detection
+
+## 🧩 Integration
+
+Tests import Luminara as an external package, ensuring:
+- Real-world usage validation
+- Import/export correctness
+- Bundle integrity
+- Cross-environment compatibility
