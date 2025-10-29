@@ -1,13 +1,16 @@
 # 🌌 Luminara
 
-**Luminara** is a lightweight, plugin-based HTTP client built on [ofetch](https://github.com/unjs/ofetch).  
-Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision. ✨
+**Luminara** is a lightweight, framework-agnostic HTTP client built on [ofetch](https://github.com/unjs/ofetch).  
+Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision across all modern JavaScript frameworks and vanilla applications. ✨
+
+🌐 **Universal Compatibility**: Works seamlessly with React, Vue, Angular, Svelte, vanilla JavaScript, and any modern browser environment.
 
 ---
 
 ## ✨ Features
 
 - ⚡ Built on modern `fetch` via ofetch
+- 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
 - 🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
 - 🔄 Advanced retry logic with 6 backoff strategies
 - ⏱️ Configurable timeouts and status code handling
@@ -15,11 +18,13 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - 🪶 Zero dependencies besides ofetch
 - 🎯 Fully promise-based and type-friendly
 - 🚗 Custom driver support
+- 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
 
 ---
 
 ## 📦 Installation
 
+### NPM/Yarn (All Frameworks)
 ```bash
 # npm
 npm install luminara
@@ -29,6 +34,27 @@ yarn add luminara
 
 # pnpm
 pnpm add luminara
+```
+
+### CDN (Vanilla JavaScript)
+```html
+<!-- ES Modules via CDN -->
+<script type="module">
+	import { createLuminara } from 'https://cdn.skypack.dev/luminara';
+	// Your code here
+</script>
+```
+
+### Framework-Specific Imports
+
+**React, Vue, Angular, Svelte, etc.**
+```javascript
+import { createLuminara } from 'luminara';
+```
+
+**Node.js (if browser APIs available)**
+```javascript
+import { createLuminara } from 'luminara';
 ```
 
 ---
@@ -384,53 +410,208 @@ npx serve .
 
 ---
 
-## 🌈 Example in React
+## 🌈 Framework Examples
 
+### React
 ```jsx
 import { useEffect, useState } from "react";
 import { createLuminara } from "luminara";
 
 const api = createLuminara({
-  baseURL: "https://api.example.com",
-  retry: 3,
-  retryDelay: 1000,
-  backoffType: "exponential"
+	baseURL: "https://api.example.com",
+	retry: 3,
+	retryDelay: 1000,
+	backoffType: "exponential"
 });
 
 // Add global error handling
 api.use({
-  onError(error) {
-    console.error("API Error:", error.message);
-  }
+	onError(error) {
+		console.error("API Error:", error.message);
+	}
 });
 
 export default function UsersList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+	const [users, setUsers] = useState([]);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.getJson("/users")
-      .then(res => {
-        setUsers(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
+	useEffect(() => {
+		api.getJson("/users")
+			.then(res => {
+				setUsers(res.data);
+				setLoading(false);
+			})
+			.catch(err => {
+				console.error(err);
+				setLoading(false);
+			});
+	}, []);
 
-  if (loading) return <div>Loading...</div>;
+	if (loading) return <div>Loading...</div>;
 
-  return (
-    <ul>
-      {users.map(user => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
+	return (
+		<ul>
+			{users.map(user => (
+				<li key={user.id}>{user.name}</li>
+			))}
+		</ul>
+	);
 }
 ```
+
+### Vue 3 (Composition API)
+```vue
+<script setup>
+import { ref, onMounted } from 'vue';
+import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+	baseURL: 'https://api.example.com',
+	retry: 3,
+	backoffType: 'exponential'
+});
+
+const users = ref([]);
+const loading = ref(true);
+
+onMounted(async () => {
+	try {
+		const response = await api.getJson('/users');
+		users.value = response.data;
+	} catch (error) {
+		console.error('Failed to fetch users:', error);
+	} finally {
+		loading.value = false;
+	}
+});
+</script>
+
+<template>
+	<div>
+		<div v-if="loading">Loading...</div>
+		<ul v-else>
+			<li v-for="user in users" :key="user.id">
+				{{ user.name }}
+			</li>
+		</ul>
+	</div>
+</template>
+```
+
+### Angular
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { createLuminara } from 'luminara';
+
+@Component({
+	selector: 'app-users',
+	template: `
+		<div *ngIf="loading">Loading...</div>
+		<ul *ngIf="!loading">
+			<li *ngFor="let user of users">{{ user.name }}</li>
+		</ul>
+	`
+})
+export class UsersComponent implements OnInit {
+	users: any[] = [];
+	loading = true;
+	
+	private api = createLuminara({
+		baseURL: 'https://api.example.com',
+		retry: 3,
+		backoffType: 'exponential'
+	});
+
+	async ngOnInit() {
+		try {
+			const response = await this.api.getJson('/users');
+			this.users = response.data;
+		} catch (error) {
+			console.error('Failed to fetch users:', error);
+		} finally {
+			this.loading = false;
+		}
+	}
+}
+```
+
+### Pure JavaScript (No Frameworks)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Luminara Example</title>
+</head>
+<body>
+	<div id="app">
+		<div id="loading">Loading...</div>
+		<ul id="users" style="display: none;"></ul>
+	</div>
+
+	<script type="module">
+		import { createLuminara } from 'https://cdn.skypack.dev/luminara';
+
+		const api = createLuminara({
+			baseURL: 'https://api.example.com',
+			retry: 3,
+			backoffType: 'exponential'
+		});
+
+		async function loadUsers() {
+			try {
+				const response = await api.getJson('/users');
+				
+				const loadingEl = document.getElementById('loading');
+				const usersEl = document.getElementById('users');
+				
+				loadingEl.style.display = 'none';
+				usersEl.style.display = 'block';
+				
+				response.data.forEach(user => {
+					const li = document.createElement('li');
+					li.textContent = user.name;
+					usersEl.appendChild(li);
+				});
+			} catch (error) {
+				console.error('Failed to fetch users:', error);
+			}
+		}
+
+		loadUsers();
+	</script>
+</body>
+</html>
+```
+
+---
+
+## 🌐 Framework Compatibility
+
+Luminara is designed to be **completely framework-agnostic** and works seamlessly across all modern JavaScript environments:
+
+| Framework | Compatibility | Example |
+|-----------|---------------|---------|
+| **React** | ✅ Full Support | `useEffect(() => { api.getJson('/data') }, [])` |
+| **Vue 3** | ✅ Full Support | `onMounted(() => api.getJson('/data'))` |
+| **Angular** | ✅ Full Support | `ngOnInit() { api.getJson('/data') }` |
+| **Svelte** | ✅ Full Support | `onMount(() => api.getJson('/data'))` |
+| **Pure JavaScript** | ✅ Full Support | `api.getJson('/data').then(...)` |
+| **Next.js** | ✅ Full Support | Client-side data fetching |
+| **Nuxt.js** | ✅ Full Support | Client-side data fetching |
+| **Vite** | ✅ Full Support | All frameworks via Vite |
+| **Webpack** | ✅ Full Support | All bundled applications |
+
+### Browser Support
+- ✅ Chrome 88+
+- ✅ Firefox 90+
+- ✅ Safari 14+
+- ✅ Edge 88+
+- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
+
+### Runtime Requirements
+- Modern `fetch` API support
+- ES2020+ JavaScript features
+- ES Modules support
 
 ---
 
@@ -492,11 +673,11 @@ Includes portions of [ofetch](https://github.com/unjs/ofetch) (MIT License)
 
 **Luminara** — derived from "lumen" (light) — symbolizes clarity and adaptability.
 
-Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision. Built with mindfulness for developers who craft with intention.
+Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision across all JavaScript environments. Built with mindfulness for developers who craft with intention.
 
-**Simple by Design** • **Separation of Concerns** • **Developer-Friendly** • **Extensible**
+**Framework-Agnostic** • **Simple by Design** • **Separation of Concerns** • **Developer-Friendly** • **Extensible**
 
-✨ *May your requests flow like starlight* ✨
+✨ *May your requests flow like starlight across any framework* ✨
 ```
 
 ---

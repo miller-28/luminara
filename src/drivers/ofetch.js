@@ -28,9 +28,31 @@ export function OfetchDriver(config = {}) {
 			
 			// Map Luminara's options to ofetch's options
 			const ofetchOptions = { method, headers, query, body, signal };
-			if (timeout !== undefined) {
-				ofetchOptions.timeout = timeout;
+			
+			// Handle timeout manually since ofetch timeout is unreliable
+			let timeoutId;
+			let combinedSignal = signal;
+			
+			if (timeout !== undefined && timeout > 0) {
+				const timeoutController = new AbortController();
+				timeoutId = setTimeout(() => {
+					timeoutController.abort();
+				}, timeout);
+				
+				// Combine user signal with timeout signal
+				if (signal) {
+					const combinedController = new AbortController();
+					const cleanup = () => combinedController.abort();
+					signal.addEventListener('abort', cleanup);
+					timeoutController.signal.addEventListener('abort', cleanup);
+					combinedSignal = combinedController.signal;
+				} else {
+					combinedSignal = timeoutController.signal;
+				}
 			}
+			
+			ofetchOptions.signal = combinedSignal;
+			
 			if (retry !== undefined) {
 				ofetchOptions.retry = retry;
 			}
@@ -51,10 +73,31 @@ export function OfetchDriver(config = {}) {
 			}
 			
 			// Note: ofetch throws on non-2xx; we'll normalize in Luminara layer if needed.
-			const responseData = await ofetchInstance(url, ofetchOptions);
-			// ofetch returns parsed body; raw headers/status require raw mode.
-			// For now we return a minimal normalized shape.
-			return { status: 200, headers: new Headers(), data: responseData };
+			try {
+				const responseData = await ofetchInstance(url, ofetchOptions);
+				// Clear timeout if request succeeded
+				if (timeoutId) {
+					clearTimeout(timeoutId);
+				}
+				// ofetch returns parsed body; raw headers/status require raw mode.
+				// For now we return a minimal normalized shape.
+				return { status: 200, headers: new Headers(), data: responseData };
+			} catch (error) {
+				// Clear timeout on error
+				if (timeoutId) {
+					clearTimeout(timeoutId);
+				}
+				
+				// Convert timeout abort to timeout error
+				if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
+					const timeoutError = new Error(`Request timeout after ${timeout}ms`);
+					timeoutError.name = 'TimeoutError';
+					throw timeoutError;
+				}
+				
+				// Re-throw other errors
+				throw error;
+			}
 		}
 	};
 }

@@ -1,7 +1,7 @@
 {
   "name": "luminara",
-  "version": "0.2.1",
-  "description": "Lightweight, plugin-based HTTP client with retry strategies, backoff algorithms, and interceptors. Built on ofetch for modern browsers.",
+  "version": "0.2.2",
+	"description": "Lightweight, framework-agnostic HTTP client with retry strategies, backoff algorithms, and interceptors. Built on ofetch for universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
   "type": "module",
   "module": "./src/index.js",
   "main": "./src/index.js",
@@ -18,34 +18,41 @@
     "url": "https://www.linkedin.com/in/miller28/"
   },
   "keywords": [
-    "fetch",
-    "http",
-    "http-client",
-    "ajax",
-    "client",
-    "browser",
-    "react",
-    "ofetch",
-    "interceptors",
-    "retry",
-    "backoff",
-    "exponential-backoff",
-    "fibonacci",
-    "jitter",
-    "plugins",
-    "middleware",
-    "timeout",
-    "abort",
-    "promise"
-  ],
+		"fetch",
+		"http",
+		"http-client",
+		"ajax",
+		"client",
+		"browser",
+		"framework-agnostic",
+		"universal",
+		"react",
+		"vue",
+		"angular",
+		"svelte",
+		"vanilla-js",
+		"pure-javascript",
+		"ofetch",
+		"interceptors",
+		"retry",
+		"backoff",
+		"exponential-backoff",
+		"fibonacci",
+		"jitter",
+		"plugins",
+		"middleware",
+		"timeout",
+		"abort",
+		"promise"
+	],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/miller-28/react-luminara.git"
+    "url": "git+https://github.com/miller-28/luminara.git"
   },
   "bugs": {
-    "url": "https://github.com/miller-28/react-luminara/issues"
+    "url": "https://github.com/miller-28/luminara/issues"
   },
-  "homepage": "https://github.com/miller-28/react-luminara#readme",
+  "homepage": "https://github.com/miller-28/luminara#readme",
   "dependencies": {
     "ofetch": "^1.5.0"
   },

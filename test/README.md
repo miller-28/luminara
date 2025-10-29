@@ -1,6 +1,8 @@
 # Luminara Testing Environment
 
-This testing environment programmatically validates all Luminara features as they would be used in real React applications.
+This testing environment programmatically validates all Luminara features as they would be used in real JavaScript applications across all frameworks.
+
+> **🌐 Framework-Agnostic Testing**: While some tests simulate React-like patterns, Luminara works identically across React, Vue, Angular, Svelte, vanilla JavaScript, and any modern browser environment.
 
 ## 🧪 Test Structure
 
@@ -17,7 +19,7 @@ test/
 │   ├── plugins.test.js    # Plugin system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
-│   └── reactSimulation.test.js  # React-like usage patterns
+│   	└── reactSimulation.test.js  # Framework usage patterns
 └── README.md              # This file
 ```
 
@@ -38,7 +40,7 @@ npm run test:backoff
 npm run test:plugins
 npm run test:timeout
 npm run test:drivers
-npm run test:react-simulation
+npm run test:framework-simulation
 
 # Watch mode for development
 npm run test:watch
@@ -81,17 +83,17 @@ npm run test:watch
 - Error handling
 - Signal propagation
 
-### React Simulation
-- useEffect patterns
-- State management
-- Error boundaries
-- Component lifecycle
-- Concurrent requests
+### Framework Simulation
+- useEffect patterns (React-like)
+- State management patterns
+- Error boundaries simulation
+- Component lifecycle patterns
+- Concurrent requests handling
 
 ## 🎯 Features
 
 - **Programmatic Testing**: Validates actual behavior, not just API contracts
-- **React Simulation**: Tests patterns commonly used in React applications
+- **Framework Simulation**: Tests common patterns used across JavaScript frameworks
 - **Mock Server**: Controlled HTTP responses for predictable testing
 - **Timing Validation**: Ensures backoff strategies work as expected
 - **Error Scenarios**: Tests failure cases and recovery

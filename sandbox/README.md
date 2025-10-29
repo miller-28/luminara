@@ -1,6 +1,8 @@
 # Luminara Sandbox
 
-An interactive demo and testing environment for the Luminara HTTP client. This sandbox provides a beautiful, feature-rich UI to explore all Luminara capabilities with individual test controls and parallel execution.
+An interactive demo and testing environment for the **framework-agnostic** Luminara HTTP client. This sandbox provides a beautiful, feature-rich UI to explore all Luminara capabilities with individual test controls and parallel execution.
+
+> **🌐 Universal Compatibility**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), Luminara works seamlessly with React, Vue, Angular, Svelte, and any modern browser environment.
 
 ## 📁 File Structure
 
@@ -33,6 +35,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 - 🎨 **Modern UI** - Clean, responsive interface with color-coded outputs
 - 📱 **Mobile Responsive** - Works beautifully on all screen sizes
 - 🔍 **Real-time Feedback** - See test status (running/success/error) with informative output
+- 🌐 **Framework-Agnostic Demo** - Pure JavaScript (no frameworks) demonstrating universal compatibility
 
 ## 📦 Test Categories
 
@@ -125,6 +128,8 @@ The sandbox demonstrates different ways to create and use the Luminara client:
 3. **Custom BrowserDriver** - Using native `fetch` API directly
 
 It includes example plugin usage for request/response interceptors and error handling.
+
+**Framework Examples**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), the same Luminara client works identically in React, Vue, Angular, Svelte, and all other modern JavaScript frameworks.
 
 ## Technical Notes
 
