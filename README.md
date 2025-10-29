@@ -40,8 +40,8 @@ pnpm add luminara
 ```html
 <!-- ES Modules via CDN -->
 <script type="module">
-	import { createLuminara } from 'https://cdn.skypack.dev/luminara';
-	// Your code here
+  import { createLuminara } from 'https://cdn.skypack.dev/luminara';
+  // Your code here
 </script>
 ```
 
@@ -418,44 +418,45 @@ import { useEffect, useState } from "react";
 import { createLuminara } from "luminara";
 
 const api = createLuminara({
-	baseURL: "https://api.example.com",
-	retry: 3,
-	retryDelay: 1000,
-	backoffType: "exponential"
+  baseURL: "https://api.example.com",
+  retry: 3,
+  retryDelay: 1000,
+  backoffType: "exponential"
 });
 
 // Add global error handling
 api.use({
-	onError(error) {
-		console.error("API Error:", error.message);
-	}
+  onError(error) {
+    console.error("API Error:", error.message);
+  }
 });
 
 export default function UsersList() {
-	const [users, setUsers] = useState([]);
-	const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		api.getJson("/users")
-			.then(res => {
-				setUsers(res.data);
-				setLoading(false);
-			})
-			.catch(err => {
-				console.error(err);
-				setLoading(false);
-			});
-	}, []);
+  useEffect(() => {
+    api.getJson("/users")
+      .then(res => {
+        setUsers(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
 
-	if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
 
-	return (
-		<ul>
-			{users.map(user => (
-				<li key={user.id}>{user.name}</li>
-			))}
-		</ul>
-	);
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
 }
 ```
 
@@ -466,35 +467,35 @@ import { ref, onMounted } from 'vue';
 import { createLuminara } from 'luminara';
 
 const api = createLuminara({
-	baseURL: 'https://api.example.com',
-	retry: 3,
-	backoffType: 'exponential'
+  baseURL: 'https://api.example.com',
+  retry: 3,
+  backoffType: 'exponential'
 });
 
 const users = ref([]);
 const loading = ref(true);
 
 onMounted(async () => {
-	try {
-		const response = await api.getJson('/users');
-		users.value = response.data;
-	} catch (error) {
-		console.error('Failed to fetch users:', error);
-	} finally {
-		loading.value = false;
-	}
+  try {
+    const response = await api.getJson('/users');
+    users.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
 <template>
-	<div>
-		<div v-if="loading">Loading...</div>
-		<ul v-else>
-			<li v-for="user in users" :key="user.id">
-				{{ user.name }}
-			</li>
-		</ul>
-	</div>
+  <div>
+    <div v-if="loading">Loading...</div>
+    <ul v-else>
+      <li v-for="user in users" :key="user.id">
+        {{ user.name }}
+      </li>
+    </ul>
+  </div>
 </template>
 ```
 
@@ -504,34 +505,34 @@ import { Component, OnInit } from '@angular/core';
 import { createLuminara } from 'luminara';
 
 @Component({
-	selector: 'app-users',
-	template: `
-		<div *ngIf="loading">Loading...</div>
-		<ul *ngIf="!loading">
-			<li *ngFor="let user of users">{{ user.name }}</li>
-		</ul>
-	`
+  selector: 'app-users',
+  template: `
+    <div *ngIf="loading">Loading...</div>
+    <ul *ngIf="!loading">
+      <li *ngFor="let user of users">{{ user.name }}</li>
+    </ul>
+  `
 })
 export class UsersComponent implements OnInit {
-	users: any[] = [];
-	loading = true;
-	
-	private api = createLuminara({
-		baseURL: 'https://api.example.com',
-		retry: 3,
-		backoffType: 'exponential'
-	});
+  users: any[] = [];
+  loading = true;
+  
+  private api = createLuminara({
+    baseURL: 'https://api.example.com',
+    retry: 3,
+    backoffType: 'exponential'
+  });
 
-	async ngOnInit() {
-		try {
-			const response = await this.api.getJson('/users');
-			this.users = response.data;
-		} catch (error) {
-			console.error('Failed to fetch users:', error);
-		} finally {
-			this.loading = false;
-		}
-	}
+  async ngOnInit() {
+    try {
+      const response = await this.api.getJson('/users');
+      this.users = response.data;
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      this.loading = false;
+    }
+  }
 }
 ```
 
@@ -540,45 +541,45 @@ export class UsersComponent implements OnInit {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Luminara Example</title>
+  <title>Luminara Example</title>
 </head>
 <body>
-	<div id="app">
-		<div id="loading">Loading...</div>
-		<ul id="users" style="display: none;"></ul>
-	</div>
+  <div id="app">
+    <div id="loading">Loading...</div>
+    <ul id="users" style="display: none;"></ul>
+  </div>
 
-	<script type="module">
-		import { createLuminara } from 'https://cdn.skypack.dev/luminara';
+  <script type="module">
+    import { createLuminara } from 'https://cdn.skypack.dev/luminara';
 
-		const api = createLuminara({
-			baseURL: 'https://api.example.com',
-			retry: 3,
-			backoffType: 'exponential'
-		});
+    const api = createLuminara({
+      baseURL: 'https://api.example.com',
+      retry: 3,
+      backoffType: 'exponential'
+    });
 
-		async function loadUsers() {
-			try {
-				const response = await api.getJson('/users');
-				
-				const loadingEl = document.getElementById('loading');
-				const usersEl = document.getElementById('users');
-				
-				loadingEl.style.display = 'none';
-				usersEl.style.display = 'block';
-				
-				response.data.forEach(user => {
-					const li = document.createElement('li');
-					li.textContent = user.name;
-					usersEl.appendChild(li);
-				});
-			} catch (error) {
-				console.error('Failed to fetch users:', error);
-			}
-		}
+    async function loadUsers() {
+      try {
+        const response = await api.getJson('/users');
+        
+        const loadingEl = document.getElementById('loading');
+        const usersEl = document.getElementById('users');
+        
+        loadingEl.style.display = 'none';
+        usersEl.style.display = 'block';
+        
+        response.data.forEach(user => {
+          const li = document.createElement('li');
+          li.textContent = user.name;
+          usersEl.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
+    }
 
-		loadUsers();
-	</script>
+    loadUsers();
+  </script>
 </body>
 </html>
 ```

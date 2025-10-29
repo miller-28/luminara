@@ -1,6 +1,6 @@
 {
   "name": "luminara",
-  "version": "0.2.2",
+  "version": "0.2.3",
 	"description": "Lightweight, framework-agnostic HTTP client with retry strategies, backoff algorithms, and interceptors. Built on ofetch for universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
   "type": "module",
   "module": "./src/index.js",
