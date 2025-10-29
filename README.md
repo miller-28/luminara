@@ -810,9 +810,6 @@ luminara/
 ## 📚 Documentation
 
 - **[Sandbox Guide](./sandbox/README.md)** - Interactive examples and usage
-- **[Architecture Guide](./sandbox/ARCHITECTURE.md)** - Separation of concerns implementation
-- **[Copilot Instructions](./.github/copilot-instructions.md)** - AI development guidelines
-- **[Separation of Concerns](./.github/SEPARATION_OF_CONCERNS.md)** - Core architectural principles
 
 ---
 
