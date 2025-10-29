@@ -10,6 +10,7 @@ import { suite as retrySuite, mockServer as retryServer } from './tests/retry.te
 import { suite as timeoutSuite, mockServer as timeoutServer } from './tests/timeout.test.js';
 import { suite as driversSuite, mockServer as driversServer } from './tests/drivers.test.js';
 import { suite as reactSuite, mockServer as reactServer } from './tests/reactSimulation.test.js';
+import { suite as enhancedInterceptorsSuite, mockServer as enhancedInterceptorsServer } from './tests/enhancedInterceptors.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -19,7 +20,8 @@ const TEST_SUITES = [
 	{ name: 'Retry Logic', suite: retrySuite, server: retryServer },
 	{ name: 'Timeout Handling', suite: timeoutSuite, server: timeoutServer },
 	{ name: 'Custom Drivers', suite: driversSuite, server: driversServer },
-	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer }
+	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },
+	{ name: 'Enhanced Interceptors', suite: enhancedInterceptorsSuite, server: enhancedInterceptorsServer }
 ];
 
 // Colors for output

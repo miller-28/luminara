@@ -6,7 +6,14 @@ import { retry } from './examples/retry.js';
 import { backoffStrategies } from './examples/backoffStrategies.js';
 import { customRetry } from './examples/customRetry.js';
 import { plugins } from './examples/plugins.js';
+import { enhancedInterceptorExamples } from './examples/enhancedInterceptors.js';
 import { customDriver } from './examples/customDriver.js';
+
+// Create enhanced interceptors feature
+const enhancedInterceptors = {
+	title: "🚀 Enhanced Interceptor System",
+	tests: enhancedInterceptorExamples
+};
 
 // Aggregate all examples
 export const examples = {
@@ -17,6 +24,7 @@ export const examples = {
 	backoffStrategies,
 	customRetry,
 	plugins,
+	enhancedInterceptors,
 	customDriver
 };
 

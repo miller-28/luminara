@@ -205,98 +205,271 @@ const api = createLuminara({
 
 ---
 
-## 🔌 Plugin System
+## 🔌 Enhanced Interceptor System
 
-Luminara's plugin architecture allows you to intercept and transform requests at different lifecycle stages.
+Luminara's interceptor architecture provides **deterministic execution order** and **guaranteed flow control** with a mutable context object that travels through the entire request lifecycle.
+
+### Execution Flow & Order Guarantees
+
+```
+Request → onRequest[] (L→R) → Driver → onResponse[] (R→L) → Success
+                                   ↓
+                               onResponseError[] (R→L) → Error
+```
+
+**Order Guarantees:**
+- **onRequest**: Executes **Left→Right** (registration order)
+- **onResponse**: Executes **Right→Left** (reverse registration order)  
+- **onResponseError**: Executes **Right→Left** (reverse registration order)
+- **On Retry**: Re-runs onRequest interceptors for fresh tokens/headers
+
+### Mutable Context Object
+
+Each interceptor receives a **mutable context** object:
+
+```js
+{
+  req: { /* request object */ },      // Mutable request
+  res: { /* response object */ },     // Mutable response (in onResponse)
+  error: { /* error object */ },      // Error details (in onResponseError)
+  attempt: 1,                         // Current retry attempt number
+  controller: AbortController,        // Request abort controller
+  meta: {}                           // Custom metadata storage
+}
+```
 
 ### Request Interceptor
 
-Modify requests before they're sent:
+Modify requests with guaranteed **Left→Right** execution:
 
 ```js
+// First registered = First executed
 api.use({
-  onRequest(request) {
-    console.log('📤 Sending:', request.method, request.url);
+  onRequest(context) {
+    console.log(`📤 Attempt ${context.attempt}:`, context.req.method, context.req.url);
     
-    // Add custom headers
-    request.headers = {
-      ...(request.headers || {}),
+    // Modify request directly
+    context.req.headers = {
+      ...(context.req.headers || {}),
       'X-Custom-Header': 'Luminara',
-      'Authorization': `Bearer ${getToken()}`
+      'X-Attempt': context.attempt.toString()
     };
+
+    // Store metadata for later interceptors
+    context.meta.startTime = Date.now();
     
-    return request;
+    // Add fresh auth token (important for retries!)
+    context.req.headers['Authorization'] = `Bearer ${getFreshToken()}`;
+  }
+});
+
+// Second registered = Second executed
+api.use({
+  onRequest(context) {
+    console.log('🔐 Adding security headers...');
+    context.req.headers['X-Request-ID'] = generateRequestId();
   }
 });
 ```
 
-### Response Transformer
+### Response Interceptor
 
-Transform responses after they arrive:
+Transform responses with guaranteed **Right→Left** execution:
 
 ```js
+// First registered = LAST executed (reverse order)
 api.use({
-  onSuccess(response) {
-    console.log('📥 Received:', response.status);
+  onResponse(context) {
+    console.log('📥 Processing response:', context.res.status);
     
-    // Add metadata
-    response.data.timestamp = new Date().toISOString();
-    response.data.transformed = true;
+    // Transform response data
+    context.res.data = {
+      ...context.res.data,
+      timestamp: new Date().toISOString(),
+      processingTime: Date.now() - context.meta.startTime,
+      attempt: context.attempt
+    };
+  }
+});
+
+// Second registered = FIRST executed (reverse order)
+api.use({
+  onResponse(context) {
+    console.log('✅ Response received, validating...');
     
-    return response;
+    // Validate response structure
+    if (!context.res.data || typeof context.res.data !== 'object') {
+      throw new Error('Invalid response format');
+    }
   }
 });
 ```
 
 ### Error Handler
 
-Handle errors globally:
+Handle errors with guaranteed **Right→Left** execution:
 
 ```js
 api.use({
-  onError(error, request) {
-    console.error('❌ Request failed:', request.url);
-    console.error('Error:', error.message);
+  onResponseError(context) {
+    console.error(`❌ Request failed (attempt ${context.attempt}):`, context.req.url);
+    console.error('Error:', context.error.message);
     
-    // Log to analytics service
-    analytics.trackError(error);
+    // Log error details
+    context.meta.errorLogged = true;
+    
+    // Modify error before it propagates
+    if (context.error.status === 401) {
+      context.error.message = 'Authentication failed - please refresh your session';
+    }
   }
 });
 ```
 
-### Multiple Plugins
+### Retry-Aware Authentication
 
-Chain multiple plugins for complex workflows:
+The enhanced system re-runs **onRequest** interceptors on retry, perfect for refreshing tokens:
 
 ```js
-// Authentication plugin
 api.use({
-  onRequest(req) {
-    req.headers = { ...req.headers, 'Authorization': `Bearer ${token}` };
-    return req;
+  onRequest(context) {
+    // This runs EVERY attempt, ensuring fresh tokens
+    const token = context.attempt === 1 
+      ? getCachedToken() 
+      : await refreshToken(); // Fresh token on retry
+      
+    context.req.headers['Authorization'] = `Bearer ${token}`;
+    
+    console.log(`🔑 Attempt ${context.attempt}: Using ${context.attempt === 1 ? 'cached' : 'fresh'} token`);
+  }
+});
+```
+
+### Complex Multi-Interceptor Example
+
+Demonstrates guaranteed execution order and context sharing:
+
+```js
+// Interceptor 1: Authentication (runs FIRST on request, LAST on response)
+api.use({
+  onRequest(context) {
+    console.log('1️⃣ [Auth] Adding authentication...');
+    context.req.headers['Authorization'] = `Bearer ${getToken()}`;
+    context.meta.authAdded = true;
+  },
+  onResponse(context) {
+    console.log('1️⃣ [Auth] Validating auth response... (LAST)');
+    if (context.res.status === 401) {
+      invalidateToken();
+    }
+  },
+  onResponseError(context) {
+    console.log('1️⃣ [Auth] Handling auth error... (LAST)');
+    if (context.error.status === 401) {
+      context.meta.authFailed = true;
+    }
   }
 });
 
-// Logging plugin
+// Interceptor 2: Logging (runs SECOND on request, MIDDLE on response)
 api.use({
-  onRequest(req) {
-    console.log('→', req.method, req.url);
-    return req;
+  onRequest(context) {
+    console.log('2️⃣ [Log] Request started...');
+    context.meta.startTime = performance.now();
   },
-  onSuccess(res) {
-    console.log('✓', res.status);
-    return res;
+  onResponse(context) {
+    console.log('2️⃣ [Log] Request completed (MIDDLE)');
+    const duration = performance.now() - context.meta.startTime;
+    console.log(`Duration: ${duration.toFixed(2)}ms`);
+  },
+  onResponseError(context) {
+    console.log('2️⃣ [Log] Request failed (MIDDLE)');
+    const duration = performance.now() - context.meta.startTime;
+    console.log(`Failed after: ${duration.toFixed(2)}ms`);
   }
 });
 
-// Analytics plugin
+// Interceptor 3: Analytics (runs THIRD on request, FIRST on response)
 api.use({
-  onSuccess(res) {
-    analytics.track('api_success', { url: res.url });
-    return res;
+  onRequest(context) {
+    console.log('3️⃣ [Analytics] Tracking request... (LAST)');
+    analytics.trackRequestStart(context.req.url);
   },
-  onError(err, req) {
-    analytics.track('api_error', { url: req.url, error: err.message });
+  onResponse(context) {
+    console.log('3️⃣ [Analytics] Tracking success... (FIRST)');
+    analytics.trackRequestSuccess(context.req.url, context.res.status);
+  },
+  onResponseError(context) {
+    console.log('3️⃣ [Analytics] Tracking error... (FIRST)');
+    analytics.trackRequestError(context.req.url, context.error);
+  }
+});
+
+/*
+Execution Order:
+Request: 1️⃣ Auth → 2️⃣ Log → 3️⃣ Analytics → HTTP Request
+Response: 3️⃣ Analytics → 2️⃣ Log → 1️⃣ Auth
+Error: 3️⃣ Analytics → 2️⃣ Log → 1️⃣ Auth
+*/
+```
+
+### Abort Controller Access
+
+Every request gets an AbortController accessible via context:
+
+```js
+api.use({
+  onRequest(context) {
+    // Cancel request after 5 seconds
+    setTimeout(() => {
+      console.log('⏰ Request taking too long, aborting...');
+      context.controller.abort();
+    }, 5000);
+  },
+  onResponseError(context) {
+    if (context.error.name === 'AbortError') {
+      console.log('🚫 Request was aborted');
+    }
+  }
+});
+```
+
+### Migration from Legacy Plugin System
+
+**Old System (Deprecated):**
+```js
+// ❌ Old way - no order guarantees
+api.use({
+  onRequest(request) {
+    // Immutable, no context sharing
+    return { ...request, headers: { ...request.headers, auth: token } };
+  },
+  onSuccess(response, request) {
+    // Different parameter order, no context
+    return { ...response, transformed: true };
+  },
+  onError(error, request) {
+    // No context, limited error handling
+    console.error(error);
+  }
+});
+```
+
+**New System (Enhanced):**
+```js
+// ✅ New way - guaranteed order, mutable context
+api.use({
+  onRequest(context) {
+    // Mutable context, guaranteed order
+    context.req.headers = { ...context.req.headers, auth: token };
+  },
+  onResponse(context) {
+    // Consistent context object, reverse order
+    context.res.data.transformed = true;
+  },
+  onResponseError(context) {
+    // Rich context with attempt info, metadata
+    console.error(`Attempt ${context.attempt}:`, context.error);
   }
 });
 ```
@@ -646,7 +819,8 @@ luminara/
 ## 🛣️ Roadmap
 
 - [x] Core HTTP methods (GET, POST, PUT, PATCH, DELETE)
-- [x] Plugin system (onRequest, onSuccess, onError)
+- [x] **Enhanced interceptor system** (deterministic order, mutable context, retry-aware)
+- [x] Plugin system (onRequest, onResponse, onResponseError)
 - [x] Retry logic with configurable attempts
 - [x] 6 Backoff strategies (linear, exponential, fibonacci, jitter, etc.)
 - [x] Custom retry handlers
@@ -678,32 +852,4 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 
 **Framework-Agnostic** • **Simple by Design** • **Separation of Concerns** • **Developer-Friendly** • **Extensible**
 
-✨ *May your requests flow like starlight across any framework* ✨
-```
-
----
-
-## 🪄 Future Add-ons
-
-Luminara’s roadmap includes:
-
-- [ ] Retry with exponential backoff  
-- [ ] Request debouncer (per key)  
-- [ ] Rate limiter (token bucket)  
-- [ ] Cache adapter (localStorage / memory)  
-- [ ] Request tracing and metrics  
-- [ ] Configurable interceptors  
-
----
-
-## 🧠 License
-
-MIT © 2025 Jonathan Miller  
-Includes portions of [ofetch](https://github.com/unjs/ofetch) (MIT License)
-
----
-
-## 🪐 Name Origin
-
-**Luminara** — derived from “lumen” (light) — symbolizes clarity and adaptability.  
-A library that brings *light* to the world of fetching: minimal yet full of potential.
+✨ *May your requests flow like starlight across any framework*

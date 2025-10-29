@@ -53,6 +53,7 @@ export function OfetchDriver(config = {}) {
 			
 			ofetchOptions.signal = combinedSignal;
 			
+			// Handle retry options for legacy requests (enhanced interceptors handle their own retry)
 			if (retry !== undefined) {
 				ofetchOptions.retry = retry;
 			}
@@ -93,6 +94,16 @@ export function OfetchDriver(config = {}) {
 					const timeoutError = new Error(`Request timeout after ${timeout}ms`);
 					timeoutError.name = 'TimeoutError';
 					throw timeoutError;
+				}
+				
+				// Preserve HTTP status code from ofetch error for retry logic
+				if (error.status) {
+					const httpError = new Error(error.message || `HTTP ${error.status}`);
+					httpError.status = error.status;
+					httpError.statusText = error.statusText;
+					httpError.data = error.data;
+					httpError.response = error.response;
+					throw httpError;
 				}
 				
 				// Re-throw other errors

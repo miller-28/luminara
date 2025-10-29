@@ -138,7 +138,7 @@ export class MockServer {
 							method: req.method
 						}));
 					});
-					break;
+					return; // Important: return here to avoid the rest of the switch
 					
 				default:
 					res.writeHead(200, { 'Content-Type': 'application/json' });

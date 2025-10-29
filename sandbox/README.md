@@ -73,6 +73,12 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 - Response Transformer - Transform responses after they arrive
 - Error Handler - Handle and log errors through plugins
 
+### 🚀 Enhanced Interceptor System
+- **Deterministic Execution Order** - Guaranteed L→R for onRequest, R→L for onResponse/onResponseError
+- **Mutable Context Sharing** - Share data between interceptors via context.meta
+- **Retry-Aware Authentication** - Fresh tokens on retry attempts
+- **AbortController Integration** - Control request cancellation from interceptors
+
 ### 🚗 Custom Driver
 - Browser Fetch Driver - Use native fetch instead of ofetch
 
