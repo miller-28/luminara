@@ -1,5 +1,35 @@
 # Luminara Release Notes
 
+## Version 0.5.2 (October 30, 2025)
+
+### 📦 npm Package Size Optimization
+
+#### Dramatic Package Size Reduction
+- **70% Unpacked Size Reduction**: 195.2 kB → 58.8 kB
+- **63% Package Size Reduction**: 50.8 kB → 18.6 kB
+- **Source Map Exclusion**: Removed 136KB of source maps from npm package
+- **Streamlined Distribution**: Only essential files included for production use
+
+#### What Users Get
+- ✅ **Minified bundles**: ESM (11.8KB) + CJS (12.2KB) 
+- ✅ **TypeScript definitions**: Full IntelliSense support (3.8KB)
+- ✅ **Documentation**: README + LICENSE (28.4KB)
+- ✅ **Package metadata**: package.json (2.5KB)
+- ❌ **Source maps excluded**: Available in development, not in npm package
+
+#### Configuration Changes
+- **npm Package Optimization**: Added `.npmignore` to exclude development files
+- **Selective File Inclusion**: Updated `package.json` files array for precise control
+- **Development Preserved**: Source maps still generated for local development
+
+### 📊 Metrics
+- **Total Package Size**: 70% smaller than v0.5.1
+- **Network Transfer**: Significantly faster npm install times
+- **Production Focus**: Only production-necessary files included
+- **Zero Breaking Changes**: Full backward compatibility maintained
+
+---
+
 ## Version 0.5.1 (October 30, 2025)
 
 ### 🚀 Bundle Size Optimization

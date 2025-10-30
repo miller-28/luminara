@@ -1,0 +1,16 @@
+# Exclude source maps from npm package
+*.map
+
+# Exclude development files
+src/
+sandbox/
+test-cli/
+test-on-react-app/
+.github/
+.vscode/
+tsup.config.js
+
+# Exclude build artifacts
+node_modules/
+.DS_Store
+*.log
