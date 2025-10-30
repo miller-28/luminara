@@ -54,7 +54,7 @@ pnpm add luminara
 import { createLuminara } from 'luminara';
 ```
 
-**Node.js (if browser APIs available)**
+**Vanilla JavaScript (Browser)**
 ```javascript
 import { createLuminara } from 'luminara';
 ```
@@ -178,7 +178,7 @@ if (isIdempotentMethod('GET')) {
 Luminara supports both ESM and CommonJS with automatic format detection:
 
 ```js
-// ES Modules (modern bundlers, Node.js)
+// ES Modules (modern bundlers, browsers)
 import { createLuminara } from "luminara";
 
 // CommonJS (legacy environments)
@@ -524,46 +524,6 @@ api.use({
 });
 ```
 
-### Migration from Legacy Plugin System
-
-**Old System (Deprecated):**
-```js
-// ❌ Old way - no order guarantees
-api.use({
-  onRequest(request) {
-    // Immutable, no context sharing
-    return { ...request, headers: { ...request.headers, auth: token } };
-  },
-  onSuccess(response, request) {
-    // Different parameter order, no context
-    return { ...response, transformed: true };
-  },
-  onError(error, request) {
-    // No context, limited error handling
-    console.error(error);
-  }
-});
-```
-
-**New System (Enhanced):**
-```js
-// ✅ New way - guaranteed order, mutable context
-api.use({
-  onRequest(context) {
-    // Mutable context, guaranteed order
-    context.req.headers = { ...context.req.headers, auth: token };
-  },
-  onResponse(context) {
-    // Consistent context object, reverse order
-    context.res.data.transformed = true;
-  },
-  onResponseError(context) {
-    // Rich context with attempt info, metadata
-    console.error(`Attempt ${context.attempt}:`, context.error);
-  }
-});
-```
-
 ---
 
 ## ⏱️ Timeout & Abort
@@ -873,6 +833,7 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
 ### Runtime Requirements
+- **Browser Environment Only** - Not for server-side/Node.js use
 - Modern `fetch` API support
 - ES2020+ JavaScript features
 - ES Modules support
