@@ -1,14 +1,31 @@
 {
   "name": "luminara",
-  "version": "0.3.0",
-	"description": "Lightweight, framework-agnostic HTTP client with native fetch, retry strategies, backoff algorithms, and interceptors. Universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
+  "version": "0.4.0",
+  "description": "Lightweight, framework-agnostic HTTP client with native fetch, retry strategies, backoff algorithms, and interceptors. Universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
   "type": "module",
-  "module": "./src/index.js",
-  "main": "./src/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.js"
-    }
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "postinstall": "npm run build"
   },
   "sideEffects": false,
   "license": "MIT",
@@ -18,40 +35,40 @@
     "url": "https://www.linkedin.com/in/miller28/"
   },
   "keywords": [
-		"fetch",
-		"native-fetch",
-		"http",
-		"http-client",
-		"ajax",
-		"client",
-		"browser",
-		"framework-agnostic",
-		"universal",
-		"react",
-		"vue",
-		"angular",
-		"svelte",
-		"vanilla-js",
-		"pure-javascript",
-		"drivers",
-		"ofetch-optional",
-		"interceptors",
-		"enhanced-interceptors",
-		"deterministic-order",
-		"mutable-context",
-		"retry-aware",
-		"retry",
-		"backoff",
-		"exponential-backoff",
-		"fibonacci",
-		"jitter",
-		"plugins",
-		"middleware",
-		"timeout",
-		"abort",
-		"abort-controller",
-		"promise"
-	],
+    "fetch",
+    "native-fetch",
+    "http",
+    "http-client",
+    "ajax",
+    "client",
+    "browser",
+    "framework-agnostic",
+    "universal",
+    "react",
+    "vue",
+    "angular",
+    "svelte",
+    "vanilla-js",
+    "pure-javascript",
+    "drivers",
+    "ofetch-optional",
+    "interceptors",
+    "enhanced-interceptors",
+    "deterministic-order",
+    "mutable-context",
+    "retry-aware",
+    "retry",
+    "backoff",
+    "exponential-backoff",
+    "fibonacci",
+    "jitter",
+    "plugins",
+    "middleware",
+    "timeout",
+    "abort",
+    "abort-controller",
+    "promise"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/miller-28/luminara.git"
@@ -69,7 +86,8 @@
     }
   },
   "files": [
-    "src",
+    "dist",
+    "types",
     "README.md",
     "LICENSE"
   ],
@@ -81,5 +99,10 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
   }
 }
