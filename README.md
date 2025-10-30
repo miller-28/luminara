@@ -11,12 +11,14 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 
 - ⚡ Built on modern native `fetch` (with optional ofetch driver support)
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
-- 🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
+- 🏗️ **Domain-driven architecture** (v0.5.0) - Feature-based modular structure
+- � **Dual export support** (v0.4.0) - ESM/CJS compatibility with auto-detection
+- �🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
 - 🔄 Advanced retry logic with 6 backoff strategies
 - ⏱️ Configurable timeouts and status code handling
 - 💎 Tiny footprint (~7KB native, ~10KB with ofetch)
 - 🪶 Zero dependencies (ofetch optional)
-- 🎯 Fully promise-based and type-friendly
+- 🎯 Fully promise-based with TypeScript support (v0.4.0)
 - 🚗 Pluggable driver architecture (native fetch, ofetch, custom)
 - 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
 
@@ -104,7 +106,95 @@ const api = createLuminara({
 
 ---
 
-## 🔄 Retry & Backoff Strategies
+## � Exports & Advanced Usage
+
+Luminara provides multiple export options for different use cases:
+
+### Simple Factory (Recommended)
+```js
+import { createLuminara } from "luminara";
+
+// Creates client with NativeFetchDriver by default
+const api = createLuminara({
+  baseURL: "https://api.example.com",
+  retry: 3,
+  backoffType: "exponential"
+});
+```
+
+### Direct Client & Driver Access
+```js
+import { 
+  LuminaraClient, 
+  NativeFetchDriver, 
+  OfetchDriver 
+} from "luminara";
+
+// Use native fetch driver
+const nativeDriver = NativeFetchDriver({
+  timeout: 10000,
+  retry: 5
+});
+const api = new LuminaraClient(nativeDriver);
+
+// Or use ofetch driver (optional)
+const ofetchDriver = OfetchDriver({
+  timeout: 10000,
+  retry: 5
+});
+const apiWithOfetch = new LuminaraClient(ofetchDriver);
+```
+
+### Feature Utilities & Constants
+```js
+import { 
+  backoffStrategies,
+  createBackoffHandler,
+  defaultRetryPolicy,
+  createRetryPolicy,
+  parseRetryAfter,
+  isIdempotentMethod,
+  IDEMPOTENT_METHODS,
+  DEFAULT_RETRY_STATUS_CODES
+} from "luminara";
+
+// Use backoff strategies directly
+const exponentialDelay = backoffStrategies.exponential(3, 1000); // 4000ms
+
+// Create custom retry policy
+const customPolicy = createRetryPolicy({
+  maxRetries: 5,
+  statusCodes: [408, 429, 500, 502, 503],
+  methods: ['GET', 'POST', 'PUT']
+});
+
+// Check if method is idempotent
+if (isIdempotentMethod('GET')) {
+  console.log('Safe to retry GET requests');
+}
+```
+
+### Build System Support (v0.4.0+)
+Luminara supports both ESM and CommonJS with automatic format detection:
+
+```js
+// ES Modules (modern bundlers, Node.js)
+import { createLuminara } from "luminara";
+
+// CommonJS (legacy environments)
+const { createLuminara } = require("luminara");
+```
+
+**Build Requirements for Development:**
+```bash
+# Required before testing sandbox/examples
+npm run build        # Production build
+npm run dev          # Development with watch mode
+```
+
+---
+
+## �🔄 Retry & Backoff Strategies
 
 Luminara includes 6 built-in backoff strategies for intelligent retry logic:
 
@@ -793,26 +883,49 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 
 ```
 luminara/
-  src/
-    index.js              # entry point
-    core/
-      backoff.js          # backoff strategies
-      luminara.js         # core client + plugin system
-    drivers/
-      native/             # native fetch driver
-        index.js          # main driver implementation
-        utils/            # driver utilities
-      ofetch/             # ofetch driver
-        index.js          # ofetch implementation
-  test-cli/               # CLI test environment
-    tests/                # comprehensive test suites
-    testRunner.js         # test orchestrator
-  test-on-react-app/      # React browser test environment
-  sandbox/                # interactive examples
-  package.json
-  README.md
-  LICENSE
+  src/                      # Source code (domain-driven architecture)
+    index.js                # Main entry point and exports
+    core/                   # Core client abstraction layer
+      luminara.js           # LuminaraClient with plugin system
+    drivers/                # HTTP driver implementations
+      native/               # Native fetch driver (feature-based)
+        index.js            # Main driver implementation
+        features/           # Modular feature domains
+          retry/            # Retry logic, backoff strategies, policies
+            backoff.js      # Backoff strategy implementations
+            retryPolicy.js  # Retry policies and utilities
+          timeout/          # Timeout handling
+          response/         # Response type processing
+          error/            # Error handling utilities
+          url/              # URL processing and query handling
+      ofetch/               # Ofetch driver (optional)
+        index.js            # Ofetch implementation
+  dist/                     # Built distribution files (auto-generated)
+    index.mjs               # ES Module format
+    index.cjs               # CommonJS format
+  types/                    # TypeScript definitions (auto-generated)
+    index.d.ts              # Type definitions
+  test-cli/                 # CLI test environment
+    tests/                  # Comprehensive test suites
+    testRunner.js           # Test orchestrator
+    testUtils.js            # Testing utilities
+  test-on-react-app/        # React browser test environment
+    src/                    # React app with 22 comprehensive tests
+  sandbox/                  # Interactive examples (21 examples)
+    examples/               # Feature-based example files
+    index.html              # Sandbox UI
+  package.json              # Package configuration with dual exports
+  tsup.config.js            # Build configuration
+  README.md                 # This documentation
+  RELEASE_NOTES.md          # Version history and changes
+  LICENSE                   # MIT License
 ```
+
+### Build System (v0.4.0+)
+- **Dual Exports**: Automatic ESM/CJS format support
+- **Auto-Build**: `npm run build` or `npm run dev` (watch mode)
+- **TypeScript Support**: Generated type definitions
+- **Universal Compatibility**: Works across all JavaScript environments
 
 ---
 
@@ -834,11 +947,16 @@ luminara/
 - [x] Retry on specific status codes
 - [x] Custom driver support
 - [x] Interactive sandbox with 21 examples
+- [x] **Dual export support** (ESM/CJS) - v0.4.0
+- [x] **Auto-build system** with watch mode - v0.4.0
+- [x] **TypeScript definitions** and IntelliSense support - v0.4.0
+- [x] **Domain-driven architecture** with feature-based modules - v0.5.0
+- [x] **Client-driver separation** and pluggable architecture - v0.5.0
+- [x] **Comprehensive export system** with utilities and constants - v0.5.0
 - [ ] Request debouncer (per key)
 - [ ] Rate limiter (token bucket)
 - [ ] Cache adapter (localStorage/memory)
 - [ ] Request tracing and metrics
-- [ ] TypeScript definitions
 
 ---
 

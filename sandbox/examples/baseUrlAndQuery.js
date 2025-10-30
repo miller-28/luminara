@@ -1,4 +1,4 @@
-import { createLuminara } from "../../src/index.js";
+import { createLuminara } from "../../dist/index.mjs";
 
 export const baseUrlAndQuery = {
 	title: "🔗 Base URL & Query Parameters",

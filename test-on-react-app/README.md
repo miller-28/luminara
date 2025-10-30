@@ -147,10 +147,11 @@ const api = createLuminara({
 - **Solution**: Enhanced timing analysis to detect retry behavior correctly
 - **Result**: Retry tests now show ✅ success when retries are functioning
 
-### ✅ **Local Source Integration**
+### ✅ **Local Distribution Integration**
 - **Issue**: Tests were using npm Luminara package instead of local development version
-- **Solution**: Updated imports to use local source files (`../../../src/index.js`)
-- **Result**: Tests now validate actual development changes immediately
+- **Solution**: Updated imports to use local built distribution files (`../../../dist/index.mjs`)
+- **Result**: Tests now validate actual development changes after build
+- **Requirement**: Must run `npm run build` in main project before testing
 
 ### ✅ **Individual Test Controls**
 - **Feature**: Each test card has its own stop button
@@ -243,9 +244,12 @@ This comprehensive test suite validates that Luminara works exactly as designed 
 ## 🔧 Development Workflow
 
 1. **Make changes** to Luminara source code (`../src/`)
-2. **Auto-reload** - Vite detects changes and reloads tests  
-3. **Run tests** - Individual or full suite validation
-4. **Monitor results** - Real-time feedback with detailed analysis
-5. **Debug issues** - Browser DevTools integration for deep inspection
+2. **Build changes** - Run `npm run build` in main project to compile distribution files
+3. **Auto-reload** - Vite detects distribution changes and reloads tests  
+4. **Run tests** - Individual or full suite validation
+5. **Monitor results** - Real-time feedback with detailed analysis
+6. **Debug issues** - Browser DevTools integration for deep inspection
+
+**Important**: This React app uses the built distribution files (`../dist/index.mjs`), so you must build the main project after making source changes for tests to reflect your updates.
 
 This comprehensive test suite validates that **Luminara works perfectly across all browser environments** with React being just one example of its framework-agnostic design!

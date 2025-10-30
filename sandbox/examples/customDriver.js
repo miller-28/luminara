@@ -1,4 +1,4 @@
-import { createLuminara, LuminaraClient } from "../../src/index.js";
+import { createLuminara, LuminaraClient } from "../../dist/index.mjs";
 
 export const customDriver = {
 	title: "🚗 Custom Driver",

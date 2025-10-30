@@ -27,7 +27,7 @@ test-cli/
 
 ```bash
 # Install test dependencies
-cd test
+cd test-cli
 npm install
 
 # Run all tests

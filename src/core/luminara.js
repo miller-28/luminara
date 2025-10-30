@@ -17,36 +17,26 @@ export class LuminaraClient {
 		// Merge global config with per-request options (per-request takes priority)
 		const mergedReq = { ...this.config, ...req };
 		
-		// Use enhanced interceptor system when any modern interceptor hooks are present
-		const hasEnhancedInterceptors = this.plugins.some(plugin => 
-			plugin.onRequest || plugin.onResponse || plugin.onResponseError
-		);
+		// Always use enhanced interceptor system - no legacy mode
+		let context = {
+			req: { ...mergedReq },
+			res: null,
+			error: null,
+			attempt: 1,
+			controller: new AbortController(),
+			meta: {}
+		};
 
-		if (hasEnhancedInterceptors) {
-			// Use enhanced interceptor system with deterministic order and mutable context
-			let context = {
-				req: { ...mergedReq },
-				res: null,
-				error: null,
-				attempt: 1,
-				controller: new AbortController(),
-				meta: {}
-			};
-
-			// Merge user's AbortController signal if provided
-			if (mergedReq.signal) {
-				const userSignal = mergedReq.signal;
-				const cleanup = () => context.controller.abort();
-				userSignal.addEventListener('abort', cleanup);
-			}
-
-			context.req.signal = context.controller.signal;
-
-			return this.#executeWithRetry(context);
-		} else {
-			// Use legacy system with ofetch's built-in retry for backward compatibility
-			return this.#executeLegacyRequest(mergedReq);
+		// Merge user's AbortController signal if provided
+		if (mergedReq.signal) {
+			const userSignal = mergedReq.signal;
+			const cleanup = () => context.controller.abort();
+			userSignal.addEventListener('abort', cleanup);
 		}
+
+		context.req.signal = context.controller.signal;
+
+		return this.#executeWithRetry(context);
 	}
 
 	async #executeWithRetry(context) {
@@ -124,9 +114,9 @@ export class LuminaraClient {
 				}
 
 				// Check if we should retry
-				if (attempt < maxAttempts && this.#shouldRetry(error, context.req)) {
+				if (attempt < maxAttempts && this.#shouldRetry(error, context)) {
 					// Apply retry delay
-					const delay = this.#getRetryDelay(context);
+					const delay = await this.#getRetryDelay(context);
 					if (delay > 0) {
 						await new Promise(resolve => setTimeout(resolve, delay));
 					}
@@ -139,38 +129,16 @@ export class LuminaraClient {
 		}
 	}
 
-	async #executeLegacyRequest(req) {
-		// Legacy system: execute driver directly with ofetch's built-in retry
-		try {
-			const response = await this.driver.request(req);
-			
-			// Apply legacy onSuccess plugins
-			let finalResponse = response;
-			for (const plugin of this.plugins) {
-				if (plugin.onSuccess) {
-					const result = await plugin.onSuccess(finalResponse, req);
-					if (result) {
-						finalResponse = result;
-					}
-				}
-			}
-			
-			return finalResponse;
-		} catch (error) {
-			// Apply legacy onError plugins
-			for (const plugin of this.plugins) {
-				if (plugin.onError) {
-					await plugin.onError(error, req);
-				}
-			}
-			throw error;
+	#shouldRetry(error, context) {
+		// Use driver's retry logic for sophisticated policy decisions
+		if (this.driver.shouldRetry) {
+			return this.driver.shouldRetry(error, context);
 		}
-	}
-
-	#shouldRetry(error, req) {
+		
+		// Fallback to simple retry logic
 		// Check custom retry status codes first
-		if (req.retryStatusCodes && error.status) {
-			return req.retryStatusCodes.includes(error.status);
+		if (context.req.retryStatusCodes && error.status) {
+			return context.req.retryStatusCodes.includes(error.status);
 		}
 		
 		// Default retry logic for server errors (5xx) and specific client errors
@@ -201,7 +169,13 @@ export class LuminaraClient {
 		return false;
 	}
 
-	#getRetryDelay(context) {
+	async #getRetryDelay(context) {
+		// Use driver's retry delay calculation if available
+		if (this.driver.calculateRetryDelay) {
+			return await this.driver.calculateRetryDelay(context);
+		}
+		
+		// Fallback to simple retry delay logic
 		const { req, attempt } = context;
 		if (typeof req.retryDelay === 'function') {
 			return req.retryDelay(context);

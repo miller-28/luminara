@@ -175,3 +175,17 @@ export async function testEnhancedErrors() {
 	console.log(`\nEnhanced Error Properties Tests: ${passCount}/${testCount} passed\n`);
 	return { total: testCount, passed: passCount };
 }
+
+// Run tests if this file is executed directly
+import { fileURLToPath } from 'url';
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
+	console.log('🧪 Running Enhanced Error Properties Tests...');
+	try {
+		const results = await testEnhancedErrors();
+		console.log(`✅ Tests completed: ${results.passed}/${results.total} passed`);
+		process.exit(results.passed === results.total ? 0 : 1);
+	} catch (error) {
+		console.error('Test execution failed:', error);
+		process.exit(1);
+	}
+}

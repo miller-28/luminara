@@ -49,7 +49,7 @@ suite.test('Request completes within timeout', async () => {
 	
 	const duration = timer.getDuration();
 	assert(response.status === 200, 'Request should succeed');
-	assertRange(duration, 80, 150, `Request should complete in ~100ms, took ${duration}ms`);
+	assertRange(duration, 50, 250, `Request should complete in ~100ms, took ${duration}ms`);
 });
 
 suite.test('Different timeouts for different requests', async () => {

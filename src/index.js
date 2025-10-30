@@ -12,4 +12,12 @@ export function createLuminara(config = {}) {
 export { LuminaraClient } from "./core/luminara.js";
 export { NativeFetchDriver } from "./drivers/native/index.js";
 export { OfetchDriver } from "./drivers/ofetch/index.js"; // Optional driver for users who prefer ofetch
-export { backoffStrategies, createBackoffHandler } from "./core/backoff.js";
+export { backoffStrategies, createBackoffHandler } from "./drivers/native/features/retry/backoff.js";
+export { 
+	defaultRetryPolicy, 
+	createRetryPolicy, 
+	parseRetryAfter, 
+	isIdempotentMethod,
+	IDEMPOTENT_METHODS,
+	DEFAULT_RETRY_STATUS_CODES
+} from "./drivers/native/features/retry/retryPolicy.js";

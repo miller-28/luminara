@@ -1,5 +1,5 @@
 import { ofetch } from "ofetch";
-import { createBackoffHandler } from "../../core/backoff.js";
+import { createBackoffHandler } from "../native/features/retry/backoff.js";
 
 export function OfetchDriver(config = {}) {
 	// Store global configuration

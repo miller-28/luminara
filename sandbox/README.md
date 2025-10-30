@@ -4,7 +4,36 @@ An interactive demo and testing environment for the **framework-agnostic** Lumin
 
 > **🌐 Universal Compatibility**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), Luminara works seamlessly with React, Vue, Angular, Svelte, and any modern browser environment.
 
-## 📁 File Structure
+## � **CRITICAL: Build Requirement**
+
+**⚠️ The sandbox REQUIRES the Luminara library to be built before use!**
+
+The sandbox uses the built distribution files (`dist/index.mjs`) from the main project, not the source files directly. **You MUST run the build command before the sandbox will work:**
+
+```powershell
+# From the main project root (not the sandbox folder)
+npm run build
+```
+
+**What this does:**
+- Creates `dist/index.mjs` (ES Module format) 
+- Creates `dist/index.cjs` (CommonJS format)
+- Builds from `src/` files using tsup bundler
+- **Required for sandbox to load Luminara properly**
+
+**Why this is required:**
+- Sandbox examples import from `../../dist/index.mjs`
+- Browser cannot directly load unbundled TypeScript/module source files
+- Build process resolves dependencies and creates browser-compatible modules
+
+**If you get errors like:**
+- `Failed to resolve module specifier`
+- `Cannot destructure property 'createLuminara' of 'window.Luminara'`
+- Examples show "Luminara not loaded" errors
+
+**Solution:** Run `npm run build` from the main project root first!
+
+## �📁 File Structure
 
 The sandbox follows strict **separation of concerns**:
 
@@ -91,6 +120,15 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 
 ## How to Run
 
+### 🏗️ **Step 0: Build First (REQUIRED)**
+
+Before running the sandbox, you **MUST** build the Luminara library:
+
+```powershell
+# From the main project root directory
+npm run build
+```
+
 ### Method 1: VS Code Debugging (Recommended)
 
 The repository includes pre-configured VS Code debug settings in `.vscode/`:
@@ -106,20 +144,25 @@ The repository includes pre-configured VS Code debug settings in `.vscode/`:
   - Detects when the server is ready before launching Chrome
 
 **To debug:**
-1. Open the project in VS Code
-2. Press `F5` or click "Run and Debug" → "Debug Luminara Sandbox"
-3. VS Code will:
+1. **Build first:** `npm run build` (from main project root)
+2. Open the project in VS Code
+3. Press `F5` or click "Run and Debug" → "Debug Luminara Sandbox"
+4. VS Code will:
    - Start the serve task on port 2880
    - Launch Chrome with debugging enabled
    - Navigate to the sandbox page
-4. Click "Run demo" to test the Luminara client
-5. Set breakpoints in the source files to debug
+5. Click "Run demo" to test the Luminara client
+6. Set breakpoints in the source files to debug
 
 ### Method 2: Manual Server
 
 If you prefer to run the server manually:
 
-```bash
+```powershell
+# Step 1: Build the library (REQUIRED)
+npm run build
+
+# Step 2: Start the server
 npx serve .
 ```
 

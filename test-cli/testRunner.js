@@ -11,6 +11,7 @@ import { suite as timeoutSuite, mockServer as timeoutServer } from './tests/time
 import { suite as driversSuite, mockServer as driversServer } from './tests/drivers.test.js';
 import { suite as reactSuite, mockServer as reactServer } from './tests/reactSimulation.test.js';
 import { suite as enhancedInterceptorsSuite, mockServer as enhancedInterceptorsServer } from './tests/enhancedInterceptors.test.js';
+import { suite as advancedRetryPoliciesSuite, mockServer as advancedRetryPoliciesServer } from './tests/advancedRetryPolicies.test.js';
 import { testResponseTypes } from './tests/responseTypes.test.js';
 import { testEnhancedErrors } from './tests/enhancedErrors.test.js';
 import { testParseResponse } from './tests/parseResponse.test.js';
@@ -25,7 +26,8 @@ const TEST_SUITES = [
 	{ name: 'Timeout Handling', suite: timeoutSuite, server: timeoutServer },
 	{ name: 'Custom Drivers', suite: driversSuite, server: driversServer },
 	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },
-	{ name: 'Enhanced Interceptors', suite: enhancedInterceptorsSuite, server: enhancedInterceptorsServer }
+	{ name: 'Enhanced Interceptors', suite: enhancedInterceptorsSuite, server: enhancedInterceptorsServer },
+	{ name: 'Advanced Retry Policies', suite: advancedRetryPoliciesSuite, server: advancedRetryPoliciesServer }
 ];
 
 // Standalone tests (no mock server needed)

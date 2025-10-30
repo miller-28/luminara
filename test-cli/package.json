@@ -13,6 +13,12 @@
 		"test:timeout": "node --experimental-fetch tests/timeout.test.js",
 		"test:drivers": "node --experimental-fetch tests/drivers.test.js",
 		"test:react-simulation": "node --experimental-fetch tests/reactSimulation.test.js",
+		"test:advanced-retry": "node --experimental-fetch tests/advancedRetryPolicies.test.js",
+		"test:enhanced-errors": "node --experimental-fetch tests/enhancedErrors.test.js",
+		"test:enhanced-interceptors": "node --experimental-fetch tests/enhancedInterceptors.test.js",
+		"test:ignore-response-error": "node --experimental-fetch tests/ignoreResponseError.test.js",
+		"test:parse-response": "node --experimental-fetch tests/parseResponse.test.js",
+		"test:response-types": "node --experimental-fetch tests/responseTypes.test.js",
 		"test:watch": "nodemon --experimental-fetch testRunner.js"
 	},
 	"dependencies": {

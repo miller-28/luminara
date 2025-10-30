@@ -6,7 +6,7 @@ export const enhancedInterceptorExamples = [
 		id: 'interceptor-order',
 		title: 'Deterministic Execution Order',
 		run: async (updateOutput, signal) => {
-			const { createLuminara } = await import('../../src/index.js');
+			const { createLuminara } = await import('../../dist/index.mjs');
 			
 			const api = createLuminara({
 				baseURL: 'https://httpbin.org',
@@ -110,7 +110,7 @@ export const enhancedInterceptorExamples = [
 		id: 'mutable-context',
 		title: 'Mutable Context Sharing',
 		run: async (updateOutput, signal) => {
-			const { createLuminara } = await import('../../src/index.js');
+			const { createLuminara } = await import('../../dist/index.mjs');
 			
 			const api = createLuminara({
 				baseURL: 'https://httpbin.org'
@@ -196,7 +196,7 @@ export const enhancedInterceptorExamples = [
 		id: 'retry-aware-auth',
 		title: 'Retry-Aware Authentication',
 		run: async (updateOutput, signal) => {
-			const { createLuminara } = await import('../../src/index.js');
+			const { createLuminara } = await import('../../dist/index.mjs');
 			
 			const api = createLuminara({
 				baseURL: 'https://httpbin.org',
@@ -299,7 +299,7 @@ export const enhancedInterceptorExamples = [
 		id: 'retry-with-real-failure',
 		title: 'Retry with Simulated Auth Failure',
 		run: async (updateOutput, signal) => {
-			const { createLuminara } = await import('../../src/index.js');
+			const { createLuminara } = await import('../../dist/index.mjs');
 			
 			const api = createLuminara({
 				baseURL: 'https://httpbin.org',
@@ -359,7 +359,7 @@ export const enhancedInterceptorExamples = [
 		id: 'abort-controller',
 		title: 'AbortController Integration',
 		run: async (updateOutput, signal) => {
-			const { createLuminara } = await import('../../src/index.js');
+			const { createLuminara } = await import('../../dist/index.mjs');
 			
 			const api = createLuminara({
 				baseURL: 'https://httpbin.org',

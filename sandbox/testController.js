@@ -9,6 +9,7 @@ import { plugins } from './examples/plugins.js';
 import { enhancedInterceptorExamples } from './examples/enhancedInterceptors.js';
 import { customDriver } from './examples/customDriver.js';
 import { responseTypesExamples } from './examples/responseTypes.js';
+import { advancedRetryPoliciesExamples } from './examples/advancedRetryPolicies.js';
 
 // Create enhanced interceptors feature
 const enhancedInterceptors = {
@@ -22,6 +23,12 @@ const responseTypes = {
 	tests: responseTypesExamples
 };
 
+// Create advanced retry policies feature
+const advancedRetryPolicies = {
+	title: "🎯 Advanced Retry Policies",
+	tests: advancedRetryPoliciesExamples
+};
+
 // Aggregate all examples
 export const examples = {
 	basicUsage,
@@ -33,6 +40,7 @@ export const examples = {
 	plugins,
 	enhancedInterceptors,
 	responseTypes,
+	advancedRetryPolicies,
 	customDriver
 };
 

@@ -1,5 +1,136 @@
 # Luminara Release Notes
 
+## Version 0.5.0 (October 30, 2025)
+
+### � MAJOR ARCHITECTURAL OVERHAUL
+
+#### Complete Source Code Restructuring
+- **Domain-Driven Architecture**: Completely restructured `src/` folder into feature-based domains
+  - `src/core/` - Core client abstraction layer
+  - `src/drivers/native/` - Native fetch driver with modular feature system
+  - `src/drivers/ofetch/` - Ofetch driver implementation
+  - Each driver now has its own dedicated directory and feature modules
+
+#### Driver Architecture Revolution  
+- **Feature-Based Modular System**: Native driver now organized by feature domains
+  - `src/drivers/native/features/retry/` - Retry logic, backoff strategies, retry policies
+  - `src/drivers/native/features/timeout/` - Timeout handling
+  - `src/drivers/native/features/response/` - Response type processing
+  - `src/drivers/native/features/error/` - Error handling utilities
+  - `src/drivers/native/features/url/` - URL processing and query handling
+
+- **Client-Driver Separation**: Complete separation of concerns between client and drivers
+  - `LuminaraClient` in `src/core/` handles plugin system and high-level orchestration
+  - Drivers handle HTTP implementation details and feature-specific logic
+  - Clean interfaces between client and driver layers
+  - Pluggable driver architecture allowing easy driver swapping
+
+#### Export System Redesign
+- **Comprehensive API Exports**: New export structure from `src/index.js`
+  - Factory function: `createLuminara()` for simple usage
+  - Direct access: `LuminaraClient`, `NativeFetchDriver`, `OfetchDriver`
+  - Feature utilities: `backoffStrategies`, `createBackoffHandler`
+  - Retry policies: `defaultRetryPolicy`, `createRetryPolicy`, `parseRetryAfter`
+  - Constants: `IDEMPOTENT_METHODS`, `DEFAULT_RETRY_STATUS_CODES`
+
+#### Developer Experience Improvements
+- **Modular Feature Development**: Each feature is self-contained with its own utilities
+- **Clear Separation of Concerns**: Business logic separated from HTTP transport
+- **Extensible Architecture**: Easy to add new drivers or extend existing features
+- **Better Code Organization**: Domain-driven structure improves maintainability
+
+### �🐛 Bug Fixes & Sandbox Improvements
+
+#### Sandbox Environment Fixes
+- **Parameter Naming Standardization**: Fixed inconsistent parameter naming across response type examples
+  - Updated all `outputCallback` parameters to `updateOutput` for consistency
+  - Affected files: `responseTypes.js` (stream, arrayBuffer, auto, default examples)
+  - Ensures proper callback function binding and UI updates
+
+- **Scope Issue Resolution**: Fixed variable scope error in advanced retry policies
+  - Moved `startTime` declaration outside try block in `advancedRetryPolicies.js`
+  - Resolves "startTime is not defined" ReferenceError
+  - Enables proper duration calculation in catch blocks
+
+- **Network Connectivity Improvements**: Enhanced reliability of response type examples
+  - Migrated from `httpbin.org` to `httpbingo.org` for all response type tests
+  - Better CORS support for localhost browser testing
+  - Eliminates "Failed to fetch" errors in sandbox environment
+
+#### Code Quality Enhancements
+- **Consistent Formatting**: Applied proper one-liner formatting to retry examples
+  - Converted multi-line `updateOutput` calls to single lines with `\n` separators
+  - Improved code readability and maintainability
+  - Follows project coding standards
+
+#### Build System Stability
+- **Distribution Compilation**: Ensured all architectural changes are properly compiled
+  - Multiple build cycles to validate new structure
+  - ESM (`dist/index.mjs`) and CJS (`dist/index.cjs`) formats updated
+  - All new exports and feature modules properly bundled
+
+### 🎯 Testing & Validation
+- **3-Tier Testing Strategy**: All functionality validated across:
+  - ✅ Sandbox environment (manual browser testing)  
+  - ✅ CLI testing (automated unit tests)
+  - ✅ React browser testing (integration validation)
+
+### 📊 Metrics
+- **100% Backward Compatibility**: All existing APIs continue to work
+- **Zero Breaking Changes**: Factory function maintains same interface
+- **Enhanced Modularity**: 5 feature domains with dedicated utilities
+- **Driver Flexibility**: 2 driver implementations (Native, Ofetch)
+- **Complete Test Coverage**: All architectural changes thoroughly tested
+
+---
+
+## Version 0.4.0 (October 30, 2025)
+
+### 🚀 Build System & Distribution Revolution
+
+#### Dual Export Support (ESM/CJS)
+- **Universal Compatibility**: Added support for both ESM and CommonJS formats
+  - `dist/index.mjs` - ES Module format for modern bundlers and Node.js
+  - `dist/index.cjs` - CommonJS format for legacy environments
+  - Proper `package.json` exports configuration for automatic format detection
+  - Maintains compatibility across all JavaScript environments
+
+#### Auto-Build System Implementation
+- **Development Workflow Enhancement**: Implemented automatic build system with tsup
+  - `npm run build` - Production build for distribution
+  - `npm run build:watch` - Development mode with auto-rebuild on file changes
+  - `npm run dev` - Alias for watch mode during active development
+  - **Critical Requirement**: All `src/` changes must be built before testing
+
+#### TypeScript Support Infrastructure
+- **Type Definitions**: Added comprehensive TypeScript support
+  - Generated type definitions in `types/index.d.ts`
+  - Proper type exports in package.json
+  - IntelliSense support for all APIs and configuration options
+  - Maintains pure JavaScript source code while providing TypeScript DX
+
+#### Package Distribution Optimization
+- **Build Configuration**: Optimized build pipeline with tsup
+  - ES2020 target for modern browser compatibility
+  - Tree-shaking friendly exports
+  - Source maps for debugging
+  - Minimal bundle size optimization
+
+#### Development Environment Standards
+- **PowerShell Integration**: Established Windows/PowerShell as primary development environment
+  - PowerShell command syntax in all documentation
+  - Windows path separator compatibility
+  - PowerShell-specific command chaining with `;`
+
+### 📊 Metrics
+- **Universal Package Support**: ESM + CJS compatibility
+- **Zero Configuration**: Automatic format detection
+- **Developer Experience**: TypeScript support without complexity
+- **Build Performance**: Fast incremental builds with tsup
+- **Distribution Size**: Optimized bundle sizes for both formats
+
+---
+
 ## Version 0.3.0 (October 30, 2025)
 
 ### 🚀 Major Improvements

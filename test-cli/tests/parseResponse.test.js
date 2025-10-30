@@ -194,3 +194,17 @@ export async function testParseResponse() {
 	
 	return { total: testCount, passed: passCount };
 }
+
+// Run tests if this file is executed directly
+import { fileURLToPath } from 'url';
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
+	console.log('🧪 Running parseResponse Option Tests...');
+	try {
+		const results = await testParseResponse();
+		console.log(`✅ Tests completed: ${results.passed}/${results.total} passed`);
+		process.exit(results.passed === results.total ? 0 : 1);
+	} catch (error) {
+		console.error('Test execution failed:', error);
+		process.exit(1);
+	}
+}
