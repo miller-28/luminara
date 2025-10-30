@@ -4,9 +4,9 @@ A comprehensive React + Vite testing suite for the **framework-agnostic** Lumina
 
 ## ✨ Features
 
-- 🧪 **18 Comprehensive Tests** - Full feature coverage including HTTP methods, retries, backoff strategies, timeouts, and plugins
-- � **Framework Example** - Demonstrates Luminara's framework-agnostic nature within React environment
-- �🎯 **Individual Test Controls** - Run tests individually or all at once with individual stop buttons
+- 🧪 **22 Comprehensive Tests** - Full feature coverage including HTTP methods, retries, backoff strategies, timeouts, and enhanced interceptors
+- 🏗️ **Modular Test Architecture** - Tests organized into focused modules by feature category
+- 🎯 **Individual Test Controls** - Run tests individually or all at once with individual stop buttons
 - 🔄 **Real-time Monitoring** - Live logs, timing analysis, and retry detection
 - 📊 **Visual Results** - Color-coded test results with detailed analysis
 - 🛑 **Abort Controls** - Stop individual tests or entire test suite
@@ -31,13 +31,13 @@ Use VS Code's debug configurations:
 
 ## 🧪 Comprehensive Test Suite
 
-The React app includes 18 comprehensive tests covering all Luminara features:
+The React app includes 22 comprehensive tests covering all Luminara features, organized into modular test files:
 
 > **Note**: This React implementation is just one example of Luminara's universal compatibility. Luminara works equally well with Vue, Angular, Svelte, vanilla JavaScript, and any modern browser environment.
 
-### Test Categories
+### Modular Test Categories
 
-#### 🌐 **HTTP Methods (4 tests)**
+#### 🌐 **Basic HTTP Methods (4 tests)**
 - GET Request (JSON)
 - POST Request  
 - PUT Request
@@ -48,9 +48,10 @@ The React app includes 18 comprehensive tests covering all Luminara features:
 - GET HTML Response
 - POST Form Data
 
-#### 🔧 **Parameters & Headers (2 tests)**
+#### 🔧 **Query Parameters & Headers (3 tests)**
 - GET with Query Parameters
 - Custom Headers
+- Base URL Test
 
 #### 🔄 **Retry & Error Handling (3 tests)**
 - 503 Status with Retry
@@ -64,10 +65,15 @@ The React app includes 18 comprehensive tests covering all Luminara features:
 #### ⏰ **Timeout Tests (1 test)**
 - Timeout Test (3s) - **Now working correctly!**
 
-#### 🔗 **Integration Tests (3 tests)**
-- Base URL Test
+#### � **Plugin System & Enhanced Interceptors (5 tests)**
 - Custom Plugin Test
-- Raw ofetch 503 Test
+- Enhanced Interceptors: Execution Order
+- Enhanced Interceptors: Mutable Context
+- Enhanced Interceptors: Retry-Aware Auth
+- Enhanced Interceptors: AbortController
+
+#### 🚗 **Driver Comparison (1 test)**
+- OfetchDriver vs NativeFetchDriver Test
 
 ### 🎯 Test Results Analysis
 
@@ -96,8 +102,17 @@ src/
 │   └── LogsSection.jsx        # Logs display and controls
 ├── controllers/               # 🧠 Business Logic
 │   └── TestController.js      # Test execution and state management (380 lines)
-├── data/                      # 📊 Pure Data
-│   └── testDefinitions.js     # Test configurations (18 tests, 243 lines)
+├── data/                      # 📊 Pure Data (Modular Architecture)
+│   ├── testDefinitions.js     # Test aggregator importing all modules
+│   └── tests/                 # Individual test modules by feature
+│       ├── basicHttpTests.js      # HTTP methods (GET, POST, PUT, DELETE)
+│       ├── contentTypeTests.js    # Content types (text, HTML, form)
+│       ├── queryHeaderTests.js    # Query params, headers, base URL
+│       ├── retryErrorTests.js     # Retry logic and error handling
+│       ├── backoffTests.js        # Backoff strategies
+│       ├── timeoutTests.js        # Timeout handling
+│       ├── pluginTests.js         # Plugin system & interceptors
+│       └── driverTests.js         # Driver comparisons
 └── services/                  # 🔧 API Layer
     └── luminaraService.js     # Luminara client management
 ```

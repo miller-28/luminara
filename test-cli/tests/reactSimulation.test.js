@@ -3,7 +3,7 @@ import { TestSuite, MockServer, assert, assertEqual, Timer } from '../testUtils.
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('React Application Simulation');
-const mockServer = new MockServer(3007);
+const mockServer = new MockServer(4207);
 
 // Simulate React component patterns and usage scenarios
 suite.test('Component initialization with useEffect pattern', async () => {
@@ -17,7 +17,7 @@ suite.test('Component initialization with useEffect pattern', async () => {
 		// Simulate useEffect initialization
 		async useEffectInit() {
 			this.api = createLuminara({
-				baseURL: 'http://localhost:3007',
+				baseURL: 'http://localhost:4207',
 				timeout: 5000,
 				retry: 3,
 				retryDelay: 1000,
@@ -71,7 +71,7 @@ suite.test('Form submission with validation pattern', async () => {
 	// Simulate a React form component
 	const formComponent = {
 		api: createLuminara({
-			baseURL: 'http://localhost:3007',
+			baseURL: 'http://localhost:4207',
 			timeout: 10000,
 			headers: { 'Content-Type': 'application/json' }
 		}),
@@ -139,7 +139,7 @@ suite.test('Data fetching with loading states', async () => {
 	// Simulate a React component with data fetching states
 	const dataComponent = {
 		api: createLuminara({
-			baseURL: 'http://localhost:3007',
+			baseURL: 'http://localhost:4207',
 			retry: 2,
 			retryDelay: 500
 		}),
@@ -202,7 +202,7 @@ suite.test('Authentication flow simulation', async () => {
 		user: null,
 		
 		api: createLuminara({
-			baseURL: 'http://localhost:3007'
+			baseURL: 'http://localhost:4207'
 		}),
 		
 		async login(credentials) {
@@ -217,7 +217,7 @@ suite.test('Authentication flow simulation', async () => {
 			
 			// Update API client with auth header
 			this.api = createLuminara({
-				baseURL: 'http://localhost:3007',
+				baseURL: 'http://localhost:4207',
 				headers: {
 					'Authorization': `Bearer ${this.token}`
 				}
@@ -245,7 +245,7 @@ suite.test('Authentication flow simulation', async () => {
 			
 			// Reset API client
 			this.api = createLuminara({
-				baseURL: 'http://localhost:3007'
+				baseURL: 'http://localhost:4207'
 			});
 		}
 	};
@@ -274,7 +274,7 @@ suite.test('Error boundary simulation with retry', async () => {
 		maxRetries: 3,
 		
 		api: createLuminara({
-			baseURL: 'http://localhost:3007',
+			baseURL: 'http://localhost:4207',
 			retry: 0 // Handle retries manually in component
 		}),
 		
@@ -329,7 +329,7 @@ suite.test('Pagination component simulation', async () => {
 	// Simulate pagination in a React component
 	const paginationComponent = {
 		api: createLuminara({
-			baseURL: 'http://localhost:3007'
+			baseURL: 'http://localhost:4207'
 		}),
 		
 		currentPage: 1,
@@ -401,7 +401,7 @@ suite.test('Real-time data updates simulation', async () => {
 	// Simulate polling for real-time updates
 	const realTimeComponent = {
 		api: createLuminara({
-			baseURL: 'http://localhost:3007',
+			baseURL: 'http://localhost:4207',
 			timeout: 2000
 		}),
 		
@@ -467,7 +467,7 @@ suite.test('Bulk operations simulation', async () => {
 	// Simulate bulk data operations like batch uploads
 	const bulkComponent = {
 		api: createLuminara({
-			baseURL: 'http://localhost:3007',
+			baseURL: 'http://localhost:4207',
 			timeout: 30000 // Longer timeout for bulk operations
 		}),
 		

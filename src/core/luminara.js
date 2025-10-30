@@ -1,8 +1,8 @@
-import { OfetchDriver } from "../drivers/ofetch.js";
+import { NativeFetchDriver } from "../drivers/native/index.js";
 
 export class LuminaraClient {
 
-	constructor(driver = OfetchDriver(), plugins = [], config = {}) {
+	constructor(driver = NativeFetchDriver(), plugins = [], config = {}) {
 		this.driver = driver;
 		this.plugins = plugins;
 		this.config = config; // Store global configuration
@@ -280,7 +280,7 @@ export class LuminaraClient {
 	postForm(url, data, options = {}) {
 		const body = data instanceof URLSearchParams ? data : new URLSearchParams(data);
 		// note: URLSearchParams auto-encodes; body will be used directly
-		return this.post(url, body, this.#withType(options, 'application/x-www-form-urlencoded', 'text'));
+		return this.post(url, body, this.#withType(options, 'application/x-www-form-urlencoded', 'auto'));
 	}
 
 	postMultipart(url, formData, options = {}) {

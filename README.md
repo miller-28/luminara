@@ -1,6 +1,6 @@
 # 🌌 Luminara
 
-**Luminara** is a lightweight, framework-agnostic HTTP client built on [ofetch](https://github.com/unjs/ofetch).  
+**Luminara** is a lightweight, framework-agnostic HTTP client built on native fetch.  
 Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision across all modern JavaScript frameworks and vanilla applications. ✨
 
 🌐 **Universal Compatibility**: Works seamlessly with React, Vue, Angular, Svelte, vanilla JavaScript, and any modern browser environment.
@@ -9,15 +9,15 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 
 ## ✨ Features
 
-- ⚡ Built on modern `fetch` via ofetch
+- ⚡ Built on modern native `fetch` (with optional ofetch driver support)
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
 - 🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
 - 🔄 Advanced retry logic with 6 backoff strategies
 - ⏱️ Configurable timeouts and status code handling
-- 💎 Tiny footprint (~10KB + ofetch)
-- 🪶 Zero dependencies besides ofetch
+- 💎 Tiny footprint (~7KB native, ~10KB with ofetch)
+- 🪶 Zero dependencies (ofetch optional)
 - 🎯 Fully promise-based and type-friendly
-- 🚗 Custom driver support
+- 🚗 Pluggable driver architecture (native fetch, ofetch, custom)
 - 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
 
 ---
@@ -515,7 +515,7 @@ try {
 
 ## 🚗 Custom Drivers
 
-Replace the default ofetch driver with your own implementation:
+Replace the default native fetch driver with your own implementation:
 
 ```js
 import { LuminaraClient } from "luminara";
@@ -796,13 +796,22 @@ luminara/
   src/
     index.js              # entry point
     core/
-      driver.js           # generic driver interface
+      backoff.js          # backoff strategies
       luminara.js         # core client + plugin system
     drivers/
-      ofetch.js           # default driver
+      native/             # native fetch driver
+        index.js          # main driver implementation
+        utils/            # driver utilities
+      ofetch/             # ofetch driver
+        index.js          # ofetch implementation
+  test-cli/               # CLI test environment
+    tests/                # comprehensive test suites
+    testRunner.js         # test orchestrator
+  test-on-react-app/      # React browser test environment
+  sandbox/                # interactive examples
   package.json
   README.md
-    LICENSE
+  LICENSE
 ```
 
 ---
@@ -837,7 +846,7 @@ luminara/
 
 MIT © 2025 [Jonathan Miller](mailto:jonathan@miller28.com) • [LinkedIn](https://www.linkedin.com/in/miller28/)
 
-Includes portions of [ofetch](https://github.com/unjs/ofetch) (MIT License)
+Optional compatibility with [ofetch](https://github.com/unjs/ofetch) (MIT License)
 
 ---
 

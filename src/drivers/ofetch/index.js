@@ -1,5 +1,5 @@
 import { ofetch } from "ofetch";
-import { createBackoffHandler } from "../core/backoff.js";
+import { createBackoffHandler } from "../../core/backoff.js";
 
 export function OfetchDriver(config = {}) {
 	// Store global configuration
@@ -23,11 +23,27 @@ export function OfetchDriver(config = {}) {
 			const { 
 				url, method = "GET", headers, query, body, signal, 
 				timeout, retry, retryDelay, retryStatusCodes,
-				backoffType, backoffMaxDelay
+				backoffType, backoffMaxDelay, responseType, parseResponse,
+				ignoreResponseError
 			} = mergedOpts;
 			
 			// Map Luminara's options to ofetch's options
 			const ofetchOptions = { method, headers, query, body, signal };
+			
+			// Handle ignoreResponseError mapping to ofetch
+			if (ignoreResponseError) {
+				ofetchOptions.ignoreResponseError = ignoreResponseError;
+			}
+			
+			// Handle parseResponse mapping to ofetch
+			if (typeof parseResponse === 'function') {
+				ofetchOptions.parseResponse = parseResponse;
+			}
+			
+			// Handle responseType mapping to ofetch
+			if (responseType && responseType !== 'auto') {
+				ofetchOptions.responseType = responseType;
+			}
 			
 			// Handle timeout manually since ofetch timeout is unreliable
 			let timeoutId;
@@ -93,16 +109,41 @@ export function OfetchDriver(config = {}) {
 				if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
 					const timeoutError = new Error(`Request timeout after ${timeout}ms`);
 					timeoutError.name = 'TimeoutError';
+					timeoutError.status = null;
+					timeoutError.statusText = null;
+					timeoutError.data = null;
+					timeoutError.response = null;
+					// Add options for debugging
+					timeoutError.options = {
+						url,
+						method,
+						headers: { ...ofetchOptions.headers },
+						timeout,
+						retry,
+						retryDelay,
+						responseType
+					};
 					throw timeoutError;
 				}
 				
 				// Preserve HTTP status code from ofetch error for retry logic
 				if (error.status) {
 					const httpError = new Error(error.message || `HTTP ${error.status}`);
+					httpError.name = 'FetchError';
 					httpError.status = error.status;
 					httpError.statusText = error.statusText;
 					httpError.data = error.data;
 					httpError.response = error.response;
+					// Add options for debugging
+					httpError.options = {
+						url,
+						method,
+						headers: { ...ofetchOptions.headers },
+						timeout,
+						retry,
+						retryDelay,
+						responseType
+					};
 					throw httpError;
 				}
 				

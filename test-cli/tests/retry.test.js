@@ -3,14 +3,14 @@ import { TestSuite, MockServer, assert, assertRange, Timer } from '../testUtils.
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('Retry Logic');
-const mockServer = new MockServer(3004);
+const mockServer = new MockServer(4204);
 
 // Test basic retry functionality
 suite.test('Basic retry on server errors', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 3,
 		retryDelay: 50
 	});
@@ -28,7 +28,7 @@ suite.test('No retry on client errors (4xx)', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 3,
 		retryDelay: 50
 	});
@@ -46,7 +46,7 @@ suite.test('Retry on specific status codes', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 2,
 		retryDelay: 50,
 		retryStatusCodes: [408, 429, 503] // Specific codes to retry
@@ -75,7 +75,7 @@ suite.test('Retry with timeout combination', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 2,
 		retryDelay: 100,
 		timeout: 200 // 200ms timeout
@@ -126,7 +126,7 @@ suite.test('Eventual success after retries', async () => {
 	};
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 3,
 		retryDelay: 50
 	});
@@ -146,7 +146,7 @@ suite.test('Custom retry delay function', async () => {
 	const totalRetries = 4;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: totalRetries,
 		retryDelay: (context) => {
 			// Calculate attempt number: totalRetries - current retry + 1
@@ -182,7 +182,7 @@ suite.test('Retry context provides request information', async () => {
 	const totalRetries = 3;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: totalRetries,
 		retryDelay: (context) => {
 			// Calculate attempt number: totalRetries - current retry + 1
@@ -219,7 +219,7 @@ suite.test('Retry with POST requests and body preservation', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 2,
 		retryDelay: 50
 	});
@@ -241,7 +241,7 @@ suite.test('Retry disabled with retry: 0', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3004',
+		baseURL: 'http://localhost:4204',
 		retry: 0, // Disable retries
 		retryDelay: 100
 	});

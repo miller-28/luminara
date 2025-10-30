@@ -8,11 +8,18 @@ import { customRetry } from './examples/customRetry.js';
 import { plugins } from './examples/plugins.js';
 import { enhancedInterceptorExamples } from './examples/enhancedInterceptors.js';
 import { customDriver } from './examples/customDriver.js';
+import { responseTypesExamples } from './examples/responseTypes.js';
 
 // Create enhanced interceptors feature
 const enhancedInterceptors = {
 	title: "🚀 Enhanced Interceptor System",
 	tests: enhancedInterceptorExamples
+};
+
+// Create response types feature
+const responseTypes = {
+	title: "📦 Response Type Options",
+	tests: responseTypesExamples
 };
 
 // Aggregate all examples
@@ -25,6 +32,7 @@ export const examples = {
 	customRetry,
 	plugins,
 	enhancedInterceptors,
+	responseTypes,
 	customDriver
 };
 

@@ -7,7 +7,7 @@ This testing environment programmatically validates all Luminara features as the
 ## 🧪 Test Structure
 
 ```
-test/
+test-cli/
 ├── package.json           # Test environment dependencies
 ├── testRunner.js          # Main test runner
 ├── testUtils.js           # Shared testing utilities
@@ -113,7 +113,7 @@ Tests provide detailed output including:
 
 Tests can be configured via environment variables:
 - `TEST_TIMEOUT=10000` - Global test timeout (default: 10s)
-- `MOCK_SERVER_PORT=3001` - Mock server port (default: 3001)
+- `MOCK_SERVER_PORT=4201` - Mock server port (default: 4201)
 - `VERBOSE=true` - Enable verbose logging
 - `SKIP_SLOW=true` - Skip long-running tests
 

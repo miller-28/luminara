@@ -11,6 +11,10 @@ import { suite as timeoutSuite, mockServer as timeoutServer } from './tests/time
 import { suite as driversSuite, mockServer as driversServer } from './tests/drivers.test.js';
 import { suite as reactSuite, mockServer as reactServer } from './tests/reactSimulation.test.js';
 import { suite as enhancedInterceptorsSuite, mockServer as enhancedInterceptorsServer } from './tests/enhancedInterceptors.test.js';
+import { testResponseTypes } from './tests/responseTypes.test.js';
+import { testEnhancedErrors } from './tests/enhancedErrors.test.js';
+import { testParseResponse } from './tests/parseResponse.test.js';
+import { testIgnoreResponseError } from './tests/ignoreResponseError.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -22,6 +26,14 @@ const TEST_SUITES = [
 	{ name: 'Custom Drivers', suite: driversSuite, server: driversServer },
 	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },
 	{ name: 'Enhanced Interceptors', suite: enhancedInterceptorsSuite, server: enhancedInterceptorsServer }
+];
+
+// Standalone tests (no mock server needed)
+const STANDALONE_TESTS = [
+	{ name: 'Response Types', test: testResponseTypes },
+	{ name: 'Enhanced Error Properties', test: testEnhancedErrors },
+	{ name: 'parseResponse Option', test: testParseResponse },
+	{ name: 'ignoreResponseError Option', test: testIgnoreResponseError }
 ];
 
 // Colors for output
@@ -59,7 +71,7 @@ async function runAllTests() {
 	console.log(colorize('Testing Luminara package as used in React applications\n', 'yellow'));
 	
 	const overallResults = {
-		totalSuites: TEST_SUITES.length,
+		totalSuites: TEST_SUITES.length + STANDALONE_TESTS.length,
 		passedSuites: 0,
 		failedSuites: 0,
 		totalTests: 0,
@@ -118,6 +130,64 @@ async function runAllTests() {
 			} catch (error) {
 				suiteTimer.mark();
 				console.log(colorize(`   ❌ Suite failed to run: ${error.message}`, 'red'));
+				overallResults.failedSuites++;
+				overallResults.suiteResults.push({
+					name,
+					passed: 0,
+					failed: 1,
+					total: 1,
+					duration: suiteTimer.getDuration(),
+					status: 'ERROR',
+					error: error.message
+				});
+			}
+		}
+		
+		// Run standalone tests (no mock server needed)
+		for (const { name, test } of STANDALONE_TESTS) {
+			printSeparator();
+			console.log(colorize(`\n📋 Running: ${name}`, 'magenta'));
+			console.log(colorize(`   Standalone test (no server)`, 'blue'));
+			
+			const suiteTimer = new Timer();
+			suiteTimer.mark();
+			
+			try {
+				const results = await test();
+				suiteTimer.mark();
+				
+				const duration = suiteTimer.getDuration();
+				const status = results.passed === results.total ? 'PASSED' : 'FAILED';
+				const statusColor = results.passed === results.total ? 'green' : 'red';
+				
+				console.log(colorize(`   ✓ ${results.passed} passed, ✗ ${results.total - results.passed} failed`, 
+					results.passed === results.total ? 'green' : 'yellow'));
+				console.log(colorize(`   Duration: ${duration}ms`, 'blue'));
+				console.log(colorize(`   Status: ${status}`, statusColor));
+				
+				// Update overall results
+				overallResults.totalTests += results.total;
+				overallResults.passedTests += results.passed;
+				overallResults.failedTests += (results.total - results.passed);
+				
+				if (results.passed === results.total) {
+					overallResults.passedSuites++;
+				} else {
+					overallResults.failedSuites++;
+				}
+				
+				overallResults.suiteResults.push({
+					name,
+					passed: results.passed,
+					failed: results.total - results.passed,
+					total: results.total,
+					duration,
+					status
+				});
+				
+			} catch (error) {
+				suiteTimer.mark();
+				console.log(colorize(`   ❌ Test failed to run: ${error.message}`, 'red'));
 				overallResults.failedSuites++;
 				overallResults.suiteResults.push({
 					name,

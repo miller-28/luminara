@@ -1,7 +1,10 @@
 // luminaraService.js - Services Layer
 // Centralized Luminara client management and configuration
 
-import { createLuminara as originalCreateLuminara } from '../../../src/index.js'
+import { createLuminara as originalCreateLuminara, OfetchDriver } from '../../../src/index.js'
+
+// Re-export drivers for testing
+export { OfetchDriver }
 
 // Default configuration for main API client
 const defaultConfig = {

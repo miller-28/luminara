@@ -80,7 +80,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 - **AbortController Integration** - Control request cancellation from interceptors
 
 ### 🚗 Custom Driver
-- Browser Fetch Driver - Use native fetch instead of ofetch
+- Browser Fetch Driver - Use custom implementation alongside default native fetch
 
 ## 🎮 Controls
 
@@ -129,9 +129,9 @@ Then open `http://localhost:3000/sandbox/` (or the port shown in the terminal) i
 
 The sandbox demonstrates different ways to create and use the Luminara client:
 
-1. **Default client** - Using `createLuminara()` with ofetch driver
-2. **Explicit OfetchDriver** - Manually creating a client with ofetch
-3. **Custom BrowserDriver** - Using native `fetch` API directly
+1. **Default client** - Using `createLuminara()` with native fetch driver
+2. **Explicit OfetchDriver** - Manually creating a client with ofetch (optional)
+3. **Custom BrowserDriver** - Using custom implementation alongside native fetch
 
 It includes example plugin usage for request/response interceptors and error handling.
 
@@ -139,7 +139,7 @@ It includes example plugin usage for request/response interceptors and error han
 
 ## Technical Notes
 
-- **Import Map**: The `index.html` includes an import map that maps `ofetch` to the CDN version from esm.sh, allowing the sandbox to work without a build step
+- **Import Map**: The `index.html` includes an import map that maps `ofetch` to the CDN version from esm.sh, enabling optional OfetchDriver usage without a build step
 - **Tab Indentation**: Files use tabs with a tab size of 4 for consistency
 - **Favicon**: Uses an inline SVG data URL with the 🌌 emoji to avoid an additional file request
 

@@ -3,11 +3,11 @@ import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('Basic HTTP Operations');
-const mockServer = new MockServer(3011); // Use different port to avoid conflicts
+const mockServer = new MockServer(4211); // Use different port to avoid conflicts
 
 // Test basic HTTP methods as they would be used in React apps
 suite.test('GET JSON request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.getJson('/json');
 	
@@ -17,7 +17,7 @@ suite.test('GET JSON request', async () => {
 });
 
 suite.test('POST JSON request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const payload = { name: 'Test User', email: 'test@example.com' };
 	const response = await api.postJson('/json', payload);
@@ -27,7 +27,7 @@ suite.test('POST JSON request', async () => {
 });
 
 suite.test('GET Text request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.getText('/text');
 	
@@ -37,7 +37,7 @@ suite.test('GET Text request', async () => {
 });
 
 suite.test('POST Form data', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const formData = { username: 'testuser', password: 'secret123' };
 	const response = await api.postForm('/form', formData);
@@ -48,7 +48,7 @@ suite.test('POST Form data', async () => {
 
 suite.test('Base URL configuration', async () => {
 	const api = createLuminara({ 
-		baseURL: 'http://localhost:3011',
+		baseURL: 'http://localhost:4211',
 		headers: { 'X-Test': 'base-url-test' }
 	});
 	
@@ -60,7 +60,7 @@ suite.test('Base URL configuration', async () => {
 });
 
 suite.test('Query parameters', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.get('/json', {
 		query: { test: 'query-params', value: 123 }
@@ -71,7 +71,7 @@ suite.test('Query parameters', async () => {
 
 suite.test('Custom headers', async () => {
 	const api = createLuminara({ 
-		baseURL: 'http://localhost:3011',
+		baseURL: 'http://localhost:4211',
 		headers: { 'Authorization': 'Bearer test-token' }
 	});
 	
@@ -83,7 +83,7 @@ suite.test('Custom headers', async () => {
 });
 
 suite.test('PUT request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.put('/json', { id: 1, updated: true });
 	
@@ -92,7 +92,7 @@ suite.test('PUT request', async () => {
 });
 
 suite.test('PATCH request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.patch('/json', { status: 'updated' });
 	
@@ -101,7 +101,7 @@ suite.test('PATCH request', async () => {
 });
 
 suite.test('DELETE request', async () => {
-	const api = createLuminara({ baseURL: 'http://localhost:3011' });
+	const api = createLuminara({ baseURL: 'http://localhost:4211' });
 	
 	const response = await api.del('/json');
 	

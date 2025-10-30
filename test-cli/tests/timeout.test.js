@@ -3,12 +3,12 @@ import { TestSuite, MockServer, assert, assertRange, Timer } from '../testUtils.
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('Timeout Handling');
-const mockServer = new MockServer(3005);
+const mockServer = new MockServer(4205);
 
 // Test basic timeout functionality
 suite.test('Request times out after specified duration', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 200 // 200ms timeout
 	});
 	
@@ -35,7 +35,7 @@ suite.test('Request times out after specified duration', async () => {
 
 suite.test('Request completes within timeout', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 300 // 300ms timeout
 	});
 	
@@ -54,7 +54,7 @@ suite.test('Request completes within timeout', async () => {
 
 suite.test('Different timeouts for different requests', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005'
+		baseURL: 'http://localhost:4205'
 		// No default timeout
 	});
 	
@@ -86,7 +86,7 @@ suite.test('Different timeouts for different requests', async () => {
 
 suite.test('Timeout with retry combination', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 150,
 		retry: 2,
 		retryDelay: 50
@@ -116,7 +116,7 @@ suite.test('Timeout with retry combination', async () => {
 
 suite.test('Timeout overrides per-request', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 100 // Default 100ms timeout
 	});
 	
@@ -137,7 +137,7 @@ suite.test('Timeout overrides per-request', async () => {
 
 suite.test('Zero timeout disables timeout', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 0 // Disable timeout
 	});
 	
@@ -156,7 +156,7 @@ suite.test('Zero timeout disables timeout', async () => {
 
 suite.test('Timeout error provides meaningful message', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 100
 	});
 	
@@ -176,7 +176,7 @@ suite.test('Timeout error provides meaningful message', async () => {
 
 suite.test('Timeout with POST request', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 150
 	});
 	
@@ -199,7 +199,7 @@ suite.test('Timeout with POST request', async () => {
 suite.test('Timeout with large response simulation', async () => {
 	// Configure mock server to simulate slow response with large data
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 200
 	});
 	
@@ -220,7 +220,7 @@ suite.test('Timeout with large response simulation', async () => {
 
 suite.test('Concurrent requests with different timeouts', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005'
+		baseURL: 'http://localhost:4205'
 	});
 	
 	const startTime = Date.now();
@@ -258,7 +258,7 @@ suite.test('Concurrent requests with different timeouts', async () => {
 
 suite.test('Timeout inheritance in method wrappers', async () => {
 	const api = createLuminara({
-		baseURL: 'http://localhost:3005',
+		baseURL: 'http://localhost:4205',
 		timeout: 120
 	});
 	

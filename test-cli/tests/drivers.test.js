@@ -3,7 +3,7 @@ import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('Custom Drivers');
-const mockServer = new MockServer(3006);
+const mockServer = new MockServer(4206);
 
 // Create a custom mock driver for testing
 class MockDriver {
@@ -116,7 +116,7 @@ suite.test('Custom driver receives all request options', async () => {
 suite.test('Default OfetchDriver functionality', async () => {
 	// Test that the default OfetchDriver works correctly
 	const api = createLuminara({
-		baseURL: 'http://localhost:3006'
+		baseURL: 'http://localhost:4206'
 	});
 	
 	const response = await api.getJson('/json');
@@ -214,7 +214,7 @@ suite.test('Custom driver with backoff strategies', async () => {
 suite.test('Driver comparison - ofetch vs custom', async () => {
 	// Test with OfetchDriver
 	const ofetchApi = createLuminara({
-		baseURL: 'http://localhost:3006'
+		baseURL: 'http://localhost:4206'
 	});
 	
 	const ofetchResponse = await ofetchApi.getJson('/json');

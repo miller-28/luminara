@@ -2,7 +2,7 @@ import { createLuminara } from '../../src/index.js';
 import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 
 const suite = new TestSuite('Enhanced Interceptors');
-const mockServer = new MockServer(3009);
+const mockServer = new MockServer(4209);
 
 // Test enhanced interceptor system functionality
 suite.test('Deterministic execution order L→R for onRequest', async () => {

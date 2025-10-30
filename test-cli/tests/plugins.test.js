@@ -3,14 +3,14 @@ import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 import { fileURLToPath } from 'url';
 
 const suite = new TestSuite('Plugin System');
-const mockServer = new MockServer(3003);
+const mockServer = new MockServer(4203);
 
 // Test plugin lifecycle hooks
 suite.test('Plugin onRequest hook modifies requests', async () => {
 	let requestCaptured = null;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003'
+		baseURL: 'http://localhost:4203'
 	});
 	
 	// Add plugin that modifies requests
@@ -41,7 +41,7 @@ suite.test('Plugin onSuccess hook modifies responses', async () => {
 	let modifiedResponse = null;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003'
+		baseURL: 'http://localhost:4203'
 	});
 	
 	api.use({
@@ -75,7 +75,7 @@ suite.test('Plugin onError hook handles errors', async () => {
 	let requestCaptured = null;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003',
+		baseURL: 'http://localhost:4203',
 		retry: 0 // Disable retries for clean error testing
 	});
 	
@@ -106,7 +106,7 @@ suite.test('Multiple plugins chain correctly', async () => {
 	const executionOrder = [];
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003'
+		baseURL: 'http://localhost:4203'
 	});
 	
 	// First plugin
@@ -164,7 +164,7 @@ suite.test('Plugin can prevent request execution', async () => {
 	let requestPrevented = false;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003'
+		baseURL: 'http://localhost:4203'
 	});
 	
 	api.use({
@@ -219,7 +219,7 @@ suite.test('Authentication plugin pattern', async () => {
 	};
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003',
+		baseURL: 'http://localhost:4203',
 		retry: 0
 	});
 	
@@ -276,7 +276,7 @@ suite.test('Logging plugin pattern', async () => {
 	};
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003',
+		baseURL: 'http://localhost:4203',
 		retry: 0
 	});
 	
@@ -347,7 +347,7 @@ suite.test('Caching plugin pattern simulation', async () => {
 	};
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:3003'
+		baseURL: 'http://localhost:4203'
 	});
 	
 	api.use(cachingPlugin);

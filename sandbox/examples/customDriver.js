@@ -20,7 +20,7 @@ export const customDriver = {
 
 				const client = new LuminaraClient(BrowserDriver());
 				const response = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
-				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver instead of ofetch`;
+				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver instead of default NativeFetchDriver`;
 			}
 		}
 	]
