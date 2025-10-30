@@ -7,13 +7,17 @@ export default defineConfig({
 	clean: true,
 	sourcemap: true,
 	dts: false, // We'll handle types differently since we're using pure JS
-	minify: false, // Keep readable for debugging
+	minify: true, // Enable minification for smaller bundle size
 	splitting: false,
 	bundle: true,
 	external: ['ofetch'], // Keep ofetch as external peer dependency
 	platform: 'browser',
 	target: 'es2020',
 	treeshake: true,
+	// Additional optimization options
+	minifyWhitespace: true,
+	minifyIdentifiers: true,
+	minifySyntax: true,
 	outExtension({ format }) {
 		return {
 			js: format === 'cjs' ? '.cjs' : '.mjs'

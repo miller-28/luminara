@@ -1,5 +1,36 @@
 # Luminara Release Notes
 
+## Version 0.5.1 (October 30, 2025)
+
+### 🚀 Bundle Size Optimization
+
+#### Minified Distribution 
+- **58% Size Reduction**: Enabled minification in build system
+  - ESM bundle: 27.79 KB → 11.80 KB (~58% smaller)
+  - CJS bundle: 28.13 KB → 11.87 KB (~58% smaller)
+  - **Ultra-compact footprint**: ~12KB minified, estimated ~4KB gzipped
+
+#### Build System Enhancements
+- **Advanced Minification**: Enabled comprehensive minification options
+  - `minifyWhitespace: true` - Removes unnecessary whitespace
+  - `minifyIdentifiers: true` - Shortens variable names
+  - `minifySyntax: true` - Optimizes JavaScript syntax
+  - Maintains source maps for debugging
+
+#### Performance Benefits
+- **Faster Downloads**: Significantly reduced network transfer time
+- **Better Performance**: Smaller bundle size improves load times
+- **CDN Optimization**: Reduced bandwidth costs for CDN delivery
+- **Mobile-Friendly**: Especially beneficial for mobile users with limited bandwidth
+
+### 📊 Metrics
+- **Bundle Size**: 58% reduction across both ESM and CJS formats
+- **Zero Feature Loss**: All functionality preserved with optimization
+- **Source Map Support**: Full debugging capability maintained
+- **Backward Compatibility**: No breaking changes, drop-in replacement
+
+---
+
 ## Version 0.5.0 (October 30, 2025)
 
 ### � MAJOR ARCHITECTURAL OVERHAUL

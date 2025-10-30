@@ -16,7 +16,7 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - �🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
 - 🔄 Advanced retry logic with 6 backoff strategies
 - ⏱️ Configurable timeouts and status code handling
-- 💎 Tiny footprint (~7KB native, ~10KB with ofetch)
+- 💎 **Ultra-compact footprint** (~12KB minified, ~4KB gzipped)
 - 🪶 Zero dependencies (ofetch optional)
 - 🎯 Fully promise-based with TypeScript support (v0.4.0)
 - 🚗 Pluggable driver architecture (native fetch, ofetch, custom)
