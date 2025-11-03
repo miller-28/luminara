@@ -1,202 +1,203 @@
-/**
- * Error Handling Examples
- * Demonstrates LuminaraError normalization and consistent error structure
- */
+import { createLuminara } from "../../dist/index.mjs";
 
-export const errorHandlingExamples = [
-	{
-		name: "HTTP Error with JSON Data",
-		description: "Server returns JSON error data that gets parsed into error.data",
-		category: "Error Handling",
-		async execute(client, updateOutput) {
-			updateOutput("Testing HTTP error with JSON response...");
-			
-			try {
-				// This should return a 400 error with JSON data
-				await client.post('https://httpbingo.org/status/400', {
-					message: "Invalid request data"
-				});
-				updateOutput("❌ Expected error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Caught LuminaraError:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status}`);
-				updateOutput(`  Code: ${error.code}`);
-				updateOutput(`  Data: ${error.data ? JSON.stringify(error.data, null, 2) : 'undefined'}`);
-				updateOutput(`  Request URL: ${error.request?.url}`);
-				updateOutput(`  Request Method: ${error.request?.method}`);
-				updateOutput(`  Response Status: ${error.response?.status}`);
-				updateOutput(`  Attempt: ${error.attempt}`);
-			}
-		}
-	},
-	
-	{
-		name: "Network Error",
-		description: "Network failure that creates a network error",
-		category: "Error Handling", 
-		async execute(client, updateOutput) {
-			updateOutput("Testing network error...");
-			
-			try {
-				// Use a non-existent domain to trigger network error
-				await client.get('https://this-domain-does-not-exist-12345.com/api/test');
-				updateOutput("❌ Expected error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Caught LuminaraError:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status || 'undefined'}`);
-				updateOutput(`  Code: ${error.code}`);
-				updateOutput(`  Data: ${error.data || 'undefined'}`);
-				updateOutput(`  Request URL: ${error.request?.url}`);
-				updateOutput(`  Request Method: ${error.request?.method}`);
-				updateOutput(`  Attempt: ${error.attempt}`);
-				updateOutput(`  Original Error: ${error.cause?.name || 'undefined'}`);
-			}
-		}
-	},
-	
-	{
-		name: "Timeout Error",
-		description: "Request timeout that creates a timeout error",
-		category: "Error Handling",
-		async execute(client, updateOutput) {
-			updateOutput("Testing timeout error (timeout: 100ms)...");
-			
-			try {
-				// Use a delay endpoint with short timeout
-				await client.get('https://httpbingo.org/delay/2', {
-					timeout: 100
-				});
-				updateOutput("❌ Expected timeout error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Caught LuminaraError:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status || 'undefined'}`);
-				updateOutput(`  Code: ${error.code}`);
-				updateOutput(`  Data: ${error.data || 'undefined'}`);
-				updateOutput(`  Request URL: ${error.request?.url}`);
-				updateOutput(`  Request Method: ${error.request?.method}`);
-				updateOutput(`  Request Timeout: ${error.request?.timeout}ms`);
-				updateOutput(`  Attempt: ${error.attempt}`);
-			}
-		}
-	},
-	
-	{
-		name: "Parse Error",
-		description: "Invalid response that causes a parse error",
-		category: "Error Handling",
-		async execute(client, updateOutput) {
-			updateOutput("Testing parse error with invalid JSON...");
-			
-			try {
-				// Try to parse HTML as JSON (this should fail)
-				await client.get('https://httpbingo.org/html', {
-					responseType: 'json'
-				});
-				updateOutput("❌ Expected parse error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Caught LuminaraError:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status}`);
-				updateOutput(`  Code: ${error.code}`);
-				updateOutput(`  Data: ${error.data || 'undefined'}`);
-				updateOutput(`  Request URL: ${error.request?.url}`);
-				updateOutput(`  Request Method: ${error.request?.method}`);
-				updateOutput(`  Response Status: ${error.response?.status}`);
-				updateOutput(`  Response Content-Type: ${error.response?.headers?.['content-type']}`);
-				updateOutput(`  Attempt: ${error.attempt}`);
-				updateOutput(`  Original Error: ${error.cause?.name || 'undefined'}`);
-			}
-		}
-	},
-	
-	{
-		name: "Error with Retry Attempts", 
-		description: "Error handling across multiple retry attempts",
-		category: "Error Handling",
-		async execute(client, updateOutput) {
-			updateOutput("Testing error with retry attempts...");
-			let attemptCount = 0;
-			
-			try {
-				await client.get('https://httpbingo.org/status/500', {
-					retry: 2,
-					retryDelay: 500,
-					onRetry: (error, attempt) => {
-						attemptCount = attempt;
-						updateOutput(`  Retry attempt ${attempt}: ${error.message}`);
-					}
-				});
-				updateOutput("❌ Expected error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Final LuminaraError after ${attemptCount} retries:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status}`);
-				updateOutput(`  Code: ${error.code}`);
-				updateOutput(`  Data: ${error.data ? JSON.stringify(error.data, null, 2) : 'undefined'}`);
-				updateOutput(`  Request URL: ${error.request?.url}`);
-				updateOutput(`  Request Method: ${error.request?.method}`);
-				updateOutput(`  Response Status: ${error.response?.status}`);
-				updateOutput(`  Final Attempt: ${error.attempt}`);
-			}
-		}
-	},
-	
-	{
-		name: "Custom Error Data Parsing",
-		description: "Server error with custom JSON error structure",
-		category: "Error Handling",
-		async execute(client, updateOutput) {
-			updateOutput("Testing custom error data parsing...");
-			
-			try {
-				// Simulate a server error with custom error structure
-				await client.post('https://httpbingo.org/status/422', {
-					field: "email",
-					value: "invalid-email"
-				}, {
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				});
-				updateOutput("❌ Expected error but request succeeded");
-			} catch (error) {
-				updateOutput(`✅ Caught LuminaraError with server data:`);
-				updateOutput(`  Name: ${error.name}`);
-				updateOutput(`  Message: ${error.message}`);
-				updateOutput(`  Status: ${error.status}`);
-				updateOutput(`  Code: ${error.code}`);
+export const errorHandling = {
+	title: "🛠️ Error Handling",
+	examples: [
+		{
+			id: "http-error-json",
+			title: "HTTP Error with JSON Data",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing HTTP error with JSON response...");
 				
-				// Show detailed error data structure
-				if (error.data) {
-					updateOutput(`  Error Data:`);
-					updateOutput(`    ${JSON.stringify(error.data, null, 4)}`);
-				} else {
-					updateOutput(`  Error Data: undefined`);
+				const client = createLuminara();
+				
+				try {
+					// This should return a 400 error with JSON data
+					await client.post('https://httpbingo.org/status/400', {
+						message: "Invalid request data"
+					}, { signal });
+					updateOutput("❌ Expected error but request succeeded");
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					
+					return `✅ Caught LuminaraError:
+  Name: ${error.name}
+  Message: ${error.message}
+  Status: ${error.status}
+  Code: ${error.code || 'undefined'}
+  Data: ${error.data ? JSON.stringify(error.data, null, 2) : 'undefined'}
+  Request URL: ${error.request?.url}
+  Request Method: ${error.request?.method}
+  Response Status: ${error.response?.status}
+  Attempt: ${error.attempt}`;
 				}
+			}
+		},
+		{
+			id: "network-error",
+			title: "Network Error",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing network error...");
 				
-				updateOutput(`  Request Details:`);
-				updateOutput(`    URL: ${error.request?.url}`);
-				updateOutput(`    Method: ${error.request?.method}`);
-				updateOutput(`    Headers: ${JSON.stringify(error.request?.headers, null, 4)}`);
+				const client = createLuminara();
 				
-				updateOutput(`  Response Details:`);
-				updateOutput(`    Status: ${error.response?.status}`);
-				updateOutput(`    Status Text: ${error.response?.statusText}`);
-				updateOutput(`    Headers: ${JSON.stringify(error.response?.headers, null, 4)}`);
+				try {
+					// Use a non-existent domain to trigger network error
+					await client.get('https://this-domain-does-not-exist-12345.com/api/test', { signal });
+					updateOutput("❌ Expected error but request succeeded");
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					
+					return `✅ Caught LuminaraError:
+  Name: ${error.name}
+  Message: ${error.message}
+  Status: ${error.status || 'undefined'}
+  Code: ${error.code || 'undefined'}
+  Data: ${error.data ? JSON.stringify(error.data, null, 2) : 'undefined'}
+  Request URL: ${error.request?.url}
+  Request Method: ${error.request?.method}
+  Type: Network Error (no response object)
+  Attempt: ${error.attempt}`;
+				}
+			}
+		},
+		{
+			id: "timeout-error",
+			title: "Timeout Error",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing timeout error...");
 				
-				updateOutput(`  Debugging Info:`);
-				updateOutput(`    Attempt: ${error.attempt}`);
-				updateOutput(`    Error Type: ${typeof error}`);
-				updateOutput(`    Error Constructor: ${error.constructor.name}`);
+				const client = createLuminara();
+				
+				try {
+					// This should timeout after 100ms
+					await client.get('https://httpbingo.org/delay/2', { 
+						timeout: 100,
+						signal 
+					});
+					updateOutput("❌ Expected timeout but request succeeded");
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					
+					return `✅ Caught LuminaraError:
+  Name: ${error.name}
+  Message: ${error.message}
+  Status: ${error.status || 'undefined'}
+  Code: ${error.code || 'undefined'}
+  Type: ${error.name}
+  Request URL: ${error.request?.url}
+  Request Method: ${error.request?.method}
+  Timeout: 100ms
+  Attempt: ${error.attempt}`;
+				}
+			}
+		},
+		{
+			id: "abort-error",
+			title: "Abort Error",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing abort error...");
+				
+				const client = createLuminara();
+				const controller = new AbortController();
+				
+				// Abort the request after 100ms
+				setTimeout(() => controller.abort(), 100);
+				
+				try {
+					await client.get('https://httpbingo.org/delay/2', { 
+						signal: controller.signal
+					});
+					updateOutput("❌ Expected abort but request succeeded");
+				} catch (error) {
+					if (signal.aborted) throw error; // Re-throw if our main signal was aborted
+					
+					return `✅ Caught LuminaraError:
+  Name: ${error.name}
+  Message: ${error.message}
+  Status: ${error.status || 'undefined'}
+  Code: ${error.code || 'undefined'}
+  Type: ${error.name}
+  Request URL: ${error.request?.url}
+  Request Method: ${error.request?.method}
+  Aborted: ${error.name === 'AbortError'}
+  Attempt: ${error.attempt}`;
+				}
+			}
+		},
+		{
+			id: "retry-error-tracking",
+			title: "Error Tracking Across Retries",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing error tracking across retries...");
+				
+				const client = createLuminara();
+				let attemptCount = 0;
+				
+				// Add interceptor to track attempts
+				client.use({
+					onRequest(context) {
+						attemptCount++;
+						updateOutput(`Attempt ${attemptCount}: Making request...`);
+					},
+					onResponseError(context) {
+						updateOutput(`Attempt ${attemptCount}: Error occurred, status ${context.error?.status}`);
+					}
+				});
+				
+				try {
+					// This will retry 2 times on 500 errors
+					await client.get('https://httpbingo.org/status/500', { 
+						retry: 2,
+						retryDelay: 300,
+						signal 
+					});
+					updateOutput("❌ Expected error but request succeeded");
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					
+					return `✅ Final Error After ${attemptCount} Attempts:
+  Name: ${error.name}
+  Message: ${error.message}
+  Status: ${error.status}
+  Code: ${error.code || 'undefined'}
+  Total Attempts: ${attemptCount}
+  Final Attempt: ${error.attempt}
+  Request URL: ${error.request?.url}
+  Request Method: ${error.request?.method}
+  
+🎯 Notice how the error contains the final attempt number!`;
+				}
+			}
+		},
+		{
+			id: "ignore-response-error",
+			title: "Ignore Response Errors",
+			run: async (updateOutput, signal) => {
+				updateOutput("Testing ignoreResponseError option...");
+				
+				const client = createLuminara();
+				
+				try {
+					// This should return the error response without throwing
+					const errorResponse = await client.get('https://httpbingo.org/status/404', { 
+						ignoreResponseError: true,
+						signal 
+					});
+					
+					return `✅ Received error response without throwing:
+  Status: ${errorResponse.status}
+  Status Text: ${errorResponse.statusText || 'undefined'}
+  Headers: ${JSON.stringify(errorResponse.headers, null, 2)}
+  Data: ${errorResponse.data ? JSON.stringify(errorResponse.data, null, 2) : 'undefined'}
+  
+🎯 With ignoreResponseError: true, 4xx/5xx responses don't throw errors!`;
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					
+					return `❌ Unexpected error: ${error.message}`;
+				}
 			}
 		}
-	}
-];
+	]
+};

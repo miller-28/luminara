@@ -4,30 +4,10 @@ import { baseUrlAndQuery } from './examples/baseUrlAndQuery.js';
 import { timeout } from './examples/timeout.js';
 import { retry } from './examples/retry.js';
 import { backoffStrategies } from './examples/backoffStrategies.js';
-import { customRetry } from './examples/customRetry.js';
 import { interceptors } from './examples/interceptors.js';
-import { enhancedInterceptorExamples } from './examples/enhancedInterceptors.js';
 import { customDriver } from './examples/customDriver.js';
-import { responseTypesExamples } from './examples/responseTypes.js';
-import { errorHandlingExamples } from './examples/errorHandling.js';
-
-// Create enhanced interceptors feature
-const enhancedInterceptors = {
-	title: "🚀 Enhanced Interceptor System",
-	tests: enhancedInterceptorExamples
-};
-
-// Create response types feature
-const responseTypes = {
-	title: "📦 Response Type Options",
-	tests: responseTypesExamples
-};
-
-// Create error handling feature
-const errorHandling = {
-	title: "🛠️ Error Handling",
-	tests: errorHandlingExamples
-};
+import { responseTypes } from './examples/responseTypes.js';
+import { errorHandling } from './examples/errorHandling.js';
 
 // Aggregate all examples
 export const examples = {
@@ -36,9 +16,7 @@ export const examples = {
 	timeout,
 	retry,
 	backoffStrategies,
-	customRetry,
 	interceptors,
-	enhancedInterceptors,
 	responseTypes,
 	errorHandling,
 	customDriver
@@ -106,14 +84,14 @@ export class TestController {
 		const feature = examples[featureKey];
 		if (!feature) return;
 
-		const promises = feature.tests.map(test => runTestCallback(test.id));
+		const promises = feature.examples.map(test => runTestCallback(test.id));
 		await Promise.all(promises);
 	}
 
 	async runAll(runTestCallback) {
 		const allTests = [];
 		for (const feature of Object.values(examples)) {
-			for (const test of feature.tests) {
+			for (const test of feature.examples) {
 				allTests.push(runTestCallback(test.id));
 			}
 		}
@@ -129,7 +107,7 @@ export class TestController {
 
 	findTest(testId) {
 		for (const feature of Object.values(examples)) {
-			const test = feature.tests.find(t => t.id === testId);
+			const test = feature.examples.find(t => t.id === testId);
 			if (test) return test;
 		}
 		return null;

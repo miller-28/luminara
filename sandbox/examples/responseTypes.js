@@ -1,6 +1,8 @@
 import { createLuminara } from "../../dist/index.mjs";
 
-export const responseTypesExamples = [
+export const responseTypes = {
+	title: "📦 Response Type Options",
+	examples: [
 	{
 		id: 'response-type-text',
 		title: 'responseType: "text"',
@@ -222,4 +224,5 @@ export const responseTypesExamples = [
 			}
 		}
 	}
-];
+	]
+};

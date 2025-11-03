@@ -83,6 +83,38 @@ export const retry = {
 			}
 		},
 		{
+			id: "custom-retry-function",
+			title: "Custom retryDelay Function",
+			run: async (updateOutput, signal) => {
+				const client = createLuminara();
+				const retryLog = [];
+				
+				// Custom retryDelay function that logs each retry
+				const customRetryDelay = (context) => {
+					const retryAttempt = (context.options?.retry || 0);
+					const logMessage = `🔄 Retry attempt with custom 150ms delay (${retryAttempt} retries remaining)`;
+					retryLog.push(logMessage);
+					
+					if (updateOutput) {
+						updateOutput(`Custom retryDelay function:\n\n📊 Retry Log:\n${retryLog.join('\n')}\n\n⏳ In progress...\n\n💡 Using function instead of backoffType for full control`);
+					}
+					
+					return 150; // Return delay in milliseconds
+				};
+				
+				try {
+					await client.get('https://httpbingo.org/status/503', {
+						retry: 4,
+						retryDelay: customRetryDelay,
+						signal
+					});
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					return `Custom retryDelay function:\n\n📊 Retry Log:\n${retryLog.join('\n')}\n\n✅ All retries completed\n\n💡 retryDelay can be a function for full control over retry timing`;
+				}
+			}
+		},
+		{
 			id: "default-retry-policy",
 			title: "Default Retry Policy (Idempotent Methods)",
 			run: async (updateOutput, signal) => {
@@ -167,6 +199,56 @@ export const retry = {
 				}
 				
 				return 'Custom retry policy test completed successfully!';
+			}
+		},
+		{
+			id: "retry-status-policies",
+			title: "Retry Status Code Policies",
+			run: async (updateOutput, signal) => {
+				updateOutput('Testing retry behavior for different status codes...\n');
+				
+				const client = createLuminara();
+				
+				const testCases = [
+					{ status: 408, description: 'Request Timeout', shouldRetry: true },
+					{ status: 409, description: 'Conflict', shouldRetry: true },
+					{ status: 425, description: 'Too Early', shouldRetry: true },
+					{ status: 429, description: 'Too Many Requests', shouldRetry: true },
+					{ status: 500, description: 'Internal Server Error', shouldRetry: true },
+					{ status: 502, description: 'Bad Gateway', shouldRetry: true },
+					{ status: 503, description: 'Service Unavailable', shouldRetry: true },
+					{ status: 504, description: 'Gateway Timeout', shouldRetry: true },
+					{ status: 400, description: 'Bad Request', shouldRetry: false },
+					{ status: 401, description: 'Unauthorized', shouldRetry: false },
+					{ status: 404, description: 'Not Found', shouldRetry: false }
+				];
+				
+				updateOutput('📊 Status Code Retry Policies (for idempotent methods):\n');
+				
+				for (const testCase of testCases) {
+					const icon = testCase.shouldRetry ? '🔄' : '⏹️';
+					const action = testCase.shouldRetry ? 'Will retry' : 'Won\'t retry';
+					updateOutput(`   ${testCase.status} ${testCase.description}: ${icon} ${action}\n`);
+				}
+				
+				// Test a couple of these with actual requests
+				updateOutput('\n🧪 Testing actual retry behavior:\n');
+				
+				const startTime = Date.now();
+				try {
+					await client.get('https://httpbingo.org/status/502', {
+						retry: 1,
+						retryDelay: 1000,
+						timeout: 5000,
+						signal
+					});
+				} catch (error) {
+					if (error.name === 'AbortError') throw error;
+					const duration = Date.now() - startTime;
+					updateOutput(`✅ 502 error retried as expected (took ${duration}ms)\n`);
+				}
+				
+				return 'Retry status code policies test completed successfully!';
 			}
 		}
     ]

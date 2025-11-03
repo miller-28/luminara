@@ -1,192 +1,248 @@
 # Luminara Sandbox
 
-An interactive demo environment for the **framework-agnostic** Luminara HTTP client. This sandbox provides a beautiful, feature-rich UI to explore all Luminara capabilities with individual example controls and parallel execution.
+An interactive demo environment for exploring **Luminara**, the powerful yet lightweight HTTP client for modern JavaScript applications. This sandbox provides a comprehensive, feature-rich interface to test and understand all Luminara capabilities with real-time execution and detailed output.
 
-> **🌐 Universal Compatibility**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), Luminara works seamlessly with React, Vue, Angular, Svelte, and any modern browser environment.
+> **🌐 Universal Compatibility**: Luminara works seamlessly across all modern JavaScript environments - React, Vue, Angular, Svelte, Node.js, and vanilla JavaScript. This sandbox demonstrates pure JavaScript usage, but the API is identical everywhere.
 
-## � **CRITICAL: Build Requirement**
+## 🚀 **Quick Start**
 
-**⚠️ The sandbox REQUIRES the Luminara library to be built before use!**
-
-The sandbox uses the built distribution files (`dist/index.mjs`) from the main project, not the source files directly. **You MUST run the build command before the sandbox will work:**
+### **Step 1: Build Required**
+The sandbox imports the built Luminara distribution. Build first:
 
 ```powershell
-# From the main project root (not the sandbox folder)
+# From project root (not sandbox folder)
 npm run build
 ```
 
-**What this does:**
-- Creates `dist/index.mjs` (ES Module format) 
-- Creates `dist/index.cjs` (CommonJS format)
-- Builds from `src/` files using tsup bundler
-- **Required for sandbox to load Luminara properly**
+### **Step 2: Run Sandbox**
 
-**Why this is required:**
-- Sandbox examples import from `../../dist/index.mjs`
-- Browser cannot directly load unbundled TypeScript/module source files
-- Build process resolves dependencies and creates browser-compatible modules
+**Option A - VS Code Debugging (Recommended):**
+1. Open project in VS Code
+2. Press `F5` or "Run and Debug" → "Debug Luminara Sandbox"
+3. Chrome launches automatically with debugging enabled
 
-**If you get errors like:**
-- `Failed to resolve module specifier`
-- `Cannot destructure property 'createLuminara' of 'window.Luminara'`
-- Examples show "Luminara not loaded" errors
-
-**Solution:** Run `npm run build` from the main project root first!
-
-## �📁 File Structure
-
-The sandbox follows strict **separation of concerns**:
-
+**Option B - Manual Server:**
+```powershell
+npx serve .
+# Open http://localhost:3000/sandbox/
 ```
-sandbox/
-├── index.html          # HTML structure only
-├── styles.css          # All styling (separated from HTML)
-├── main.js             # UI rendering and event handling
-├── testController.js   # Example execution logic
-└── examples/           # Example definitions organized by feature
-    ├── basicUsage.js
-    ├── baseUrlAndQuery.js
-    ├── timeout.js
-    ├── retry.js
-    ├── backoffStrategies.js
-    ├── customRetry.js
-    ├── interceptors.js
-    └── customDriver.js
-```
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
 
 ## ✨ Features
 
-- 🎯 **Individual Example Controls** - Run each example independently with dedicated buttons
-- ⚡ **Parallel Execution** - All examples run in parallel, no more waiting for sequential execution
-- 📊 **Organized by Feature** - Examples grouped into logical categories (Basic Usage, Retry, Backoff, Interceptors, etc.)
-- 🎨 **Modern UI** - Clean, responsive interface with color-coded outputs
-- 📱 **Mobile Responsive** - Works beautifully on all screen sizes
-- 🔍 **Real-time Feedback** - See example status (running/success/error) with informative output
-- 🌐 **Framework-Agnostic Demo** - Pure JavaScript (no frameworks) demonstrating universal compatibility
+- **🎯 Individual Controls** - Run each example independently with dedicated buttons
+- **⚡ Parallel Execution** - All examples execute concurrently with real-time progress
+- **📊 Feature Organization** - Examples grouped by functionality (Basic, Retry, Backoff, etc.)
+- **🎨 Modern Interface** - Clean, responsive design with color-coded status indicators
+- **📱 Mobile Responsive** - Optimized for all screen sizes
+- **🔍 Live Feedback** - Real-time status updates with detailed execution output
+- **🛑 Cancellation Support** - Abort any running request with individual stop buttons
+- **🌐 Framework-Agnostic** - Pure JavaScript demonstrating universal API compatibility
 
 ## 📦 Example Categories
 
-### 📦 Basic Usage
-- GET JSON - Fetch and parse JSON data
-- GET Text - Fetch plain text responses
-- POST JSON - Send JSON data to server
-- POST Form Data - Submit form-encoded data
+### 📦 **Basic Usage**
+Core HTTP operations with Luminara's helper methods:
+- **GET JSON** - Fetch and automatically parse JSON responses
+- **GET Text** - Retrieve plain text content  
+- **POST JSON** - Send JSON payloads with automatic serialization
+- **POST Form Data** - Submit form-encoded data
 
-### 🔗 Base URL & Query Parameters
-- Using Base URL - Configure default base URL for all requests
-- Query Parameters - Add query strings to requests
+### 🔗 **Base URL & Query Parameters**
+Configuration and URL handling:
+- **Base URL Setup** - Configure default base URL for all requests
+- **Query Parameters** - Add and manage URL query strings
 
-### ⏱️ Timeout
-- Timeout Success - Request completes within timeout
-- Timeout Failure - Request exceeds timeout limit
+### ⏱️ **Timeout Management**
+Request timeout scenarios:
+- **Timeout Success** - Request completes within timeout window
+- **Timeout Failure** - Request exceeds configured timeout limit
 
-### 🔄 Retry
-- Basic Retry - Simple retry with fixed delay
-- Retry with Status Codes - Retry only on specific HTTP status codes
+### 🔄 **Retry Logic**
+Comprehensive retry mechanisms:
+- **Basic Retry** - Simple retry with configurable attempts
+- **Retry with Status Codes** - Conditional retry based on HTTP status
+- **Custom retryDelay Function** - Dynamic delay calculation
+- **Default Retry Policy** - Automatic retry for idempotent methods
+- **Custom Retry Policy Override** - Define custom retry conditions
+- **Retry Status Code Policies** - Granular control over retry triggers
 
-### 📈 Backoff Strategies
-- Linear Backoff - Fixed delay between retries
-- Exponential Backoff - Exponentially increasing delays (2^n)
-- Exponential Capped - Exponential with maximum delay cap
-- Fibonacci Backoff - Delays follow Fibonacci sequence
-- Jitter Backoff - Randomized delays to prevent thundering herd
-- Exponential Jitter - Combines exponential growth with randomization
+### 📈 **Backoff Strategies**
+Advanced retry delay patterns:
+- **Linear Backoff** - Fixed delay intervals between retries
+- **Exponential Backoff** - Exponentially increasing delays (2^n pattern)
+- **Exponential Capped** - Exponential growth with maximum delay limit
+- **Fibonacci Backoff** - Delays following Fibonacci sequence progression
+- **Jitter Backoff** - Randomized delays to prevent thundering herd
+- **Exponential Jitter** - Combines exponential growth with randomization
 
-### ⚙️ Custom Retry Handler
-- Custom onRetry - Implement custom retry handling that overrides backoff strategies
+### 📦 **Response Type Options**
+Response parsing and handling:
+- **responseType: "text"** - Force text parsing for any response
+- **responseType: "json"** - Force JSON parsing with error handling
+- **responseType: "blob"** - Handle binary data as Blob objects
+- **responseType: "stream"** - Process responses as ReadableStream
+- **responseType: "arrayBuffer"** - Access raw binary data
+- **responseType: "auto"** - Automatic type detection (default)
+- **Default Behavior** - Smart content-type based parsing
 
-### 🔌 Interceptors
-- Request Interceptor - Modify requests before they're sent
-- Response Interceptor - Transform responses after they arrive
-- Error Interceptor - Handle and log errors through interceptors
+### 🔌 **Interceptors**
+Powerful request/response interception system:
+- **Request Interceptor** - Modify requests before transmission
+- **Response Interceptor** - Transform responses after receipt
+- **Error Interceptor** - Handle and process errors globally
+- **Deterministic Execution Order** - Guaranteed interceptor sequence
+- **Shared Context** - Pass data between interceptors via context.meta
+- **Retry-Aware Authentication** - Token refresh on retry attempts
+- **Conditional Processing** - Dynamic interceptor behavior
 
-### 🚀 Enhanced Interceptor System
-- **Deterministic Execution Order** - Guaranteed L→R for onRequest, R→L for onResponse/onResponseError
-- **Mutable Context Sharing** - Share data between interceptors via context.meta
-- **Retry-Aware Authentication** - Fresh tokens on retry attempts
-- **AbortController Integration** - Control request cancellation from interceptors
+### 🛠️ **Error Handling**
+Comprehensive error management:
+- **HTTP Error with JSON Data** - Structured server error responses
+- **Network Error** - Connection failure handling
+- **Timeout Error** - Request timeout scenarios
+- **Abort Error** - Manual request cancellation
+- **Error Tracking Across Retries** - Error state through retry attempts
+- **Ignore Response Errors** - Bypass error throwing with ignoreResponseError
 
-### 🚗 Custom Driver
-- Browser Fetch Driver - Use custom implementation alongside default native fetch
+### 🚗 **Custom Driver**
+Driver extensibility demonstration:
+- **Browser Fetch Driver** - Custom HTTP driver implementation
 
-## 🎮 Controls
+## 🏗️ Architecture
 
-- **▶️ Run All Examples** - Execute all examples in parallel
-- **▶️ Run All [N]** - Run all examples within a specific feature category
-- **▶️** (Individual) - Run a single example
-- **🗑️ Clear All** - Reset all output windows
+### **Separation of Concerns**
+The sandbox follows strict architectural principles:
 
-## How to Run
-
-### 🏗️ **Step 0: Build First (REQUIRED)**
-
-Before running the sandbox, you **MUST** build the Luminara library:
-
-```powershell
-# From the main project root directory
-npm run build
+```
+sandbox/
+├── index.html            # 📄 HTML structure only
+├── styles.css            # � All styling (no inline styles)
+├── main.js               # 🖥️ UI rendering and DOM event handling
+├── testController.js     # 🎮 Example execution logic and state
+├── examplesController.js # 📋 Alternative controller implementation
+└── examples/             # 📁 Feature-organized example definitions
+    ├── basicUsage.js        # 📦 Core HTTP operations
+    ├── baseUrlAndQuery.js   # 🔗 URL configuration
+    ├── timeout.js           # ⏱️ Timeout scenarios
+    ├── retry.js             # 🔄 Retry mechanisms
+    ├── backoffStrategies.js # 📈 Backoff algorithms
+    ├── responseTypes.js     # 📦 Response parsing options
+    ├── interceptors.js      # 🔌 Interceptor patterns
+    ├── errorHandling.js     # 🛠️ Error scenarios
+    └── customDriver.js      # 🚗 Driver extensibility
 ```
 
-### Method 1: VS Code Debugging (Recommended)
+### **Layer Responsibilities**
 
-The repository includes pre-configured VS Code debug settings in `.vscode/`:
+- **Presentation Layer** (`styles.css`) - Visual design, responsive layout, animations
+- **UI Layer** (`main.js`) - DOM manipulation, event handling, rendering logic
+- **Business Logic** (`*Controller.js`) - Example execution, state management, orchestration
+- **Data Layer** (`examples/*.js`) - Example definitions, configurations, test cases
 
-- **`launch.json`** - Chrome debug configuration that:
-  - Launches Chrome at `http://localhost:2880/sandbox/`
-  - Enables source mapping for debugging
-  - Automatically runs the `serve-sandbox` task before launching
+### **Example Structure**
+All examples follow consistent patterns:
 
-- **`tasks.json`** - Background task that:
-  - Runs `npx serve .` to serve the project root
-  - Sets `PORT=2880` for consistent port usage
-  - Detects when the server is ready before launching Chrome
-
-**To debug:**
-1. **Build first:** `npm run build` (from main project root)
-2. Open the project in VS Code
-3. Press `F5` or click "Run and Debug" → "Debug Luminara Sandbox"
-4. VS Code will:
-   - Start the serve task on port 2880
-   - Launch Chrome with debugging enabled
-   - Navigate to the sandbox page
-5. Click "Run demo" to test the Luminara client
-6. Set breakpoints in the source files to debug
-
-### Method 2: Manual Server
-
-If you prefer to run the server manually:
-
-```powershell
-# Step 1: Build the library (REQUIRED)
-npm run build
-
-# Step 2: Start the server
-npx serve .
+```javascript
+export const featureName = {
+  title: "🔍 Feature Category",
+  examples: [
+    {
+      id: "unique-example-id",
+      title: "Descriptive Example Name",
+      run: async (updateOutput, signal) => {
+        // Example implementation with:
+        // - updateOutput() for progress logging
+        // - signal for cancellation support
+        // - Return value for final result display
+      }
+    }
+  ]
+};
 ```
 
-Then open `http://localhost:3000/sandbox/` (or the port shown in the terminal) in your browser.
+## 🎮 Interactive Controls
 
-## What It Does
+### **Global Actions**
+- **▶️ Run All Examples** - Execute all examples across all categories in parallel
+- **🗑️ Clear All** - Reset all output windows and status indicators
 
-The sandbox demonstrates different ways to create and use the Luminara client:
+### **Feature-Level Actions**
+- **▶️ Run All [N]** - Execute all examples within a specific feature category
+- **Feature sections** - Collapsible organization for better navigation
 
-1. **Default client** - Using `createLuminara()` with native fetch driver
-2. **Explicit OfetchDriver** - Manually creating a client with ofetch (optional)
-3. **Custom BrowserDriver** - Using custom implementation alongside native fetch
+### **Individual Example Actions**
+- **▶️ Run** - Execute a single example with real-time output
+- **🛑 Stop** - Cancel a running example (AbortController support)
+- **Status Indicators** - Visual feedback (Running, Success, Error, Stopped)
 
-It includes example interceptor usage for request/response interceptors and error handling.
+### **Output Management**
+- **Real-time Updates** - Live progress logging during example execution
+- **Result Display** - Final results with formatted output
+- **Error Details** - Comprehensive error information with stack traces
+- **Color Coding** - Visual status differentiation (green=success, red=error, etc.)
 
-**Framework Examples**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), the same Luminara client works identically in React, Vue, Angular, Svelte, and all other modern JavaScript frameworks.
+## 🔧 Technical Details
 
-## Technical Notes
+### **Import Configuration**
+- **Built Distribution** - Sandbox imports from `../../dist/index.mjs`
+- **ES Modules** - Native browser module support without bundling
+- **No Dependencies** - Standalone sandbox with minimal external requirements
 
-- **Import Map**: The `index.html` includes an import map that maps `ofetch` to the CDN version from esm.sh, enabling optional OfetchDriver usage without a build step
-- **Tab Indentation**: Files use tabs with a tab size of 4 for consistency
-- **Favicon**: Uses an inline SVG data URL with the 🌌 emoji to avoid an additional file request
+### **Browser Compatibility**
+- **Modern Browsers** - ES2020+ features (async/await, modules, AbortController)
+- **Mobile Support** - Responsive design for mobile testing
+- **Developer Tools** - Full debugging support with source maps
 
-## VS Code Configuration
+### **Development Features**
+- **VS Code Integration** - Pre-configured debugging with `.vscode/launch.json`
+- **Hot Reload Ready** - File watching during development
+- **Source Maps** - Debug original TypeScript/JavaScript source
+- **Port Configuration** - Consistent development server setup
 
-The `.vscode/` folder is committed to the repository, so anyone who clones this project will get the same debugging experience out of the box. No additional setup required!
+### **Performance Characteristics**
+- **Parallel Execution** - Non-blocking example execution
+- **Efficient DOM Updates** - Optimized rendering for large result sets
+- **Memory Management** - Proper cleanup of AbortControllers and event handlers
+- **Responsive UI** - Smooth interactions even during heavy network activity
+
+## 🌐 Framework Integration
+
+While this sandbox uses pure JavaScript, Luminara integrates identically across all frameworks:
+
+```javascript
+// React Hook Example
+const { data, loading, error } = useLuminara('/api/users');
+
+// Vue Composition API Example  
+const { data, loading, error } = await api.getJson('/api/users');
+
+// Angular Service Example
+constructor(private api: LuminaraService) {}
+async loadUsers() { return await this.api.getJson('/api/users'); }
+
+// Svelte Store Example
+const users = await $api.getJson('/api/users');
+```
+
+The sandbox demonstrates the universal API that works consistently across all these environments.
+
+## 🎯 Learning Path
+
+**Recommended exploration order:**
+
+1. **📦 Basic Usage** - Start with core HTTP operations
+2. **🔗 Base URL & Query** - Learn configuration patterns  
+3. **⏱️ Timeout** - Understand timeout handling
+4. **🔄 Retry** - Explore retry mechanisms
+5. **📈 Backoff Strategies** - Master advanced retry patterns
+6. **📦 Response Types** - Learn response handling options
+7. **🔌 Interceptors** - Implement request/response middleware
+8. **🛠️ Error Handling** - Master comprehensive error scenarios
+9. **🚗 Custom Driver** - Explore extensibility options
+
+Each category builds upon previous concepts, providing a comprehensive understanding of Luminara's capabilities.
+
+---
+
+**🚀 Ready to explore? Run `npm run build` then open the sandbox and start with Basic Usage!**
 
