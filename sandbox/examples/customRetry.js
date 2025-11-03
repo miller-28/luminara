@@ -2,7 +2,7 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const customRetry = {
 	title: "⚙️ Custom Retry Handler",
-	tests: [
+    examples: [
 		{
 			id: "custom-on-retry",
 			title: "Custom retryDelay Function",
@@ -34,5 +34,5 @@ export const customRetry = {
 				}
 			}
 		}
-	]
+    ]
 };

@@ -1,198 +1,109 @@
 import { createLuminara } from '../../src/index.js';
-import { MockServer } from '../testUtils.js';
+import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
+import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
-export async function testResponseTypes() {
-	// Create a mock server for response type testing
-	const mockServer = new MockServer(4208);
-	await mockServer.start();
-	const baseURL = `http://localhost:4208`;
+const suite = new TestSuite('Response Types');
+const mockServer = new MockServer(4214);
 
-	let testCount = 0;
-	let passCount = 0;
-
-	function test(description, testFunction) {
-		testCount++;
-		try {
-			testFunction();
-			console.log(`✅ ${description}`);
-			passCount++;
-		} catch (error) {
-			console.error(`❌ ${description}: ${error.message}`);
-		}
-	}
-
-	async function asyncTest(description, testFunction) {
-		testCount++;
-		try {
-			await testFunction();
-			console.log(`✅ ${description}`);
-			passCount++;
-		} catch (error) {
-			console.error(`❌ ${description}: ${error.message}`);
-		}
-	}
-
-	console.log('\n=== Testing Response Types ===');
-
+// Test responseType: 'text'
+suite.test('responseType: text should return string', async () => {
 	const luminara = createLuminara();
-
-	// Test responseType: 'text'
-	await asyncTest('responseType: text should return string', async () => {
-		// Create a mock response that would normally be parsed as JSON
-		const mockJsonString = '{"message": "hello"}';
-		
-		// We'll test this with a real endpoint that returns JSON but force text parsing
-		// For now, let's test that the option is accepted without errors
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'text'
-			});
-			
-			if (typeof response.data !== 'string') {
-				throw new Error(`Expected string response, got ${typeof response.data}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test responseType: 'json'
-	await asyncTest('responseType: json should parse JSON', async () => {
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'json'
-			});
-			
-			if (typeof response.data !== 'object') {
-				throw new Error(`Expected object response, got ${typeof response.data}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test responseType: 'blob' (browser environment)
-	await asyncTest('responseType: blob should return Blob', async () => {
-		if (typeof Blob === 'undefined') {
-			console.log('⚠️  Skipping blob test - not in browser environment');
-			return;
-		}
-		
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'blob'
-			});
-			
-			if (!(response.data instanceof Blob)) {
-				throw new Error(`Expected Blob response, got ${response.data.constructor.name}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test responseType: 'stream' (browser environment)
-	await asyncTest('responseType: stream should return ReadableStream', async () => {
-		if (typeof ReadableStream === 'undefined') {
-			console.log('⚠️  Skipping stream test - not in browser environment');
-			return;
-		}
-		
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'stream'
-			});
-			
-			if (!(response.data instanceof ReadableStream)) {
-				throw new Error(`Expected ReadableStream response, got ${response.data.constructor.name}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test responseType: 'arrayBuffer'
-	await asyncTest('responseType: arrayBuffer should return ArrayBuffer', async () => {
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'arrayBuffer'
-			});
-			
-			if (!(response.data instanceof ArrayBuffer)) {
-				throw new Error(`Expected ArrayBuffer response, got ${response.data.constructor.name}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test default auto detection
-	await asyncTest('responseType: auto should auto-detect JSON', async () => {
-		try {
-			const response = await luminara.get(`${baseURL}/json`, {
-				responseType: 'auto'
-			});
-			
-			if (typeof response.data !== 'object') {
-				throw new Error(`Expected object response from auto-detection, got ${typeof response.data}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	// Test no responseType (should default to auto)
-	await asyncTest('no responseType should default to auto-detection', async () => {
-		try {
-			const response = await luminara.get(`${baseURL}/json`);
-			
-			if (typeof response.data !== 'object') {
-				throw new Error(`Expected object response from default behavior, got ${typeof response.data}`);
-			}
-		} catch (error) {
-			// If httpbin is unavailable, just check that the option doesn't cause syntax errors
-			if (!error.message.includes('fetch')) {
-				throw error;
-			}
-		}
-	});
-
-	console.log(`\nResponse Types Tests: ${passCount}/${testCount} passed\n`);
+	const baseURL = `http://localhost:${mockServer.port}`;
 	
-	// Stop the mock server
-	await mockServer.stop();
+	// Create a mock response that would normally be parsed as JSON
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'text'
+	});
 	
-	return { total: testCount, passed: passCount };
-}
+	assert(typeof response.data === 'string', 'Response data should be a string when responseType is text');
+	assert(response.data.includes('"message"'), 'Text response should contain JSON string');
+});
+
+// Test responseType: 'json'
+suite.test('responseType: json should parse JSON', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'json'
+	});
+	
+	assert(typeof response.data === 'object', 'Response data should be an object when responseType is json');
+	assert(response.data.message === 'Success', 'JSON should be properly parsed');
+});
+
+// Test responseType: 'blob'
+suite.test('responseType: blob should return Blob', async () => {
+	// Skip in Node.js environment (no Blob support)
+	if (typeof Blob === 'undefined') {
+		return; // Test passes by skipping
+	}
+	
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'blob'
+	});
+	
+	assert(response.data instanceof Blob, 'Response data should be a Blob when responseType is blob');
+});
+
+// Test responseType: 'stream'
+suite.test('responseType: stream should return ReadableStream', async () => {
+	// Skip in Node.js environment (limited ReadableStream support)
+	if (typeof ReadableStream === 'undefined') {
+		return; // Test passes by skipping
+	}
+	
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'stream'
+	});
+	
+	assert(response.data instanceof ReadableStream, 'Response data should be a ReadableStream when responseType is stream');
+});
+
+// Test responseType: 'arrayBuffer'
+suite.test('responseType: arrayBuffer should return ArrayBuffer', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'arrayBuffer'
+	});
+	
+	assert(response.data instanceof ArrayBuffer, 'Response data should be an ArrayBuffer when responseType is arrayBuffer');
+	assert(response.data.byteLength > 0, 'ArrayBuffer should have content');
+});
+
+// Test responseType: 'auto' (default behavior)
+suite.test('responseType: auto should auto-detect JSON', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`, {
+		responseType: 'auto'
+	});
+	
+	assert(typeof response.data === 'object', 'Auto-detection should parse JSON as object');
+	assert(response.data.message === 'Success', 'Auto-detected JSON should be properly parsed');
+});
+
+// Test default behavior (no responseType specified)
+suite.test('no responseType should default to auto-detection', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	
+	const response = await luminara.get(`${baseURL}/json`);
+	
+	assert(typeof response.data === 'object', 'Default behavior should parse JSON as object');
+	assert(response.data.message === 'Success', 'Default behavior should properly parse JSON');
+});
 
 // Run tests if this file is executed directly
-import { fileURLToPath } from 'url';
-if (fileURLToPath(import.meta.url) === process.argv[1]) {
-	console.log('🧪 Running Response Types Tests...');
-	try {
-		const results = await testResponseTypes();
-		console.log(`✅ Tests completed: ${results.passed}/${results.total} passed`);
-		process.exit(results.passed === results.total ? 0 : 1);
-	} catch (error) {
-		console.error('Test execution failed:', error);
-		process.exit(1);
-	}
-}
+await runTestSuiteIfDirect(import.meta.url, 'Response Types', suite, mockServer);
+
+export { suite, mockServer };

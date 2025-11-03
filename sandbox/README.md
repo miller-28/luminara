@@ -1,6 +1,6 @@
 # Luminara Sandbox
 
-An interactive demo and testing environment for the **framework-agnostic** Luminara HTTP client. This sandbox provides a beautiful, feature-rich UI to explore all Luminara capabilities with individual test controls and parallel execution.
+An interactive demo environment for the **framework-agnostic** Luminara HTTP client. This sandbox provides a beautiful, feature-rich UI to explore all Luminara capabilities with individual example controls and parallel execution.
 
 > **🌐 Universal Compatibility**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), Luminara works seamlessly with React, Vue, Angular, Svelte, and any modern browser environment.
 
@@ -42,15 +42,15 @@ sandbox/
 ├── index.html          # HTML structure only
 ├── styles.css          # All styling (separated from HTML)
 ├── main.js             # UI rendering and event handling
-├── testController.js   # Test execution logic
-└── examples/           # Test definitions organized by feature
+├── testController.js   # Example execution logic
+└── examples/           # Example definitions organized by feature
     ├── basicUsage.js
     ├── baseUrlAndQuery.js
     ├── timeout.js
     ├── retry.js
     ├── backoffStrategies.js
     ├── customRetry.js
-    ├── plugins.js
+    ├── interceptors.js
     └── customDriver.js
 ```
 
@@ -58,15 +58,15 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 
 ## ✨ Features
 
-- 🎯 **Individual Test Controls** - Run each example independently with dedicated buttons
-- ⚡ **Parallel Execution** - All tests run in parallel, no more waiting for sequential execution
-- 📊 **Organized by Feature** - Examples grouped into logical categories (Basic Usage, Retry, Backoff, Plugins, etc.)
+- 🎯 **Individual Example Controls** - Run each example independently with dedicated buttons
+- ⚡ **Parallel Execution** - All examples run in parallel, no more waiting for sequential execution
+- 📊 **Organized by Feature** - Examples grouped into logical categories (Basic Usage, Retry, Backoff, Interceptors, etc.)
 - 🎨 **Modern UI** - Clean, responsive interface with color-coded outputs
 - 📱 **Mobile Responsive** - Works beautifully on all screen sizes
-- 🔍 **Real-time Feedback** - See test status (running/success/error) with informative output
+- 🔍 **Real-time Feedback** - See example status (running/success/error) with informative output
 - 🌐 **Framework-Agnostic Demo** - Pure JavaScript (no frameworks) demonstrating universal compatibility
 
-## 📦 Test Categories
+## 📦 Example Categories
 
 ### 📦 Basic Usage
 - GET JSON - Fetch and parse JSON data
@@ -82,7 +82,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 - Timeout Success - Request completes within timeout
 - Timeout Failure - Request exceeds timeout limit
 
-### 🔄 Retry Logic
+### 🔄 Retry
 - Basic Retry - Simple retry with fixed delay
 - Retry with Status Codes - Retry only on specific HTTP status codes
 
@@ -95,12 +95,12 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 - Exponential Jitter - Combines exponential growth with randomization
 
 ### ⚙️ Custom Retry Handler
-- Custom onRetry - Implement custom retry logic that overrides backoff strategies
+- Custom onRetry - Implement custom retry handling that overrides backoff strategies
 
-### 🔌 Plugin System
+### 🔌 Interceptors
 - Request Interceptor - Modify requests before they're sent
-- Response Transformer - Transform responses after they arrive
-- Error Handler - Handle and log errors through plugins
+- Response Interceptor - Transform responses after they arrive
+- Error Interceptor - Handle and log errors through interceptors
 
 ### 🚀 Enhanced Interceptor System
 - **Deterministic Execution Order** - Guaranteed L→R for onRequest, R→L for onResponse/onResponseError
@@ -113,9 +113,9 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation
 
 ## 🎮 Controls
 
-- **▶️ Run All Examples** - Execute all tests in parallel
-- **▶️ Run All [N]** - Run all tests within a specific feature category
-- **▶️** (Individual) - Run a single test
+- **▶️ Run All Examples** - Execute all examples in parallel
+- **▶️ Run All [N]** - Run all examples within a specific feature category
+- **▶️** (Individual) - Run a single example
 - **🗑️ Clear All** - Reset all output windows
 
 ## How to Run
@@ -176,7 +176,7 @@ The sandbox demonstrates different ways to create and use the Luminara client:
 2. **Explicit OfetchDriver** - Manually creating a client with ofetch (optional)
 3. **Custom BrowserDriver** - Using custom implementation alongside native fetch
 
-It includes example plugin usage for request/response interceptors and error handling.
+It includes example interceptor usage for request/response interceptors and error handling.
 
 **Framework Examples**: While this sandbox uses vanilla JavaScript (pure JavaScript without frameworks), the same Luminara client works identically in React, Vue, Angular, Svelte, and all other modern JavaScript frameworks.
 

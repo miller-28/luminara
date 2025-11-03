@@ -1,4 +1,4 @@
-// Advanced Retry Policies Examples
+// Retry Policies Examples
 // Demonstrates intelligent retry policies with idempotent method detection, 
 // Retry-After header support, and custom shouldRetry functions
 

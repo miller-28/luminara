@@ -65,12 +65,12 @@ The React app includes 22 comprehensive tests covering all Luminara features, or
 #### ⏰ **Timeout Tests (1 test)**
 - Timeout Test (3s) - **Now working correctly!**
 
-#### � **Plugin System & Enhanced Interceptors (5 tests)**
-- Custom Plugin Test
-- Enhanced Interceptors: Execution Order
-- Enhanced Interceptors: Mutable Context
-- Enhanced Interceptors: Retry-Aware Auth
-- Enhanced Interceptors: AbortController
+#### 🔌 **Interceptors (5 tests)**
+- Custom Interceptor Test
+- Interceptors: Execution Order
+- Interceptors: Mutable Context
+- Interceptors: Retry-Aware Auth
+- Interceptors: AbortController
 
 #### 🚗 **Driver Comparison (1 test)**
 - OfetchDriver vs NativeFetchDriver Test
@@ -108,10 +108,10 @@ src/
 │       ├── basicHttpTests.js      # HTTP methods (GET, POST, PUT, DELETE)
 │       ├── contentTypeTests.js    # Content types (text, HTML, form)
 │       ├── queryHeaderTests.js    # Query params, headers, base URL
-│       ├── retryErrorTests.js     # Retry logic and error handling
+│       ├── retryErrorTests.js     # Retry system and error handling
 │       ├── backoffTests.js        # Backoff strategies
 │       ├── timeoutTests.js        # Timeout handling
-│       ├── pluginTests.js         # Plugin system & interceptors
+│       ├── interceptorTests.js     # Interceptor system
 │       └── driverTests.js         # Driver comparisons
 └── services/                  # 🔧 API Layer
     └── luminaraService.js     # Luminara client management
@@ -185,7 +185,7 @@ const api = createLuminara({
 - ✅ **Retry mechanisms working** - 503, 500, 429 status codes with proper timing
 - ✅ **Backoff strategies functional** - Exponential and Fibonacci delays
 - ✅ **Timeout working correctly** - Precise 3-second timeout implementation
-- ✅ **Plugin system operational** - Custom plugins execute properly
+- ✅ **Interceptor system operational** - Custom interceptors execute properly
 - ✅ **Query params & headers** - Proper parameter and header handling
 - ✅ **Base URL functionality** - Relative path resolution working
 
@@ -220,7 +220,7 @@ When testing in browser, open DevTools (F12) to see:
 - **Fibonacci Backoff**: 500ms → 500ms → 1000ms sequence
 
 ### ✅ **Advanced Features**
-- **Custom Plugins**: Request/response transformation and logging
+- **Custom Interceptors**: Request/response transformation and logging
 - **Query Parameters**: URL parameter handling and encoding
 - **Base URL**: Relative path resolution with base configuration
 - **AbortController**: Request cancellation and timeout handling
@@ -237,8 +237,8 @@ This comprehensive test suite validates that Luminara works exactly as designed 
 
 1. **18/18 Tests Passing** - Complete feature coverage validated
 2. **Precise Timing** - All timeout and retry delays working correctly  
-3. **Error Handling** - Proper retry logic for various HTTP error conditions
-4. **Plugin System** - Request/response transformation pipeline functional
+3. **Error Handling** - Proper retry system for various HTTP error conditions
+4. **Interceptor System** - Request/response transformation pipeline functional
 5. **Browser Integration** - Full compatibility with modern browser APIs
 
 ## 🔧 Development Workflow

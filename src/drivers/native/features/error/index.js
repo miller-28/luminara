@@ -1,12 +1,14 @@
 /**
  * Error feature module
- * Exports error handling functionality
+ * Exports error handling functionality with consistent LuminaraError normalization
  */
 
 export { 
+	createLuminaraError,
 	enhanceError, 
 	createHttpError, 
 	createTimeoutError, 
 	createParseError, 
-	createAbortError 
+	createAbortError,
+	createNetworkError
 } from "./errorHandler.js";

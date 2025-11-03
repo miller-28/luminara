@@ -13,8 +13,8 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
 - 🏗️ **Domain-driven architecture** (v0.5.0) - Feature-based modular structure
 - � **Dual export support** (v0.4.0) - ESM/CJS compatibility with auto-detection
-- �🔌 Powerful plugin architecture (interceptors, transformers, error handlers)
-- 🔄 Advanced retry logic with 6 backoff strategies
+- 🔌 Powerful interceptor architecture (request/response/error interceptors)
+- 🔄 Comprehensive retry system with 6 backoff strategies
 - ⏱️ Configurable timeouts and status code handling
 - 💎 **Ultra-compact footprint** (~12KB minified, ~4KB gzipped)
 - 🪶 Zero dependencies (ofetch optional)
@@ -196,7 +196,7 @@ npm run dev          # Development with watch mode
 
 ## �🔄 Retry & Backoff Strategies
 
-Luminara includes 6 built-in backoff strategies for intelligent retry logic:
+Luminara includes 6 built-in backoff strategies for intelligent retry handling:
 
 ### Linear Backoff
 Fixed delay between retries.
@@ -618,10 +618,10 @@ The sandbox features:
 1. 📦 **Basic Usage** - GET/POST JSON, Text, Form data
 2. 🔗 **Base URL & Query Parameters** - URL configuration
 3. ⏱️ **Timeout** - Success and failure scenarios
-4. 🔄 **Retry Logic** - Basic retry with status codes
+4. 🔄 **Retry** - Basic retry with status codes
 5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
 6. ⚙️ **Custom Retry** - Custom retryDelay functions
-7. 🔌 **Plugin System** - Request/response/error interceptors
+7. 🔌 **Interceptors** - Request/response/error interceptors
 8. 🚗 **Custom Drivers** - Replace the HTTP backend
 
 **Quick Start:**
@@ -847,7 +847,7 @@ luminara/
   src/                      # Source code (domain-driven architecture)
     index.js                # Main entry point and exports
     core/                   # Core client abstraction layer
-      luminara.js           # LuminaraClient with plugin system
+      luminara.js           # LuminaraClient with interceptor system
     drivers/                # HTTP driver implementations
       native/               # Native fetch driver (feature-based)
         index.js            # Main driver implementation
@@ -900,8 +900,8 @@ luminara/
 
 - [x] Core HTTP methods (GET, POST, PUT, PATCH, DELETE)
 - [x] **Enhanced interceptor system** (deterministic order, mutable context, retry-aware)
-- [x] Plugin system (onRequest, onResponse, onResponseError)
-- [x] Retry logic with configurable attempts
+- [x] Interceptor system (onRequest, onResponse, onResponseError)
+- [x] Retry system with configurable attempts
 - [x] 6 Backoff strategies (linear, exponential, fibonacci, jitter, etc.)
 - [x] Custom retry handlers
 - [x] Timeout support

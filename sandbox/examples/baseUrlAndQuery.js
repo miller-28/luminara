@@ -2,7 +2,7 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const baseUrlAndQuery = {
 	title: "🔗 Base URL & Query Parameters",
-	tests: [
+    examples: [
 		{
 			id: "base-url",
 			title: "Using Base URL",
@@ -24,5 +24,5 @@ export const baseUrlAndQuery = {
 				return `Query: { postId: 1 }\nFound ${queryResponse.data.length} comments for post 1`;
 			}
 		}
-	]
+    ]
 };

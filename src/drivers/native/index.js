@@ -1,7 +1,7 @@
 import { buildFullUrl } from "./features/url/index.js";
 import { createTimeoutHandler } from "./features/timeout/index.js";
 import { parseResponseData } from "./features/response/index.js";
-import { enhanceError, createHttpError, createTimeoutError, createParseError, createAbortError } from "./features/error/index.js";
+import { createLuminaraError, createHttpError, createTimeoutError, createParseError, createAbortError, createNetworkError } from "./features/error/index.js";
 import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from "./features/retry/index.js";
 
 export function NativeFetchDriver(config = {}) {
@@ -9,7 +9,7 @@ export function NativeFetchDriver(config = {}) {
 	const globalConfig = { ...config };
 
 	return {
-		async request(opts) {
+		async request(opts, context = {}) {
 			// Merge global config with per-request options (per-request takes priority)
 			const mergedOpts = { ...globalConfig, ...opts };
 			
@@ -18,6 +18,9 @@ export function NativeFetchDriver(config = {}) {
 				timeout, retry = 0, retryDelay = 1000, retryStatusCodes,
 				backoffType, backoffMaxDelay, shouldRetry // Add custom retry policy support
 			} = mergedOpts;
+			
+			// Get current attempt from context (for error reporting)
+			const currentAttempt = context.attempt || 1;
 			
 			// Convert retryStatusCodes to custom retry policy if provided
 			let effectiveRetryPolicy = shouldRetry;
@@ -55,6 +58,7 @@ export function NativeFetchDriver(config = {}) {
 				method,
 				headers: fetchOptions.headers,
 				body,
+				timeout,
 				retry,
 				retryDelay,
 				responseType: mergedOpts.responseType,
@@ -75,12 +79,12 @@ export function NativeFetchDriver(config = {}) {
 				try {
 					data = await parseResponseData(response, mergedOpts.responseType, mergedOpts.parseResponse);
 				} catch (parseError) {
-					throw createParseError(parseError, response, requestContext, timeout);
+					throw await createParseError(parseError, response, requestContext, currentAttempt);
 				}
 				
 				// For non-2xx responses, check ignoreResponseError option
 				if (!response.ok && !mergedOpts.ignoreResponseError) {
-					throw createHttpError(response, data, requestContext, timeout);
+					throw await createHttpError(response, requestContext, currentAttempt);
 				}
 				
 				return {
@@ -93,18 +97,37 @@ export function NativeFetchDriver(config = {}) {
 				// Clear timeout on error
 				timeoutCleanup();
 				
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					// Check if this was a timeout abort
+					if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
+						throw createTimeoutError(timeout, requestContext, currentAttempt);
+					}
+					// Otherwise it's a user-initiated abort
+					throw createAbortError(error, requestContext, currentAttempt);
+				}
+				
 				// Handle string abort reasons (convert to proper Error objects)
 				if (typeof error === 'string') {
-					error = createAbortError(error, requestContext, timeout);
+					throw createAbortError(error, requestContext, currentAttempt);
 				}
 				
-				// Convert timeout abort to timeout error
-				if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
-					throw createTimeoutError(timeout, requestContext);
+				// Handle TypeError (usually network errors)
+				if (error.name === 'TypeError') {
+					throw createNetworkError(error, requestContext, currentAttempt);
 				}
 				
-				// Enhance error with context and throw
-				throw enhanceError(error, requestContext, timeout);
+				// If this is already a LuminaraError, just re-throw
+				if (error.name === 'LuminaraError') {
+					throw error;
+				}
+				
+				// For any other error, create a generic LuminaraError
+				throw createLuminaraError(error.message, {
+					request: requestContext,
+					attempt: currentAttempt,
+					originalError: error
+				});
 			}
 		},
 

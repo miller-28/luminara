@@ -2,7 +2,7 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const basicUsage = {
 	title: "📦 Basic Usage",
-	tests: [
+    examples: [
 		{
 			id: "get-json",
 			title: "GET JSON",
@@ -45,5 +45,5 @@ export const basicUsage = {
 				return `Status: ${formResponse.status}\nForm Fields: ${Object.keys(formResponse.data.form || {}).join(', ')}`;
 			}
 		}
-	]
+    ]
 };

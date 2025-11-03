@@ -1,4 +1,4 @@
-import { TestController, examples } from './testController.js';
+import { ExamplesController, examples } from './examplesController.js';
 
 // UI Management - Only handles DOM manipulation and rendering
 class SandboxUI {
@@ -10,7 +10,7 @@ class SandboxUI {
 		this.runButtonElements = new Map();
 		this.stopButtonElements = new Map();
 		
-		this.testController = new TestController();
+		this.examplesController = new ExamplesController();
 
 		this.init();
 	}
@@ -39,9 +39,9 @@ class SandboxUI {
 		title.className = 'feature-title';
 		title.textContent = feature.title;
 
-		const runFeatureBtn = document.createElement('button');
+        const runFeatureBtn = document.createElement('button');
 		runFeatureBtn.className = 'btn btn-small';
-		runFeatureBtn.textContent = `▶ Run All ${feature.tests.length}`;
+        runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
 		runFeatureBtn.onclick = () => this.handleRunFeature(featureKey);
 
 		header.appendChild(title);
@@ -50,8 +50,8 @@ class SandboxUI {
 		const grid = document.createElement('div');
 		grid.className = 'examples-grid';
 
-		for (const test of feature.tests) {
-			const card = this.createExampleCard(test);
+        for (const example of feature.examples) {
+            const card = this.createExampleCard(example);
 			grid.appendChild(card);
 		}
 
@@ -61,17 +61,17 @@ class SandboxUI {
 		return section;
 	}
 
-	createExampleCard(test) {
+    createExampleCard(example) {
 		const card = document.createElement('div');
 		card.className = 'example-card';
-		card.id = `example-${test.id}`;
+        card.id = `example-${example.id}`;
 
 		const cardHeader = document.createElement('div');
 		cardHeader.className = 'example-header';
 
 		const titleDiv = document.createElement('div');
 		titleDiv.className = 'example-title';
-		titleDiv.textContent = test.title;
+        titleDiv.textContent = example.title;
 
 		const buttonContainer = document.createElement('div');
 		buttonContainer.style.display = 'flex';
@@ -80,15 +80,15 @@ class SandboxUI {
 		const runBtn = document.createElement('button');
 		runBtn.className = 'btn btn-small';
 		runBtn.textContent = '▶ Run';
-		runBtn.onclick = () => this.handleRunTest(test.id);
-		this.runButtonElements.set(test.id, runBtn);
+        runBtn.onclick = () => this.handleRunTest(example.id);
+        this.runButtonElements.set(example.id, runBtn);
 
 		const stopBtn = document.createElement('button');
 		stopBtn.className = 'btn btn-small btn-stop';
 		stopBtn.textContent = '⏹ Stop';
 		stopBtn.style.display = 'none';
-		stopBtn.onclick = () => this.handleStopTest(test.id);
-		this.stopButtonElements.set(test.id, stopBtn);
+        stopBtn.onclick = () => this.handleStopTest(example.id);
+        this.stopButtonElements.set(example.id, stopBtn);
 
 		buttonContainer.appendChild(runBtn);
 		buttonContainer.appendChild(stopBtn);
@@ -99,7 +99,7 @@ class SandboxUI {
 		const output = document.createElement('pre');
 		output.className = 'example-output';
 		output.textContent = 'Click ▶ Run to run this example';
-		this.outputElements.set(test.id, output);
+        this.outputElements.set(example.id, output);
 
 		card.appendChild(cardHeader);
 		card.appendChild(output);
@@ -112,29 +112,29 @@ class SandboxUI {
 		this.clearAllBtn.onclick = () => this.handleClearAll();
 	}
 
-	// UI Handlers - delegate logic to test controller
-	async handleRunTest(testId) {
-		const test = this.testController.findTest(testId);
-		if (!test) return;
+	// UI Handlers - delegate logic to examples controller
+    async handleRunTest(testId) {
+		const example = this.examplesController.findExample(testId);
+        if (!example) return;
 
 		const output = this.outputElements.get(testId);
 		const runButton = this.runButtonElements.get(testId);
 		const stopButton = this.stopButtonElements.get(testId);
 
 		// Update output callback for live updates
-		const updateOutput = (content) => {
+        const updateOutput = (content) => {
 			output.textContent = content;
 		};
 
 		// Status change callback for UI updates
-		const onStatusChange = (status) => {
+        const onStatusChange = (status) => {
 			switch (status) {
 				case 'running':
 					runButton.disabled = true;
 					runButton.style.display = 'none';
 					stopButton.style.display = 'inline-block';
 					output.className = 'example-output running';
-					output.textContent = `▶ Running ${test.title}...\nPlease wait...`;
+                    output.textContent = `▶ Running ${example.title}...\nPlease wait...`;
 					break;
 				case 'success':
 					output.className = 'example-output success';
@@ -148,8 +148,8 @@ class SandboxUI {
 			}
 		};
 
-		// Run test
-		const result = await this.testController.runTest(testId, updateOutput, onStatusChange);
+		// Run example
+		const result = await this.examplesController.runExample(testId, updateOutput, onStatusChange);
 
 		// Update UI based on result
 		switch (result.status) {
@@ -171,23 +171,23 @@ class SandboxUI {
 	}
 
 	handleStopTest(testId) {
-		this.testController.stopTest(testId);
+		this.examplesController.stopExample(testId);
 	}
 
 	async handleRunFeature(featureKey) {
-		await this.testController.runFeature(featureKey, (testId) => this.handleRunTest(testId));
+		await this.examplesController.runFeature(featureKey, (exampleId) => this.handleRunTest(exampleId));
 	}
 
 	async handleRunAll() {
-		await this.testController.runAll((testId) => this.handleRunTest(testId));
+		await this.examplesController.runAll((exampleId) => this.handleRunTest(exampleId));
 	}
 
 	handleClearAll() {
-		// Stop all running tests
-		this.testController.stopAll();
+		// Stop all running examples
+		this.examplesController.stopAll();
 
 		// Clear all outputs
-		for (const [testId, output] of this.outputElements) {
+        for (const [testId, output] of this.outputElements) {
 			output.className = 'example-output';
 			output.textContent = 'Click ▶ Run to run this example';
 			

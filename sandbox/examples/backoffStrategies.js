@@ -2,7 +2,7 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const backoffStrategies = {
 	title: "📈 Backoff Strategies",
-	tests: [
+    examples: [
 		{
 			id: "backoff-linear",
 			title: "Linear Backoff",
@@ -209,5 +209,5 @@ export const backoffStrategies = {
 				}
 			}
 		}
-	]
+    ]
 };

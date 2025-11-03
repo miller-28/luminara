@@ -1,5 +1,5 @@
 /**
- * Advanced retry policies for Luminara
+ * Retry policies for Luminara
  * Implements intelligent retry logic with status codes, idempotent methods, and Retry-After headers
  */
 

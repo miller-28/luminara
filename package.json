@@ -62,7 +62,7 @@
     "exponential-backoff",
     "fibonacci",
     "jitter",
-    "plugins",
+    "interceptors",
     "middleware",
     "timeout",
     "abort",

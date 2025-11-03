@@ -1,9 +1,10 @@
 import { createLuminara, OfetchDriver, LuminaraClient } from '../../src/index.js';
 import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
-import { fileURLToPath } from 'url';
+import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
 const suite = new TestSuite('Custom Drivers');
 const mockServer = new MockServer(4206);
+const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Create a custom mock driver for testing
 class MockDriver {
@@ -116,7 +117,7 @@ suite.test('Custom driver receives all request options', async () => {
 suite.test('Default OfetchDriver functionality', async () => {
 	// Test that the default OfetchDriver works correctly
 	const api = createLuminara({
-		baseURL: 'http://localhost:4206'
+		baseURL: BASE_URL
 	});
 	
 	const response = await api.getJson('/json');
@@ -214,7 +215,7 @@ suite.test('Custom driver with backoff strategies', async () => {
 suite.test('Driver comparison - ofetch vs custom', async () => {
 	// Test with OfetchDriver
 	const ofetchApi = createLuminara({
-		baseURL: 'http://localhost:4206'
+		baseURL: BASE_URL
 	});
 	
 	const ofetchResponse = await ofetchApi.getJson('/json');
@@ -284,17 +285,6 @@ suite.test('Driver initialization options', async () => {
 });
 
 // Run tests if this file is executed directly
-if (fileURLToPath(import.meta.url) === process.argv[1]) {
-	console.log('🧪 Running Custom Drivers Tests...');
-	await mockServer.start();
-	
-	try {
-		const results = await suite.run();
-		console.log(`✅ Tests completed: ${results.passed}/${results.total} passed`);
-		process.exit(results.failed > 0 ? 1 : 0);
-	} finally {
-		await mockServer.stop();
-	}
-}
+await runTestSuiteIfDirect(import.meta.url, 'Custom Drivers', suite, mockServer);
 
 export { suite, mockServer };

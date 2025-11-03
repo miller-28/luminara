@@ -14,9 +14,9 @@ test-cli/
 ├── mockServer.js          # HTTP test server for controlled responses
 ├── tests/
 │   ├── basic.test.js      # Basic HTTP operations
-│   ├── retry.test.js      # Retry logic validation
+│   ├── retry.test.js      # Retry system validation
 │   ├── backoff.test.js    # All backoff strategies
-│   ├── plugins.test.js    # Plugin system tests
+│   ├── interceptors.test.js    # Interceptor system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
 │   	└── reactSimulation.test.js  # Framework usage patterns
@@ -37,7 +37,7 @@ npm test
 npm run test:basic
 npm run test:retry
 npm run test:backoff
-npm run test:plugins
+npm run test:interceptors
 npm run test:timeout
 npm run test:drivers
 npm run test:framework-simulation
@@ -64,11 +64,11 @@ npm run test:watch
 - Custom retry handlers
 - Status code filtering
 
-### Plugin System
+### Interceptors
 - Request interceptors
 - Response transformers
 - Error handlers
-- Plugin chaining
+- Interceptor chaining
 - Context passing
 
 ### Timeout & Abort

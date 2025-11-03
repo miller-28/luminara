@@ -1,5 +1,111 @@
 import chalk from 'chalk';
 
+// Global console message suppression for test environment
+let consoleSuppression = null;
+
+// Global function to suppress redundant console messages during testing
+export function enableConsoleSuppressionForTesting() {
+	if (consoleSuppression) return; // Already enabled
+	
+	const originalConsoleWarn = console.warn;
+	const originalConsoleError = console.error;
+	const originalConsoleLog = console.log;
+	const originalProcessStderrWrite = process.stderr.write;
+	const originalProcessStdoutWrite = process.stdout.write;
+	
+	// Messages that are expected during testing but not useful for test output
+	const suppressedMessages = [
+		'Response body already consumed, cannot parse JSON',
+		'Body is unusable',
+		'Body has already been consumed',
+		'Failed to parse response as JSON',
+		// Test debug output patterns
+		'🔑 onRequest called with attempt:',
+		'🔑 Set authorization header:',
+		'🌐 Fetch call',
+		'🌐 Fetch returning',
+		'💥 onResponseError called with attempt:',
+		'onSuccess called with response:',
+		'onSuccess returning:',
+		'onResponse called with context.res:',
+		'Final transformedResponse:',
+		'[API]' // React simulation debug logs
+	];
+	
+	// Helper function to check if message should be suppressed
+	const shouldSuppress = (message) => {
+		return suppressedMessages.some(suppressed => message.includes(suppressed));
+	};
+	
+	// Suppress specific console outputs that are expected during error testing
+	console.warn = (...args) => {
+		const message = args.join(' ');
+		if (!shouldSuppress(message)) {
+			originalConsoleWarn(...args);
+		}
+	};
+	
+	console.error = (...args) => {
+		const message = args.join(' ');
+		if (!shouldSuppress(message)) {
+			originalConsoleError(...args);
+		}
+	};
+	
+	console.log = (...args) => {
+		const message = args.join(' ');
+		if (!shouldSuppress(message)) {
+			originalConsoleLog(...args);
+		}
+	};
+	
+	// Intercept stderr and stdout writes to catch low-level messages
+	process.stderr.write = function(chunk, encoding, callback) {
+		const message = chunk.toString();
+		if (!shouldSuppress(message)) {
+			return originalProcessStderrWrite.call(this, chunk, encoding, callback);
+		}
+		// Suppress the message by not writing it
+		if (typeof callback === 'function') {
+			callback();
+		}
+		return true;
+	};
+	
+	process.stdout.write = function(chunk, encoding, callback) {
+		const message = chunk.toString();
+		if (!shouldSuppress(message)) {
+			return originalProcessStdoutWrite.call(this, chunk, encoding, callback);
+		}
+		// Suppress the message by not writing it
+		if (typeof callback === 'function') {
+			callback();
+		}
+		return true;
+	};
+	
+	consoleSuppression = {
+		originalConsoleWarn,
+		originalConsoleError,
+		originalConsoleLog,
+		originalProcessStderrWrite,
+		originalProcessStdoutWrite
+	};
+}
+
+// Function to restore original console methods
+export function disableConsoleSuppressionForTesting() {
+	if (!consoleSuppression) return; // Not enabled
+	
+	console.warn = consoleSuppression.originalConsoleWarn;
+	console.error = consoleSuppression.originalConsoleError;
+	console.log = consoleSuppression.originalConsoleLog;
+	process.stderr.write = consoleSuppression.originalProcessStderrWrite;
+	process.stdout.write = consoleSuppression.originalProcessStdoutWrite;
+	
+	consoleSuppression = null;
+}
+
 // Test utilities for Luminara testing environment
 export class TestSuite {
 	constructor(name) {
@@ -17,6 +123,9 @@ export class TestSuite {
 	async run() {
 		console.log(chalk.blue.bold(`\n🧪 Running ${this.name}`));
 		console.log(chalk.gray('='.repeat(50)));
+		
+		// Enable console suppression for testing environment
+		enableConsoleSuppressionForTesting();
 		
 		this.startTime = Date.now();
 		
@@ -47,6 +156,9 @@ export class TestSuite {
 		if (this.failed > 0) {
 			console.log(chalk.red(`  💥 ${this.failed} failed`));
 		}
+		
+		// Disable console suppression after tests complete
+		disableConsoleSuppressionForTesting();
 		
 		return { passed: this.passed, failed: this.failed, total };
 	}
@@ -139,6 +251,60 @@ export class MockServer {
 						}));
 					});
 					return; // Important: return here to avoid the rest of the switch
+				
+				// Error testing endpoints
+				case '/error-json':
+					res.writeHead(400, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Bad Request',
+						message: 'Validation failed',
+						code: 'VALIDATION_ERROR',
+						details: {
+							field: 'test',
+							reason: 'Invalid data provided'
+						}
+					}));
+					break;
+					
+				case '/error-500':
+					res.writeHead(500, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Internal Server Error',
+						message: 'Something went wrong on the server',
+						code: 'INTERNAL_ERROR'
+					}));
+					break;
+					
+				case '/invalid-json':
+					res.writeHead(200, { 'Content-Type': 'application/json' });
+					res.end('{ invalid json content }'); // Malformed JSON
+					break;
+					
+				case '/validation-error':
+					res.writeHead(422, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Unprocessable Entity',
+						message: 'Validation errors occurred',
+						code: 'VALIDATION_FAILED',
+						validation_errors: [
+							{ field: 'email', message: 'Invalid email format' },
+							{ field: 'password', message: 'Password too short' }
+						]
+					}));
+					break;
+					
+				case '/prefix-json':
+					res.writeHead(200, { 'Content-Type': 'application/json' });
+					res.end(')]}\',' + JSON.stringify({ 
+						message: 'Hello from API',
+						data: 'This has a JSONP security prefix'
+					}));
+					break;
+					
+				case '/xml':
+					res.writeHead(200, { 'Content-Type': 'text/xml' });
+					res.end('<?xml version="1.0"?><root><message>Hello XML</message><data>Sample XML content</data></root>');
+					break;
 					
 				default:
 					res.writeHead(200, { 'Content-Type': 'application/json' });

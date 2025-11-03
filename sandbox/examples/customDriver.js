@@ -2,7 +2,7 @@ import { createLuminara, LuminaraClient } from "../../dist/index.mjs";
 
 export const customDriver = {
 	title: "🚗 Custom Driver",
-	tests: [
+    examples: [
 		{
 			id: "browser-driver",
 			title: "Browser Fetch Driver",
@@ -23,5 +23,5 @@ export const customDriver = {
 				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver instead of default NativeFetchDriver`;
 			}
 		}
-	]
+    ]
 };

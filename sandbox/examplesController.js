@@ -1,4 +1,4 @@
-// Test Controller - Handles test execution logic
+// Examples Controller - Handles example execution logic
 import { basicUsage } from './examples/basicUsage.js';
 import { baseUrlAndQuery } from './examples/baseUrlAndQuery.js';
 import { timeout } from './examples/timeout.js';
@@ -14,19 +14,19 @@ import { errorHandlingExamples } from './examples/errorHandling.js';
 // Create enhanced interceptors feature
 const enhancedInterceptors = {
 	title: "🚀 Enhanced Interceptor System",
-	tests: enhancedInterceptorExamples
+	examples: enhancedInterceptorExamples
 };
 
 // Create response types feature
 const responseTypes = {
 	title: "📦 Response Type Options",
-	tests: responseTypesExamples
+	examples: responseTypesExamples
 };
 
 // Create error handling feature
 const errorHandling = {
 	title: "🛠️ Error Handling",
-	tests: errorHandlingExamples
+	examples: errorHandlingExamples
 };
 
 // Aggregate all examples
@@ -44,19 +44,19 @@ export const examples = {
 	customDriver
 };
 
-// Test Controller Class
-export class TestController {
+// Examples Controller Class
+export class ExamplesController {
 	constructor() {
 		this.abortControllers = new Map();
 	}
 
-	async runTest(testId, updateOutput, onStatusChange) {
-		const test = this.findTest(testId);
-		if (!test) return;
+	async runExample(exampleId, updateOutput, onStatusChange) {
+		const example = this.findExample(exampleId);
+		if (!example) return;
 
-		// Create AbortController for this test
+		// Create AbortController for this example
 		const abortController = new AbortController();
-		this.abortControllers.set(testId, abortController);
+		this.abortControllers.set(exampleId, abortController);
 
 		// Notify UI of status change
 		if (onStatusChange) {
@@ -64,14 +64,14 @@ export class TestController {
 		}
 
 		try {
-			const result = await test.run(updateOutput, abortController.signal);
+			const result = await example.run(updateOutput, abortController.signal);
 			
 			// Check if it was aborted
 			if (abortController.signal.aborted) {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
-				return { status: 'stopped', message: `${test.title} was stopped by user.` };
+				return { status: 'stopped', message: `${example.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('success');
@@ -83,7 +83,7 @@ export class TestController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
-				return { status: 'stopped', message: `${test.title} was stopped by user.` };
+				return { status: 'stopped', message: `${example.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('error');
@@ -91,47 +91,49 @@ export class TestController {
 				return { status: 'error', message: error.message, stack: error.stack };
 			}
 		} finally {
-			this.abortControllers.delete(testId);
+			this.abortControllers.delete(exampleId);
 		}
 	}
 
-	stopTest(testId) {
-		const abortController = this.abortControllers.get(testId);
+	stopExample(exampleId) {
+		const abortController = this.abortControllers.get(exampleId);
 		if (abortController) {
 			abortController.abort();
 		}
 	}
 
-	async runFeature(featureKey, runTestCallback) {
+	async runFeature(featureKey, runExampleCallback) {
 		const feature = examples[featureKey];
 		if (!feature) return;
 
-		const promises = feature.tests.map(test => runTestCallback(test.id));
+		const promises = feature.examples.map(example => runExampleCallback(example.id));
 		await Promise.all(promises);
 	}
 
-	async runAll(runTestCallback) {
-		const allTests = [];
+	async runAll(runExampleCallback) {
+		const allExamples = [];
 		for (const feature of Object.values(examples)) {
-			for (const test of feature.tests) {
-				allTests.push(runTestCallback(test.id));
+			for (const example of feature.examples) {
+				allExamples.push(runExampleCallback(example.id));
 			}
 		}
-		await Promise.all(allTests);
+		await Promise.all(allExamples);
 	}
 
 	stopAll() {
-		for (const [testId, abortController] of this.abortControllers) {
+		for (const [exampleId, abortController] of this.abortControllers) {
 			abortController.abort();
 		}
 		this.abortControllers.clear();
 	}
 
-	findTest(testId) {
+	findExample(exampleId) {
 		for (const feature of Object.values(examples)) {
-			const test = feature.tests.find(t => t.id === testId);
-			if (test) return test;
+			const example = feature.examples.find(e => e.id === exampleId);
+			if (example) return example;
 		}
 		return null;
 	}
 }
+
+

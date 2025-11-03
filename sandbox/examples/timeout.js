@@ -2,7 +2,7 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const timeout = {
 	title: "⏱️ Timeout",
-	tests: [
+    examples: [
 		{
 			id: "timeout-success",
 			title: "Timeout Success (2s delay, 5s timeout)",
@@ -41,5 +41,5 @@ export const timeout = {
 				}
 			}
 		}
-	]
+    ]
 };

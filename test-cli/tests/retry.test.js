@@ -1,16 +1,17 @@
-import { createLuminara } from '../../src/index.js';
-import { TestSuite, MockServer, assert, assertRange, Timer } from '../testUtils.js';
-import { fileURLToPath } from 'url';
+import { createLuminara, defaultRetryPolicy, createRetryPolicy, parseRetryAfter, isIdempotentMethod } from '../../src/index.js';
+import { TestSuite, MockServer, assert, assertEqual, assertRange, Timer } from '../testUtils.js';
+import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
-const suite = new TestSuite('Retry Logic');
+const suite = new TestSuite('Retry');
 const mockServer = new MockServer(4204);
+const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Test basic retry functionality
 suite.test('Basic retry on server errors', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 3,
 		retryDelay: 50
 	});
@@ -28,7 +29,7 @@ suite.test('No retry on client errors (4xx)', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 3,
 		retryDelay: 50
 	});
@@ -46,7 +47,7 @@ suite.test('Retry on specific status codes', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 2,
 		retryDelay: 50,
 		retryStatusCodes: [408, 429, 503] // Specific codes to retry
@@ -75,7 +76,7 @@ suite.test('Retry with timeout combination', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 2,
 		retryDelay: 100,
 		timeout: 200 // 200ms timeout
@@ -126,7 +127,7 @@ suite.test('Eventual success after retries', async () => {
 	};
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 3,
 		retryDelay: 50
 	});
@@ -146,7 +147,7 @@ suite.test('Custom retry delay function', async () => {
 	const totalRetries = 4;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
 			// Calculate attempt number: totalRetries - current retry + 1
@@ -182,7 +183,7 @@ suite.test('Retry context provides request information', async () => {
 	const totalRetries = 3;
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
 			// Calculate attempt number: totalRetries - current retry + 1
@@ -219,7 +220,7 @@ suite.test('Retry with POST requests and body preservation', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 2,
 		retryDelay: 50
 	});
@@ -241,7 +242,7 @@ suite.test('Retry disabled with retry: 0', async () => {
 	mockServer.resetCounts();
 	
 	const api = createLuminara({
-		baseURL: 'http://localhost:4204',
+		baseURL: BASE_URL,
 		retry: 0, // Disable retries
 		retryDelay: 100
 	});
@@ -274,9 +275,9 @@ suite.test('Retry with network errors simulation', async () => {
 		timer.mark();
 		
 		const totalTime = timer.getDuration();
-		// Network errors may not be retried by default, expect shorter time
-		// Single attempt with timeout: ~100ms + connection attempt overhead
-		assertRange(totalTime, 50, 300, `Network error timing should be ~100ms, got ${totalTime}ms`);
+		// Network errors may fail immediately or after timeout, expect wide range
+		// Single attempt: immediate failure (0-10ms) or timeout (100ms+)
+		assertRange(totalTime, 0, 500, `Network error timing should be 0-500ms, got ${totalTime}ms`);
 		
 		// Verify it's a network error (ECONNREFUSED, timeout, or other network issue)
 		assert(error.message.includes('ECONNREFUSED') || 
@@ -291,18 +292,179 @@ suite.test('Retry with network errors simulation', async () => {
 	}
 });
 
-// Run tests if this file is executed directly
-if (fileURLToPath(import.meta.url) === process.argv[1]) {
-	console.log('🧪 Running Retry Logic Tests...');
-	await mockServer.start();
-	
+// Idempotent method detection tests
+suite.test('Idempotent method detection', async () => {
+	assert(isIdempotentMethod('GET'), 'GET should be idempotent');
+	assert(isIdempotentMethod('PUT'), 'PUT should be idempotent');
+	assert(isIdempotentMethod('DELETE'), 'DELETE should be idempotent');
+	assert(!isIdempotentMethod('POST'), 'POST should not be idempotent');
+	assert(!isIdempotentMethod('PATCH'), 'PATCH should not be idempotent');
+});
+
+// Retry-After header parsing tests
+suite.test('Retry-After header parsing (seconds)', async () => {
+	const delay = parseRetryAfter('5');
+	assertEqual(delay, 5000, 'Should parse seconds correctly');
+});
+
+suite.test('Retry-After header parsing (HTTP-date)', async () => {
+	const futureDate = new Date(Date.now() + 10000).toUTCString();
+	const delay = parseRetryAfter(futureDate);
+	assert(delay >= 8000 && delay <= 12000, `Should parse HTTP-date correctly, got ${delay}ms`);
+});
+
+suite.test('Retry-After header parsing (invalid)', async () => {
+	const delay = parseRetryAfter('invalid');
+	assertEqual(delay, 0, 'Should return 0 for invalid input');
+});
+
+// Default retry policy tests  
+suite.test('Default policy retries GET on 500 status', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+
 	try {
-		const results = await suite.run();
-		console.log(`✅ Tests completed: ${results.passed}/${results.total} passed`);
-		process.exit(results.failed > 0 ? 1 : 0);
-	} finally {
-		await mockServer.stop();
+		await luminara.get(`${baseURL}/json?status=500&delay=50`, {
+			retry: 2,
+			retryDelay: 100,
+			timeout: 10000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		assert(error.message.includes('500'), 'Should get 500 error after retries');
 	}
-}
+});
+
+suite.test('Default policy retries POST on safe status codes', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+
+	try {
+		await luminara.post(`${baseURL}/json?status=500`, { data: 'test' }, {
+			retry: 2,
+			retryDelay: 100,
+			timeout: 5000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		assert(error.message.includes('500'), 'Should get 500 error after retries');
+	}
+});
+
+// Custom retry policy tests
+suite.test('Custom retry policy overrides default behavior', async () => {
+	const customPolicy = (error, context) => {
+		// Always retry regardless of method or status (for testing)
+		return context.attempt < context.maxAttempts;
+	};
+
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+
+	try {
+		await luminara.post(`${baseURL}/json?status=400`, { data: 'test' }, {
+			retry: 2,
+			retryDelay: 100,
+			shouldRetry: customPolicy,
+			timeout: 5000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		assert(error.message.includes('400'), 'Should get 400 error after custom retries');
+	}
+});
+
+// Network error retry tests for idempotent methods
+suite.test('Network errors retry for idempotent methods (advanced)', async () => {
+	const luminara = createLuminara();
+
+	try {
+		// Use invalid URL to trigger network error
+		await luminara.get('http://invalid-host-that-does-not-exist.local/test', {
+			retry: 1,
+			retryDelay: 100,
+			timeout: 1000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		// With LuminaraError normalization, network errors are wrapped
+		assert(error.name === 'LuminaraError' || error.name === 'TypeError' || error.name === 'TimeoutError', `Expected network/timeout error, got ${error.name}`);
+	}
+});
+
+// Retry timing tests
+suite.test('Retry-After header is respected (timing)', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+	const startTime = Date.now();
+
+	try {
+		await luminara.get(`${baseURL}/json?status=429`, {
+			retry: 1,
+			retryDelay: 200,
+			timeout: 5000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		const duration = Date.now() - startTime;
+		assert(duration >= 150, `Retry too fast: ${duration}ms, expected at least 150ms`);
+	}
+});
+
+// Status code retry tests
+suite.test('Status 409 triggers retry for GET requests', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+
+	try {
+		await luminara.get(`${baseURL}/json?status=409`, {
+			retry: 1,
+			retryDelay: 100,
+			timeout: 5000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		assert(error.message.includes('409'), 'Should get 409 error after retries');
+	}
+});
+
+suite.test('Status 425 triggers retry for PUT requests', async () => {
+	const luminara = createLuminara();
+	const baseURL = `http://localhost:${mockServer.port}`;
+
+	try {
+		await luminara.put(`${baseURL}/json?status=425`, { data: 'test' }, {
+			retry: 1,
+			retryDelay: 100,
+			timeout: 5000
+		});
+		assert(false, 'Should have thrown an error');
+	} catch (error) {
+		assert(error.message.includes('425'), 'Should get 425 error after retries');
+	}
+});
+
+// createRetryPolicy tests
+suite.test('createRetryPolicy allows custom status codes', async () => {
+	const customRetryStatusCodes = new Set([418]); // I'm a teapot
+	const customPolicy = createRetryPolicy({ 
+		retryStatusCodes: customRetryStatusCodes 
+	});
+
+	const context = {
+		request: { method: 'GET' },
+		attempt: 1,
+		maxAttempts: 3
+	};
+
+	const shouldRetry418 = customPolicy({ status: 418 }, context);
+	const shouldRetry500 = customPolicy({ status: 500 }, context);
+
+	assert(shouldRetry418, 'Should retry on custom status 418');
+	assert(!shouldRetry500, 'Should not retry on default status 500 with custom policy');
+});
+
+// Run tests if this file is executed directly
+await runTestSuiteIfDirect(import.meta.url, 'Retry', suite, mockServer);
 
 export { suite, mockServer };

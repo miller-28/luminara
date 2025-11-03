@@ -5,37 +5,31 @@ import { Timer } from './testUtils.js';
 // Import all test suites
 import { suite as basicSuite, mockServer as basicServer } from './tests/basic.test.js';
 import { suite as backoffSuite, mockServer as backoffServer } from './tests/backoff.test.js';
-import { suite as pluginsSuite, mockServer as pluginsServer } from './tests/plugins.test.js';
+import { suite as interceptorsSuite, mockServer as interceptorsServer } from './tests/interceptors.test.js';
 import { suite as retrySuite, mockServer as retryServer } from './tests/retry.test.js';
 import { suite as timeoutSuite, mockServer as timeoutServer } from './tests/timeout.test.js';
 import { suite as driversSuite, mockServer as driversServer } from './tests/drivers.test.js';
 import { suite as reactSuite, mockServer as reactServer } from './tests/reactSimulation.test.js';
-import { suite as enhancedInterceptorsSuite, mockServer as enhancedInterceptorsServer } from './tests/enhancedInterceptors.test.js';
-import { suite as advancedRetryPoliciesSuite, mockServer as advancedRetryPoliciesServer } from './tests/advancedRetryPolicies.test.js';
-import { testResponseTypes } from './tests/responseTypes.test.js';
-import { testEnhancedErrors } from './tests/enhancedErrors.test.js';
-import { testParseResponse } from './tests/parseResponse.test.js';
-import { testIgnoreResponseError } from './tests/ignoreResponseError.test.js';
+import { suite as responseTypesSuite, mockServer as responseTypesServer } from './tests/responseTypes.test.js';
+import { suite as errorsSuite, mockServer as errorsServer } from './tests/errors.test.js';
+import { suite as parseResponseSuite, mockServer as parseResponseServer } from './tests/parseResponse.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
 	{ name: 'Basic HTTP Operations', suite: basicSuite, server: basicServer },
 	{ name: 'Backoff Strategies', suite: backoffSuite, server: backoffServer },
-	{ name: 'Plugin System', suite: pluginsSuite, server: pluginsServer },
-	{ name: 'Retry Logic', suite: retrySuite, server: retryServer },
+	{ name: 'Interceptors', suite: interceptorsSuite, server: interceptorsServer },
+	{ name: 'Retry', suite: retrySuite, server: retryServer },
 	{ name: 'Timeout Handling', suite: timeoutSuite, server: timeoutServer },
 	{ name: 'Custom Drivers', suite: driversSuite, server: driversServer },
 	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },
-	{ name: 'Enhanced Interceptors', suite: enhancedInterceptorsSuite, server: enhancedInterceptorsServer },
-	{ name: 'Advanced Retry Policies', suite: advancedRetryPoliciesSuite, server: advancedRetryPoliciesServer }
+	{ name: 'Error Handling', suite: errorsSuite, server: errorsServer },
+	{ name: 'Response Types', suite: responseTypesSuite, server: responseTypesServer },
+	{ name: 'parseResponse Option', suite: parseResponseSuite, server: parseResponseServer }
 ];
 
 // Standalone tests (no mock server needed)
 const STANDALONE_TESTS = [
-	{ name: 'Response Types', test: testResponseTypes },
-	{ name: 'Enhanced Error Properties', test: testEnhancedErrors },
-	{ name: 'parseResponse Option', test: testParseResponse },
-	{ name: 'ignoreResponseError Option', test: testIgnoreResponseError }
 ];
 
 // Colors for output
@@ -73,7 +67,7 @@ async function runAllTests() {
 	console.log(colorize('Testing Luminara package as used in React applications\n', 'yellow'));
 	
 	const overallResults = {
-		totalSuites: TEST_SUITES.length + STANDALONE_TESTS.length,
+		totalSuites: TEST_SUITES.length,
 		passedSuites: 0,
 		failedSuites: 0,
 		totalTests: 0,
@@ -84,7 +78,12 @@ async function runAllTests() {
 	
 	// Start all mock servers
 	console.log(colorize('🚀 Starting mock servers...', 'blue'));
-	const serverPromises = TEST_SUITES.map(({ server }) => server.start());
+	const serverPromises = TEST_SUITES.map(async ({ server }) => {
+		await server.start();
+		// Set baseUrl after server starts
+		server.baseUrl = `http://localhost:${server.port}`;
+		return server;
+	});
 	await Promise.all(serverPromises);
 	console.log(colorize('✅ All mock servers started\n', 'green'));
 	
@@ -132,64 +131,6 @@ async function runAllTests() {
 			} catch (error) {
 				suiteTimer.mark();
 				console.log(colorize(`   ❌ Suite failed to run: ${error.message}`, 'red'));
-				overallResults.failedSuites++;
-				overallResults.suiteResults.push({
-					name,
-					passed: 0,
-					failed: 1,
-					total: 1,
-					duration: suiteTimer.getDuration(),
-					status: 'ERROR',
-					error: error.message
-				});
-			}
-		}
-		
-		// Run standalone tests (no mock server needed)
-		for (const { name, test } of STANDALONE_TESTS) {
-			printSeparator();
-			console.log(colorize(`\n📋 Running: ${name}`, 'magenta'));
-			console.log(colorize(`   Standalone test (no server)`, 'blue'));
-			
-			const suiteTimer = new Timer();
-			suiteTimer.mark();
-			
-			try {
-				const results = await test();
-				suiteTimer.mark();
-				
-				const duration = suiteTimer.getDuration();
-				const status = results.passed === results.total ? 'PASSED' : 'FAILED';
-				const statusColor = results.passed === results.total ? 'green' : 'red';
-				
-				console.log(colorize(`   ✓ ${results.passed} passed, ✗ ${results.total - results.passed} failed`, 
-					results.passed === results.total ? 'green' : 'yellow'));
-				console.log(colorize(`   Duration: ${duration}ms`, 'blue'));
-				console.log(colorize(`   Status: ${status}`, statusColor));
-				
-				// Update overall results
-				overallResults.totalTests += results.total;
-				overallResults.passedTests += results.passed;
-				overallResults.failedTests += (results.total - results.passed);
-				
-				if (results.passed === results.total) {
-					overallResults.passedSuites++;
-				} else {
-					overallResults.failedSuites++;
-				}
-				
-				overallResults.suiteResults.push({
-					name,
-					passed: results.passed,
-					failed: results.total - results.passed,
-					total: results.total,
-					duration,
-					status
-				});
-				
-			} catch (error) {
-				suiteTimer.mark();
-				console.log(colorize(`   ❌ Test failed to run: ${error.message}`, 'red'));
 				overallResults.failedSuites++;
 				overallResults.suiteResults.push({
 					name,
