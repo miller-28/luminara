@@ -110,6 +110,176 @@ suite.test('DELETE request', async () => {
 	assert(response.data.method === 'DELETE', 'Should record DELETE method');
 });
 
+// Test all core HTTP verbs
+suite.test('HEAD request', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.head('/json');
+	
+	assert(response.status === 200, 'Should handle HEAD requests');
+	// HEAD requests by HTTP spec should not return body content
+});
+
+suite.test('OPTIONS request', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	// Test that OPTIONS request completes successfully
+	// Note: Some HTTP implementations may not return body content for OPTIONS
+	const response = await api.options('/json');
+	
+	assert(response.status === 200, 'Should handle OPTIONS requests');
+	// OPTIONS may not return body content in some implementations
+	// Just verify it completes successfully
+});
+
+// Test typed GET helpers (response content types)
+suite.test('getText helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getText('/text');
+	
+	assert(response.status === 200, 'Should return 200 status');
+	assert(typeof response.data === 'string', 'Should return string data');
+	assert(response.data.includes('Success'), 'Should contain success message');
+});
+
+suite.test('getXml helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getXml('/xml');
+	
+	assert(response.status === 200, 'Should handle XML requests');
+	assert(typeof response.data === 'string', 'Should return XML as string');
+	assert(response.data.includes('<?xml'), 'Should contain XML declaration');
+});
+
+suite.test('getHtml helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getHtml('/html');
+	
+	assert(response.status === 200, 'Should handle HTML requests');
+	assert(typeof response.data === 'string', 'Should return HTML as string');
+	assert(response.data.includes('<html>'), 'Should contain HTML tags');
+});
+
+suite.test('getBlob helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getBlob('/blob');
+	
+	assert(response.status === 200, 'Should handle Blob requests');
+	assert(response.data instanceof Blob, 'Should return Blob object');
+});
+
+suite.test('getArrayBuffer helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getArrayBuffer('/arraybuffer');
+	
+	assert(response.status === 200, 'Should handle ArrayBuffer requests');
+	assert(response.data instanceof ArrayBuffer, 'Should return ArrayBuffer object');
+});
+
+suite.test('getNDJSON helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const response = await api.getNDJSON('/ndjson');
+	
+	assert(response.status === 200, 'Should handle NDJSON requests');
+	assert(typeof response.data === 'string', 'Should return NDJSON as string');
+	assert(response.data.includes('\n'), 'Should contain newline separators');
+});
+
+// Test typed POST/PUT/PATCH helpers (request content types)
+suite.test('putJson helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const payload = { id: 1, name: 'Updated User' };
+	const response = await api.putJson('/json', payload);
+	
+	assert(response.status === 200, 'Should handle PUT JSON requests');
+	assert(response.data.method === 'PUT', 'Should record PUT method');
+});
+
+suite.test('patchJson helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const payload = { status: 'active' };
+	const response = await api.patchJson('/json', payload);
+	
+	assert(response.status === 200, 'Should handle PATCH JSON requests');
+	assert(response.data.method === 'PATCH', 'Should record PATCH method');
+});
+
+suite.test('postText helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const textData = 'This is plain text content';
+	const response = await api.postText('/text', textData);
+	
+	assert(response.status === 200, 'Should handle text POST requests');
+	// postText returns text responseType, so response.data is the raw JSON string
+	// Parse it to check the message
+	const responseData = JSON.parse(response.data);
+	assert(responseData.message === 'Text received', 'Should confirm text reception');
+});
+
+suite.test('postMultipart helper', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const formData = new FormData();
+	formData.append('file', new Blob(['test content'], { type: 'text/plain' }), 'test.txt');
+	formData.append('description', 'Test file upload');
+	
+	const response = await api.postMultipart('/multipart', formData);
+	
+	assert(response.status === 200, 'Should handle multipart requests');
+	assert(response.data.message === 'Multipart received', 'Should confirm multipart reception');
+});
+
+suite.test('postSoap helper (SOAP 1.1)', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const soapEnvelope = `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<GetUser xmlns="http://example.com/webservice">
+			<UserId>123</UserId>
+		</GetUser>
+	</soap:Body>
+</soap:Envelope>`;
+	
+	const response = await api.postSoap('/soap', soapEnvelope, {
+		headers: { 'SOAPAction': 'http://example.com/webservice/GetUser' }
+	});
+	
+	assert(response.status === 200, 'Should handle SOAP 1.1 requests');
+	assert(response.data.message === 'SOAP received', 'Should confirm SOAP reception');
+});
+
+suite.test('postSoap helper (SOAP 1.2)', async () => {
+	const api = createLuminara({ baseURL: BASE_URL });
+	
+	const soap12Envelope = `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+	<soap:Body>
+		<GetUser xmlns="http://example.com/webservice">
+			<UserId>456</UserId>
+		</GetUser>
+	</soap:Body>
+</soap:Envelope>`;
+	
+	const response = await api.postSoap('/soap', soap12Envelope, {
+		headers: { 
+			'Content-Type': 'application/soap+xml; action="http://example.com/webservice/GetUser"'
+		}
+	});
+	
+	assert(response.status === 200, 'Should handle SOAP 1.2 requests');
+	assert(response.data.message === 'SOAP received', 'Should confirm SOAP reception');
+});
+
 // Run tests if this file is executed directly
 await runTestSuiteIfDirect(import.meta.url, 'Basic HTTP Operations', suite, mockServer);
 

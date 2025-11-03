@@ -236,8 +236,22 @@ export class MockServer {
 					break;
 					
 				case '/text':
-					res.writeHead(200, { 'Content-Type': 'text/plain' });
-					res.end(`Success: ${req.method} request to ${path}`);
+					if (req.method === 'POST') {
+						res.writeHead(200, { 'Content-Type': 'application/json' });
+						let textBody = '';
+						req.on('data', chunk => textBody += chunk);
+						req.on('end', () => {
+							res.end(JSON.stringify({ 
+								message: 'Text received',
+								body: textBody.toString(),
+								method: req.method
+							}));
+						});
+						return;
+					} else {
+						res.writeHead(200, { 'Content-Type': 'text/plain' });
+						res.end(`Success: ${req.method} request to ${path}`);
+					}
 					break;
 					
 				case '/form':
@@ -306,6 +320,53 @@ export class MockServer {
 					res.writeHead(200, { 'Content-Type': 'text/xml' });
 					res.end('<?xml version="1.0"?><root><message>Hello XML</message><data>Sample XML content</data></root>');
 					break;
+					
+				case '/html':
+					res.writeHead(200, { 'Content-Type': 'text/html' });
+					res.end('<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Hello HTML</h1></body></html>');
+					break;
+					
+				case '/blob':
+					res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+					res.end(Buffer.from('Binary blob content'));
+					break;
+					
+				case '/arraybuffer':
+					res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+					res.end(Buffer.from('ArrayBuffer content'));
+					break;
+					
+				case '/ndjson':
+					res.writeHead(200, { 'Content-Type': 'application/x-ndjson' });
+					res.end('{"line": 1, "data": "first"}\n{"line": 2, "data": "second"}\n{"line": 3, "data": "third"}');
+					break;
+					
+				case '/multipart':
+					res.writeHead(200, { 'Content-Type': 'application/json' });
+					let multipartBody = '';
+					req.on('data', chunk => multipartBody += chunk);
+					req.on('end', () => {
+						res.end(JSON.stringify({ 
+							message: 'Multipart received',
+							bodyLength: multipartBody.length,
+							method: req.method
+						}));
+					});
+					return;
+					
+				case '/soap':
+					res.writeHead(200, { 'Content-Type': 'application/json' });
+					let soapBody = '';
+					req.on('data', chunk => soapBody += chunk);
+					req.on('end', () => {
+						res.end(JSON.stringify({ 
+							message: 'SOAP received',
+							soapAction: req.headers['soapaction'] || req.headers['content-type'],
+							method: req.method,
+							bodyLength: soapBody.length
+						}));
+					});
+					return;
 					
 				default:
 					res.writeHead(200, { 'Content-Type': 'application/json' });
