@@ -4,7 +4,7 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Debug Luminara Sandbox",
+            "name": "Run Luminara Sandbox",
             "url": "http://localhost:2880/sandbox/",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": "serve-sandbox",
@@ -17,7 +17,7 @@
             "trace": true
         },
         {
-            "name": "Debug React App in Chrome",
+            "name": "Run React App in Chrome",
             "type": "chrome",
             "request": "launch",
             "url": "http://localhost:3001",

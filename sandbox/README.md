@@ -118,8 +118,7 @@ sandbox/
 ├── index.html            # 📄 HTML structure only
 ├── styles.css            # � All styling (no inline styles)
 ├── main.js               # 🖥️ UI rendering and DOM event handling
-├── testController.js     # 🎮 Example execution logic and state
-├── examplesController.js # 📋 Alternative controller implementation
+├── examplesController.js # 📋 Examples controller implementation
 └── examples/             # 📁 Feature-organized example definitions
     ├── basicUsage.js        # 📦 Core HTTP operations
     ├── baseUrlAndQuery.js   # 🔗 URL configuration
