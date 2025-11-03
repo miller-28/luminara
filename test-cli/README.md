@@ -19,7 +19,7 @@ test-cli/
 │   ├── interceptors.test.js    # Interceptor system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
-│   	└── reactSimulation.test.js  # Framework usage patterns
+│   └── reactSimulation.test.js  # Framework usage patterns
 └── README.md              # This file
 ```
 

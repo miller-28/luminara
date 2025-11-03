@@ -3,7 +3,7 @@ import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
 const suite = new TestSuite('Basic HTTP Operations');
-const mockServer = new MockServer(4211); // Use different port to avoid conflicts
+const mockServer = new MockServer(4221);
 const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Test basic HTTP methods as they would be used in React apps

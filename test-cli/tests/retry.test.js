@@ -3,7 +3,7 @@ import { TestSuite, MockServer, assert, assertEqual, assertRange, Timer } from '
 import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
 const suite = new TestSuite('Retry');
-const mockServer = new MockServer(4204);
+const mockServer = new MockServer(4228);
 const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Test basic retry functionality

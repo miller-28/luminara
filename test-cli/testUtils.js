@@ -165,7 +165,8 @@ export class TestSuite {
 }
 
 export class MockServer {
-	constructor(port = 4201) {
+
+	constructor(port = 4200) {
 		this.port = port;
 		this.server = null;
 		this.requestCounts = new Map();

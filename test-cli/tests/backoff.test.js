@@ -3,7 +3,7 @@ import { TestSuite, MockServer, assert, assertRange, Timer } from '../testUtils.
 import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
 const suite = new TestSuite('Backoff Strategies');
-const mockServer = new MockServer(4202);
+const mockServer = new MockServer(4220);
 const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Test all backoff strategies with timing validation
