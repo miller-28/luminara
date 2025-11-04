@@ -963,46 +963,6 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 
 ---
 
-## 🧩 Project Structure
-
-```
-luminara/
-  src/                      # Source code (domain-driven architecture)
-    index.js                # Main entry point and exports
-    core/                   # Core client abstraction layer
-      luminara.js           # LuminaraClient with interceptor system
-    drivers/                # HTTP driver implementations
-      native/               # Native fetch driver (feature-based)
-        index.js            # Main driver implementation
-        features/           # Modular feature domains
-          retry/            # Retry logic, backoff strategies, policies
-            backoff.js      # Backoff strategy implementations
-            retryPolicy.js  # Retry policies and utilities
-          timeout/          # Timeout handling
-          response/         # Response type processing
-          error/            # Error handling utilities
-          url/              # URL processing and query handling
-      ofetch/               # Ofetch driver (optional)
-        index.js            # Ofetch implementation
-  dist/                     # Built distribution files (auto-generated)
-    index.mjs               # ES Module format
-    index.cjs               # CommonJS format
-  types/                    # TypeScript definitions (auto-generated)
-    index.d.ts              # Type definitions
-  test-cli/                 # CLI test environment
-    tests/                  # Comprehensive test suites
-    testRunner.js           # Test orchestrator
-    testUtils.js            # Testing utilities
-  sandbox/                  # Interactive examples (21 examples)
-    examples/               # Feature-based example files
-    index.html              # Sandbox UI
-  package.json              # Package configuration with dual exports
-  tsup.config.js            # Build configuration
-  README.md                 # This documentation
-  RELEASE_NOTES.md          # Version history and changes
-  LICENSE                   # MIT License
-```
-
 ### Build System
 - **Dual Exports**: Automatic ESM/CJS format support
 - **Auto-Build**: `npm run build` or `npm run dev` (watch mode)
@@ -1014,34 +974,7 @@ luminara/
 ## 📚 Documentation
 
 - **[Sandbox Guide](./sandbox/README.md)** - Interactive examples and usage
-
----
-
-## 🛣️ Roadmap
-
-- [x] Core HTTP methods (GET, POST, PUT, PATCH, DELETE)
-- [x] **Enhanced interceptor system** (deterministic order, mutable context, retry-aware)
-- [x] Retry system with configurable attempts
-- [x] 6 Backoff strategies (linear, exponential, fibonacci, jitter, etc.)
-- [x] Custom retry handlers and policies
-- [x] Timeout support and abort controllers
-- [x] Retry on specific status codes
-- [x] Custom driver support and pluggable architecture
-- [x] **Comprehensive stats system** - Real-time metrics, analytics, query interface
-- [x] **Error handling system** - Categorization, debugging, robust error processing
-- [x] **Response type handling** - JSON, text, form data, binary support
-- [x] **Verbose logging system** - Detailed debugging and request tracing
-- [x] Interactive sandbox with 30+ examples across 11 categories
-- [x] **Dual export support** (ESM/CJS) with auto-detection
-- [x] **Auto-build system** with watch mode
-- [x] **TypeScript definitions** and IntelliSense support
-- [x] **Domain-driven architecture** with feature-based modules
-- [x] **Client-driver separation** and pluggable architecture
-- [x] **Comprehensive export system** with utilities and constants
-- [ ] Request debouncer (per key)
-- [ ] Rate limiter (token bucket)
-- [ ] Cache adapter (localStorage/memory)
-- [ ] Advanced request tracing and performance profiling
+- **[Command Line Tests Guide](./test-cli/README.md)** - Cli test usage
 
 ---
 
