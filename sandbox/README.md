@@ -104,7 +104,30 @@ Comprehensive error management:
 - **Error Tracking Across Retries** - Error state through retry attempts
 - **Ignore Response Errors** - Bypass error throwing with ignoreResponseError
 
-### 🚗 **Custom Driver**
+### � **Stats System**
+Real-time metrics and analytics:
+- **Stats Enabled by Default** - Automatic request tracking
+- **Stats Disabled** - Performance optimization for production
+- **Runtime Control** - Enable/disable stats dynamically
+- **Separate Instances** - Independent stats per client
+- **Verbose Logging** - Detailed stats operation logging
+- **Basic Counters** - Track total, success, fail, inflight requests
+- **Performance Metrics** - Response time analytics (min, avg, p50, p95, p99, max)
+- **Rate Metrics** - Requests per second/minute with different calculation modes
+- **Error Analytics** - Error categorization and top error codes
+- **Retry Statistics** - Retry attempts, backoff timing, success rates
+- **Query Interface** - Advanced filtering and grouping capabilities
+- **Reset Functionality** - Global and individual metric resets
+- **Snapshot Capture** - Point-in-time data snapshots
+
+### 📝 **Verbose Logging**
+Detailed debugging and tracing:
+- **Request Lifecycle Logging** - Complete request/response flow
+- **Performance Insights** - Timing breakdowns and bottleneck identification
+- **Error Context** - Rich error information with request context
+- **Stats Operations** - Detailed stats system activity logging
+
+### �🚗 **Custom Driver**
 Driver extensibility demonstration:
 - **Browser Fetch Driver** - Custom HTTP driver implementation
 
@@ -116,7 +139,7 @@ The sandbox follows strict architectural principles:
 ```
 sandbox/
 ├── index.html            # 📄 HTML structure only
-├── styles.css            # � All styling (no inline styles)
+├── styles.css            # 🎨 All styling (no inline styles)
 ├── main.js               # 🖥️ UI rendering and DOM event handling
 ├── examplesController.js # 📋 Examples controller implementation
 └── examples/             # 📁 Feature-organized example definitions
@@ -128,6 +151,8 @@ sandbox/
     ├── responseTypes.js     # 📦 Response parsing options
     ├── interceptors.js      # 🔌 Interceptor patterns
     ├── errorHandling.js     # 🛠️ Error scenarios
+    ├── stats.js             # 📊 Statistics system
+    ├── verboseLogging.js    # 📝 Debugging and tracing
     └── customDriver.js      # 🚗 Driver extensibility
 ```
 
@@ -237,7 +262,9 @@ The sandbox demonstrates the universal API that works consistently across all th
 6. **📦 Response Types** - Learn response handling options
 7. **🔌 Interceptors** - Implement request/response middleware
 8. **🛠️ Error Handling** - Master comprehensive error scenarios
-9. **🚗 Custom Driver** - Explore extensibility options
+9. **� Stats System** - Explore real-time metrics and analytics
+10. **📝 Verbose Logging** - Learn debugging and tracing techniques
+11. **�🚗 Custom Driver** - Explore extensibility options
 
 Each category builds upon previous concepts, providing a comprehensive understanding of Luminara's capabilities.
 

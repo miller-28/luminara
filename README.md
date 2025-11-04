@@ -11,15 +11,19 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 
 - ⚡ Built on modern native `fetch` (with optional ofetch driver support)
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
-- 🏗️ **Domain-driven architecture** (v0.5.0) - Feature-based modular structure
-- � **Dual export support** (v0.4.0) - ESM/CJS compatibility with auto-detection
-- 🔌 Powerful interceptor architecture (request/response/error interceptors)
-- 🔄 Comprehensive retry system with 6 backoff strategies
-- ⏱️ Configurable timeouts and status code handling
+- 🏗️ **Domain-driven architecture** - Feature-based modular structure
+- 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
+- 🔄 **Dual export support** - ESM/CJS compatibility with auto-detection
+- 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
+- 🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
+- 📝 **Verbose logging system** - Detailed debugging and request tracing
+- 🎯 **Response type handling** - JSON, text, form data, binary support
+- ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
+- 🛡️ **Robust error handling** - Comprehensive error categorization and handling
 - 💎 **Ultra-compact footprint** (~12KB minified, ~4KB gzipped)
-- 🪶 Zero dependencies (ofetch optional)
-- 🎯 Fully promise-based with TypeScript support (v0.4.0)
-- 🚗 Pluggable driver architecture (native fetch, ofetch, custom)
+- 🪶 **Zero dependencies** (ofetch optional)
+- 🎯 **Fully promise-based** with TypeScript support
+- 🚗 **Pluggable driver architecture** (native fetch, ofetch, custom)
 - 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
 
 ---
@@ -174,7 +178,7 @@ if (isIdempotentMethod('GET')) {
 }
 ```
 
-### Build System Support (v0.4.0+)
+### Build System Support
 Luminara supports both ESM and CommonJS with automatic format detection:
 
 ```js
@@ -598,6 +602,122 @@ const api = new LuminaraClient(customDriver());
 
 ---
 
+## 📊 Stats System
+
+Luminara includes a **comprehensive statistics system** that tracks request metrics, performance data, and analytics in real-time. Perfect for monitoring application health and request patterns.
+
+### Basic Stats Usage
+
+```js
+const api = createLuminara({
+  baseURL: "https://api.example.com",
+  statsEnabled: true // enabled by default
+});
+
+// Make some requests
+await api.getJson('/users');
+await api.postJson('/posts', { title: 'Hello' });
+
+// Get basic counters
+const counters = api.stats().counters.get();
+console.log(counters);
+// { total: 2, success: 2, fail: 0, inflight: 0, retried: 0, aborted: 0 }
+
+// Get performance metrics
+const timeMetrics = api.stats().time.get();
+console.log(timeMetrics);
+// { minMs: 150, avgMs: 275, p50Ms: 200, p95Ms: 350, p99Ms: 350, maxMs: 400 }
+```
+
+### Advanced Query Interface
+
+The stats system provides a powerful query interface for detailed analytics:
+
+```js
+// Query stats by endpoint
+const endpointStats = api.stats().query({
+  metrics: ['counters', 'time', 'rate'],
+  groupBy: 'endpoint',
+  window: 'since-reset',
+  limit: 10
+});
+
+// Query stats by domain
+const domainStats = api.stats().query({
+  metrics: ['counters', 'error'],
+  groupBy: 'domain',
+  where: { method: 'POST' }
+});
+
+// Get rate metrics (requests per second/minute)
+const rateStats = api.stats().rate.get();
+console.log(rateStats);
+// { rps: 2.5, rpm: 150, mode: 'ema-30s' }
+```
+
+### Available Metrics
+
+- **Counters**: `total`, `success`, `fail`, `inflight`, `retried`, `aborted`
+- **Time**: `minMs`, `avgMs`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` 
+- **Rate**: `rps` (requests/sec), `rpm` (requests/min), `mode`
+- **Retry**: `count`, `giveups`, `avgBackoffMs`, `successAfterAvg`
+- **Error**: `byClass` (timeout, network, 4xx, 5xx), `topCodes`
+
+### Grouping & Filtering
+
+```js
+// Group by method, filter by domain
+const methodStats = api.stats().query({
+  metrics: ['counters'],
+  groupBy: 'method',
+  where: { domain: 'api.example.com' },
+  window: 'rolling-60s'
+});
+
+// Group by endpoint with filters
+const filteredStats = api.stats().query({
+  metrics: ['time', 'error'],
+  groupBy: 'endpoint',
+  where: { 
+    method: 'GET',
+    endpointPrefix: '/api/' 
+  },
+  limit: 5
+});
+```
+
+### Reset & Snapshots
+
+```js
+// Reset all stats
+api.stats().reset();
+
+// Reset individual modules
+api.stats().counters.reset();
+api.stats().time.reset();
+
+// Take a snapshot (all metrics, point-in-time)
+const snapshot = api.stats().snapshot();
+console.log(snapshot);
+// { timestamp: "2025-11-04T...", window: "since-start", groups: [...] }
+```
+
+### Disable/Enable Stats
+
+```js
+// Disable stats for performance-critical apps
+const api = createLuminara({
+  baseURL: "https://api.example.com",
+  statsEnabled: false
+});
+
+// Check if stats are enabled
+console.log(api.isStatsEnabled()); // false
+
+// When disabled, stats methods return safe defaults
+const counters = api.stats().counters.get(); // Returns zero counters
+```
+
 ---
 
 ## 🎨 Interactive Sandbox
@@ -607,7 +727,7 @@ Luminara includes a **beautiful interactive sandbox** where you can explore all 
 🌐 **[Try the Sandbox](./sandbox/)** • [Sandbox Documentation](./sandbox/README.md) • [Architecture Guide](./sandbox/ARCHITECTURE.md)
 
 The sandbox features:
-- **21 Interactive Examples** across 8 feature categories
+- **30+ Interactive Examples** across 11 feature categories
 - **Live Retry Logging** - Watch backoff strategies in action
 - **Individual Test Controls** - Run and stop tests independently
 - **Real-time Feedback** - Color-coded outputs with detailed logs
@@ -616,13 +736,16 @@ The sandbox features:
 ### Sandbox Categories:
 
 1. 📦 **Basic Usage** - GET/POST JSON, Text, Form data
-2. 🔗 **Base URL & Query Parameters** - URL configuration
+2. 🔗 **Base URL & Query Parameters** - URL configuration  
 3. ⏱️ **Timeout** - Success and failure scenarios
 4. 🔄 **Retry** - Basic retry with status codes
 5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
-6. ⚙️ **Custom Retry** - Custom retryDelay functions
-7. 🔌 **Interceptors** - Request/response/error interceptors
-8. 🚗 **Custom Drivers** - Replace the HTTP backend
+6. 🔌 **Interceptors** - Request/response/error interceptors
+7. �️ **Error Handling** - Comprehensive error scenarios
+8. 🎯 **Response Types** - JSON, text, form, binary data handling
+9. 📊 **Stats System** - Real-time metrics and analytics
+10. 📝 **Verbose Logging** - Detailed debugging and tracing
+11. 🚗 **Custom Drivers** - Replace the HTTP backend
 
 **Quick Start:**
 ```bash
@@ -880,7 +1003,7 @@ luminara/
   LICENSE                   # MIT License
 ```
 
-### Build System (v0.4.0+)
+### Build System
 - **Dual Exports**: Automatic ESM/CJS format support
 - **Auto-Build**: `npm run build` or `npm run dev` (watch mode)
 - **TypeScript Support**: Generated type definitions
@@ -898,24 +1021,27 @@ luminara/
 
 - [x] Core HTTP methods (GET, POST, PUT, PATCH, DELETE)
 - [x] **Enhanced interceptor system** (deterministic order, mutable context, retry-aware)
-- [x] Interceptor system (onRequest, onResponse, onResponseError)
 - [x] Retry system with configurable attempts
 - [x] 6 Backoff strategies (linear, exponential, fibonacci, jitter, etc.)
-- [x] Custom retry handlers
-- [x] Timeout support
+- [x] Custom retry handlers and policies
+- [x] Timeout support and abort controllers
 - [x] Retry on specific status codes
-- [x] Custom driver support
-- [x] Interactive sandbox with 21 examples
-- [x] **Dual export support** (ESM/CJS) - v0.4.0
-- [x] **Auto-build system** with watch mode - v0.4.0
-- [x] **TypeScript definitions** and IntelliSense support - v0.4.0
-- [x] **Domain-driven architecture** with feature-based modules - v0.5.0
-- [x] **Client-driver separation** and pluggable architecture - v0.5.0
-- [x] **Comprehensive export system** with utilities and constants - v0.5.0
+- [x] Custom driver support and pluggable architecture
+- [x] **Comprehensive stats system** - Real-time metrics, analytics, query interface
+- [x] **Error handling system** - Categorization, debugging, robust error processing
+- [x] **Response type handling** - JSON, text, form data, binary support
+- [x] **Verbose logging system** - Detailed debugging and request tracing
+- [x] Interactive sandbox with 30+ examples across 11 categories
+- [x] **Dual export support** (ESM/CJS) with auto-detection
+- [x] **Auto-build system** with watch mode
+- [x] **TypeScript definitions** and IntelliSense support
+- [x] **Domain-driven architecture** with feature-based modules
+- [x] **Client-driver separation** and pluggable architecture
+- [x] **Comprehensive export system** with utilities and constants
 - [ ] Request debouncer (per key)
 - [ ] Rate limiter (token bucket)
 - [ ] Cache adapter (localStorage/memory)
-- [ ] Request tracing and metrics
+- [ ] Advanced request tracing and performance profiling
 
 ---
 

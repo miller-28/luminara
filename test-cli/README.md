@@ -11,7 +11,6 @@ test-cli/
 ├── package.json           # Test environment dependencies
 ├── testRunner.js          # Main test runner
 ├── testUtils.js           # Shared testing utilities
-├── mockServer.js          # HTTP test server for controlled responses
 ├── tests/
 │   ├── basic.test.js      # Basic HTTP operations
 │   ├── retry.test.js      # Retry system validation
@@ -19,6 +18,10 @@ test-cli/
 │   ├── interceptors.test.js    # Interceptor system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
+│   ├── stats.test.js      # Statistics system validation
+│   ├── errors.test.js     # Error handling tests
+│   ├── responseTypes.test.js   # Response type handling
+│   ├── parseResponse.test.js   # Response parsing validation
 │   └── reactSimulation.test.js  # Framework usage patterns
 └── README.md              # This file
 ```
@@ -40,7 +43,11 @@ npm run test:backoff
 npm run test:interceptors
 npm run test:timeout
 npm run test:drivers
-npm run test:framework-simulation
+npm run test:stats
+npm run test:errors
+npm run test:response-types
+npm run test:parse-response
+npm run test:react-simulation
 
 # Watch mode for development
 npm run test:watch
@@ -70,6 +77,33 @@ npm run test:watch
 - Error handlers
 - Interceptor chaining
 - Context passing
+- Deterministic execution order
+- Mutable context sharing
+
+### Stats System
+- Real-time metrics collection
+- Query interface with grouping
+- Performance analytics
+- Rate calculations
+- Error categorization
+- Reset functionality
+- Snapshot capabilities
+
+### Error Handling
+- Network error scenarios
+- HTTP status code errors
+- Timeout error handling
+- Abort error scenarios
+- Error recovery patterns
+- Custom error processing
+
+### Response Type Handling
+- JSON response processing
+- Text response handling
+- Form data responses
+- Binary data handling
+- Content-Type detection
+- Response parsing validation
 
 ### Timeout & Abort
 - Timeout enforcement
