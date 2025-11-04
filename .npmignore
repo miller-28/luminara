@@ -5,7 +5,6 @@
 src/
 sandbox/
 test-cli/
-test-on-react-app/
 .github/
 .vscode/
 tsup.config.js

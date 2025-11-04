@@ -870,8 +870,6 @@ luminara/
     tests/                  # Comprehensive test suites
     testRunner.js           # Test orchestrator
     testUtils.js            # Testing utilities
-  test-on-react-app/        # React browser test environment
-    src/                    # React app with 22 comprehensive tests
   sandbox/                  # Interactive examples (21 examples)
     examples/               # Feature-based example files
     index.html              # Sandbox UI

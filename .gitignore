@@ -11,4 +11,3 @@ coverage
 *.log
 .vscode/chrome-debug-profile/
 .vite
-test-on-react-app/.vscode

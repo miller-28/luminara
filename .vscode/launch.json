@@ -15,26 +15,6 @@
             ],
             "sourceMaps": true,
             "trace": true
-        },
-        {
-            "name": "Run React App in Chrome",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:3001",
-            "webRoot": "${workspaceFolder}/test-on-react-app/src",
-            "preLaunchTask": "Vite Dev Server",
-            "sourceMaps": true,
-            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile/react-app",
-            "runtimeArgs": [
-                "--remote-debugging-port=9223"
-            ]
-        },
-        {
-            "name": "Attach to Chrome",
-            "type": "chrome",
-            "request": "attach",
-            "port": 9223,
-            "webRoot": "${workspaceFolder}/test-on-react-app/src"
         }
     ]
 }

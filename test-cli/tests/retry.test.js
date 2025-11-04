@@ -150,8 +150,8 @@ suite.test('Custom retry delay function', async () => {
 		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
-			// Calculate attempt number: totalRetries - current retry + 1
-			const attemptNumber = totalRetries - context.options.retry + 1;
+			// Get the attempt number from context.attempt (1-based)
+			const attemptNumber = context.attempt || 1;
 			const delay = 100 * attemptNumber; // 100ms, 200ms, 300ms, 400ms
 			delays.push(delay);
 			return delay;
@@ -186,13 +186,13 @@ suite.test('Retry context provides request information', async () => {
 		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
-			// Calculate attempt number: totalRetries - current retry + 1
-			const attemptNumber = totalRetries - context.options.retry + 1;
+			// Get the attempt number from context.attempt (1-based)
+			const attemptNumber = context.attempt || 1;
 			contextsCaptured.push({
 				attempt: attemptNumber,
 				error: context.error?.message || 'No error',
-				requestUrl: context.request || 'No URL',
-				retryRemaining: context.options.retry
+				requestUrl: context.req?.url || 'No URL',
+				retryRemaining: context.req?.retry || 0
 			});
 			return 50;
 		}

@@ -22,7 +22,6 @@
 		"node_modules",
 		"dist",
 		"test-cli",
-		"test-on-react-app",
 		"sandbox"
 	]
 }

@@ -15,7 +15,6 @@ export const backoffStrategies = {
 						retry: 6,
 						retryDelay: 300,
 						backoffType: 'linear',
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -27,16 +26,15 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential",
 			title: "Exponential Backoff",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
-					await client.get('https://httpbingo.org/status/503', {
+					await client.get('https://httpbingo.org/status/500', {
 						retry: 5,
 						retryDelay: 200,
 						backoffType: 'exponential',
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -48,17 +46,16 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential-capped",
 			title: "Exponential Capped",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
-					await client.get('https://httpbingo.org/status/503', {
+					await client.get('https://httpbingo.org/status/500', {
 						retry: 5,
 						retryDelay: 300,
 						backoffType: 'exponentialCapped',
 						backoffMaxDelay: 3000,
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -70,8 +67,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-fibonacci",
 			title: "Fibonacci Backoff",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -79,7 +76,6 @@ export const backoffStrategies = {
 						retry: 8,
 						retryDelay: 200,
 						backoffType: 'fibonacci',
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -91,8 +87,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-jitter",
 			title: "Jitter Backoff",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -100,7 +96,6 @@ export const backoffStrategies = {
 						retry: 3,
 						retryDelay: 500,
 						backoffType: 'jitter',
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -112,8 +107,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential-jitter",
 			title: "Exponential Jitter",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -122,7 +117,6 @@ export const backoffStrategies = {
 						retryDelay: 300,
 						backoffType: 'exponentialJitter',
 						backoffMaxDelay: 5000,
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -134,8 +128,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-initial-delay",
 			title: "Initial Delay Example",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -145,7 +139,6 @@ export const backoffStrategies = {
 						retryDelay: 500,
 						backoffType: 'linear', 
 						initialDelay: 2000,  // Wait 2s before first retry
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -157,8 +150,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-custom-array",
 			title: "Custom Array Example", 
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -167,7 +160,6 @@ export const backoffStrategies = {
 						retry: 5,
 						backoffType: 'custom',
 						backoffDelays: [800, 5000, 10000, 15000, 30000],
-						verbose: true,
 						signal
 					});
 				} catch (error) {
@@ -179,8 +171,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-combined-features",
 			title: "Combined Features Example",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {
@@ -190,7 +182,6 @@ export const backoffStrategies = {
 						backoffType: 'custom',
 						backoffDelays: [3000, 5000, 10000],
 						initialDelay: 1500,  // 1.5s initial, then custom array
-						verbose: true,
 						signal
 					});
 				} catch (error) {

@@ -32,66 +32,6 @@
                 "reveal": "always",
                 "panel": "shared"
             }
-        },
-        {
-            "label": "Vite Dev Server",
-            "type": "shell",
-            "command": "npm",
-            "args": ["run", "dev"],
-            "group": "build",
-            "isBackground": true,
-            "options": {
-                "cwd": "${workspaceFolder}/test-on-react-app"
-            },
-            "problemMatcher": {
-                "owner": "vite",
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^\\s*vite",
-                    "endsPattern": "Local:\\s+http://localhost:\\d+"
-                }
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            }
-        },
-        {
-            "label": "Build React App",
-            "type": "shell",
-            "command": "npm",
-            "args": ["run", "build"],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/test-on-react-app"
-            },
-            "problemMatcher": ["$tsc"]
-        },
-        {
-            "label": "Preview Build",
-            "type": "shell",
-            "command": "npm",
-            "args": ["run", "preview"],
-            "group": "build",
-            "options": {
-                "cwd": "${workspaceFolder}/test-on-react-app"
-            },
-            "dependsOn": "Build React App"
         }
     ]
 }
