@@ -1,12 +1,33 @@
 import { NativeFetchDriver } from "../drivers/native/index.js";
 import { logRequest, logPlugin, logError, verboseLog } from "./verboseLogger.js";
+import { 
+	logStatsSystem, 
+	logRequestEvent, 
+	createStatsContext 
+} from "./stats/verboseLogger.js";
+import { StatsHub } from "./stats/StatsHub.js";
 
 export class LuminaraClient {
 
 	constructor(driver = NativeFetchDriver(), plugins = [], config = {}) {
+		
 		this.driver = driver;
 		this.plugins = plugins;
 		this.config = config; // Store global configuration
+		
+		// Stats enabled by default, but can be disabled via config
+		this.statsEnabled = config.statsEnabled !== false;
+		
+		// Each instance gets its own stats (no global sharing)
+		this.statsInstance = new StatsHub();
+		
+		// Enable verbose logging on stats instance if verbose is enabled
+		if (config.verbose) {
+			this.statsInstance.setVerbose(true);
+		}
+		
+		// Generate unique request ID counter
+		this.requestIdCounter = 0;
 		
 		// Log client configuration if verbose is enabled
 		if (config.verbose) {
@@ -14,9 +35,54 @@ export class LuminaraClient {
 				driver: driver.constructor.name || 'unknown',
 				plugins: plugins.length,
 				hasGlobalConfig: Object.keys(config).length > 1, // More than just verbose
-				verboseEnabled: true
+				verboseEnabled: true,
+				statsEnabled: this.statsEnabled
+			});
+			
+			// Log stats system initialization
+			logStatsSystem(createStatsContext(true), 'instance-created', {
+				type: 'instance',
+				initialization: true
 			});
 		}
+	}	/**
+	 * Get the stats interface
+	 */
+	stats() {
+		return this.statsInstance;
+	}
+
+	/**
+	 * Enable stats collection
+	 */
+	enableStats() {
+		this.statsEnabled = true;
+		if (this.config.verbose) {
+			logStatsSystem(createStatsContext(true), 'enabled', {
+				runtime: true
+			});
+		}
+		return this;
+	}
+
+	/**
+	 * Disable stats collection
+	 */
+	disableStats() {
+		this.statsEnabled = false;
+		if (this.config.verbose) {
+			logStatsSystem(createStatsContext(true), 'disabled', {
+				runtime: true
+			});
+		}
+		return this;
+	}
+
+	/**
+	 * Check if stats are currently enabled
+	 */
+	isStatsEnabled() {
+		return this.statsEnabled;
 	}
 
 	use(plugin) {
@@ -42,12 +108,16 @@ export class LuminaraClient {
 		// Merge global config with per-request options (per-request takes priority)
 		const mergedReq = { ...this.config, ...req };
 		
+		// Generate unique request ID for stats tracking
+		const requestId = `req_${++this.requestIdCounter}_${Date.now()}`;
+		
 		// Log driver selection if verbose is enabled
 		if (mergedReq.verbose) {
 			verboseLog(mergedReq, 'REQUEST', `Using ${this.driver.constructor.name || 'unknown'} driver`, {
 				driver: this.driver.constructor.name || 'unknown',
 				hasCustomDriver: this.driver.constructor.name !== 'NativeFetchDriver',
-				driverFeatures: this.#getDriverFeatures()
+				driverFeatures: this.#getDriverFeatures(),
+				requestId
 			});
 		}
 		
@@ -58,13 +128,32 @@ export class LuminaraClient {
 			error: null,
 			attempt: 1,
 			controller: new AbortController(),
-			meta: { requestStartTime: Date.now() }
+			meta: { 
+				requestStartTime: Date.now(),
+				requestId
+			}
 		};
+
+		// Emit stats event for request start
+		this.#emitStatsEvent('request:start', {
+			id: requestId,
+			time: context.meta.requestStartTime,
+			domain: this.#extractDomain(mergedReq.url),
+			method: mergedReq.method || 'GET',
+			endpoint: this.#normalizeEndpoint(mergedReq.method || 'GET', mergedReq.url),
+			tags: mergedReq.tags || []
+		});
 
 		// Merge user's AbortController signal if provided
 		if (mergedReq.signal) {
 			const userSignal = mergedReq.signal;
-			const cleanup = () => context.controller.abort();
+			const cleanup = () => {
+				context.controller.abort();
+				// Emit abort event
+				this.#emitStatsEvent('request:abort', {
+					id: requestId
+				});
+			};
 			userSignal.addEventListener('abort', cleanup);
 			
 			// Log signal combination if verbose
@@ -72,7 +161,8 @@ export class LuminaraClient {
 				verboseLog(context, 'REQUEST', 'Combined user abort signal with internal signal', {
 					hasUserSignal: true,
 					signalAborted: userSignal.aborted,
-					combinedSignals: 'user + internal'
+					combinedSignals: 'user + internal',
+					requestId
 				});
 			}
 		}
@@ -174,8 +264,16 @@ export class LuminaraClient {
 					}
 				}
 
-				// Success - log completion and return the response
+				// Success - log completion and emit stats event
 				const duration = Date.now() - context.meta.requestStartTime;
+				
+				// Emit stats event for success
+				this.#emitStatsEvent('request:success', {
+					id: context.meta.requestId,
+					status: context.res?.status || 200,
+					durationMs: duration
+				});
+				
 				logRequest(context, 'complete', { 
 					duration, 
 					status: context.res?.status || 200,
@@ -183,7 +281,8 @@ export class LuminaraClient {
 					retries: context.attempt - 1,
 					responseType: typeof context.res?.data,
 					url: context.req.url,
-					method: context.req.method || 'GET'
+					method: context.req.method || 'GET',
+					requestId: context.meta.requestId
 				});
 				
 				// Log additional response details if verbose
@@ -194,7 +293,8 @@ export class LuminaraClient {
 						responseStatus: context.res?.status,
 						responseSize: context.res?.data ? (typeof context.res.data === 'string' ? context.res.data.length : 'object') : 'none',
 						totalDuration: `${duration}ms`,
-						successful: true
+						successful: true,
+						requestId: context.meta.requestId
 					});
 				}
 				
@@ -235,15 +335,32 @@ export class LuminaraClient {
 				if (attempt < maxAttempts && this.#shouldRetry(error, context)) {
 					// Apply retry delay
 					const delay = await this.#getRetryDelay(context);
+					
+					// Emit retry stats event
+					this.#emitStatsEvent('request:retry', {
+						id: context.meta.requestId,
+						attempt: attempt + 1,
+						backoffMs: delay
+					});
+					
 					if (delay > 0) {
 						await new Promise(resolve => setTimeout(resolve, delay));
 					}
 					continue; // Retry
 				}
 
-				// No more retries - log final error and throw
+				// No more retries - emit failure stats event and log final error
+				const duration = Date.now() - context.meta.requestStartTime;
+				this.#emitStatsEvent('request:fail', {
+					id: context.meta.requestId,
+					status: error.status,
+					errorKind: this.#classifyError(error),
+					durationMs: duration
+				});
+				
 				logError(context, 'final', {
-					message: context.error.message
+					message: context.error.message,
+					requestId: context.meta.requestId
 				});
 				throw context.error;
 			}
@@ -395,6 +512,118 @@ export class LuminaraClient {
 	}
 
 	// -------- Private helpers --------
+	
+	/**
+	 * Emit stats events to the stats hub
+	 */
+	#emitStatsEvent(eventType, data) {
+		// Early return if stats are disabled
+		if (!this.statsEnabled) {
+			return;
+		}
+		
+		// Log the stats event if verbose is enabled
+		if (this.config.verbose) {
+			logRequestEvent(createStatsContext(true), eventType, data);
+		}
+		
+		try {
+			switch (eventType) {
+				case 'request:start':
+					this.statsInstance.onRequestStart(data);
+					break;
+				case 'request:success':
+					this.statsInstance.onRequestSuccess(data);
+					break;
+				case 'request:fail':
+					this.statsInstance.onRequestFail(data);
+					break;
+				case 'request:retry':
+					this.statsInstance.onRequestRetry(data);
+					break;
+				case 'request:abort':
+					this.statsInstance.onRequestAbort(data);
+					break;
+			}
+		} catch (error) {
+			// Don't let stats errors break the main request flow
+			console.warn('Stats event error:', error);
+			
+			// Log stats system error if verbose is enabled
+			if (this.config.verbose) {
+				logStatsSystem(createStatsContext(true), 'listener-error', {
+					error,
+					listener: eventType
+				});
+			}
+		}
+	}
+
+	/**
+	 * Extract domain from URL
+	 */
+	#extractDomain(url) {
+		if (!url) return 'unknown';
+		
+		try {
+			if (url.startsWith('http://') || url.startsWith('https://')) {
+				return new URL(url).hostname;
+			} else {
+				// Relative URL - use window.location if available (browser)
+				if (typeof window !== 'undefined' && window.location) {
+					return window.location.hostname;
+				}
+				return 'localhost';
+			}
+		} catch {
+			return 'unknown';
+		}
+	}
+
+	/**
+	 * Normalize endpoint for stats tracking
+	 */
+	#normalizeEndpoint(method, url) {
+		if (!url) return 'unknown';
+		
+		try {
+			const urlObj = url.startsWith('http') ? new URL(url) : { pathname: url };
+			let path = urlObj.pathname || url;
+			
+			// Replace common ID patterns with :id
+			const idPatterns = [
+				/\/\d+(?=\/|$)/g, // Numeric IDs
+				/\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(?=\/|$)/g, // UUIDs
+				/\/[a-f0-9]{24}(?=\/|$)/g, // MongoDB ObjectIds
+				/\/[a-zA-Z0-9\-_]{8,}(?=\/|$)/g // Long alphanumeric strings
+			];
+			
+			for (const pattern of idPatterns) {
+				path = path.replace(pattern, '/:id');
+			}
+			
+			return `${method} ${path}`;
+		} catch {
+			return `${method} unknown`;
+		}
+	}
+
+	/**
+	 * Classify error for stats tracking
+	 */
+	#classifyError(error) {
+		if (error.name === 'AbortError' || error.message?.includes('abort')) {
+			return 'aborted';
+		}
+		if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
+			return 'timeout';
+		}
+		if (!error.status) {
+			return 'network';
+		}
+		return 'http';
+	}
+
 	#withAccept(options, accept, responseType) {
 		const headers = { ...(options.headers || {}) };
 		if (!headers['Accept']) headers['Accept'] = accept;

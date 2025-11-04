@@ -21,3 +21,7 @@ export {
 	IDEMPOTENT_METHODS,
 	DEFAULT_RETRY_STATUS_CODES
 } from "./drivers/native/features/retry/retryPolicy.js";
+
+// Export stats system components
+export { StatsHub } from "./core/stats/StatsHub.js";
+export { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from "./core/stats/query/schemas.js";

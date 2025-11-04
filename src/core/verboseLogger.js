@@ -176,7 +176,8 @@ function getCategoryEmoji(category) {
 		'TIMEOUT': '⏰',
 		'RESPONSE': '📥',
 		'ERROR': '❌',
-		'PLUGIN': '🔌'
+		'PLUGIN': '🔌',
+		'STATS': '📊'
 	};
 	return emojis[category] || '📋';
 }

@@ -9,6 +9,7 @@ import { customDriver } from './examples/customDriver.js';
 import { responseTypes } from './examples/responseTypes.js';
 import { errorHandling } from './examples/errorHandling.js';
 import { verboseLogging } from './examples/verboseLogging.js';
+import { stats } from './examples/stats.js';
 
 // Aggregate all examples
 export const examples = {
@@ -21,7 +22,8 @@ export const examples = {
 	responseTypes,
 	errorHandling,
 	customDriver,
-	verboseLogging
+	verboseLogging,
+	stats
 };
 
 // Examples Controller Class
