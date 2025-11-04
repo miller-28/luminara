@@ -13,6 +13,7 @@ import { suite as reactSuite, mockServer as reactServer } from './tests/reactSim
 import { suite as responseTypesSuite, mockServer as responseTypesServer } from './tests/responseTypes.test.js';
 import { suite as errorsSuite, mockServer as errorsServer } from './tests/errors.test.js';
 import { suite as parseResponseSuite, mockServer as parseResponseServer } from './tests/parseResponse.test.js';
+import { suite as statsSuite, mockServer as statsServer } from './tests/stats.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -25,7 +26,8 @@ const TEST_SUITES = [
 	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },
 	{ name: 'Error Handling', suite: errorsSuite, server: errorsServer },
 	{ name: 'Response Types', suite: responseTypesSuite, server: responseTypesServer },
-	{ name: 'parseResponse Option', suite: parseResponseSuite, server: parseResponseServer }
+	{ name: 'parseResponse Option', suite: parseResponseSuite, server: parseResponseServer },
+	{ name: 'Stats', suite: statsSuite, server: statsServer }
 ];
 
 // Standalone tests (no mock server needed)

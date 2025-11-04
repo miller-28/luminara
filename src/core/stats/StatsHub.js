@@ -83,7 +83,7 @@ export class StatsHub {
 		if (this.verboseEnabled) {
 			logStatsOperation(this._createVerboseContext(), 'snapshot', {
 				timestamp: result.timestamp,
-				dataSize: Object.keys(result.data || {}).length
+				groupCount: result.groups ? result.groups.length : 0
 			});
 		}
 		
@@ -113,7 +113,7 @@ export class StatsHub {
 	get counters() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-start", where, limit } = options;
+				const { groupBy = "none", window = "since-reset", where, limit } = options;
 				
 				if (groupBy === "none") {
 					return this.modules.counters.getMetrics(window, where ? this._createFilterFn(where) : null);
@@ -142,7 +142,7 @@ export class StatsHub {
 	get time() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-start", where, limit } = options;
+				const { groupBy = "none", window = "since-reset", where, limit } = options;
 				
 				if (groupBy === "none") {
 					return this.modules.time.getMetrics(window, where ? this._createFilterFn(where) : null);
@@ -171,7 +171,7 @@ export class StatsHub {
 	get rate() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-start", where, limit, mode = "ema-30s" } = options;
+				const { groupBy = "none", window = "since-reset", where, limit, mode = "ema-30s" } = options;
 				
 				if (groupBy === "none") {
 					return this.modules.rate.getMetrics(window, mode, where ? this._createFilterFn(where) : null);
@@ -200,7 +200,7 @@ export class StatsHub {
 	get retry() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-start", where, limit } = options;
+				const { groupBy = "none", window = "since-reset", where, limit } = options;
 				
 				if (groupBy === "none") {
 					return this.modules.retry.getMetrics(window, where ? this._createFilterFn(where) : null);
@@ -229,7 +229,7 @@ export class StatsHub {
 	get error() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-start", where, limit } = options;
+				const { groupBy = "none", window = "since-reset", where, limit } = options;
 				
 				if (groupBy === "none") {
 					return this.modules.error.getMetrics(window, where ? this._createFilterFn(where) : null);
