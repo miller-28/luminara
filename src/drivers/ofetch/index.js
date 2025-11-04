@@ -1,5 +1,6 @@
 import { ofetch } from "ofetch";
 import { createBackoffHandler } from "../native/features/retry/backoff.js";
+import { getBackoffStrategyInfo } from "../native/features/retry/verboseLogger.js";
 
 export function OfetchDriver(config = {}) {
 	// Store global configuration
@@ -80,9 +81,26 @@ export function OfetchDriver(config = {}) {
 			// Handle retry delay logic: use backoff strategy if specified, otherwise use static delay
 			if (backoffType) {
 				// Use Luminara's backoff strategy - this returns a function
-				const backoffDelayFunction = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay);
+				const backoffDelayFunction = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay, mergedOpts.backoffDelays, mergedOpts.initialDelay);
 				if (backoffDelayFunction) {
-					ofetchOptions.retryDelay = backoffDelayFunction;
+					// Wrap the backoff function to include verbose logging if enabled
+					if (mergedOpts.verbose) {
+						ofetchOptions.retryDelay = (context) => {
+							const delay = backoffDelayFunction(context);
+							
+							// Log the retry attempt with verbose information
+							if (context.attempt === 1) {
+								console.info(`🚀 [Luminara] Attempt ${context.attempt}: Initial request`);
+							} else {
+								let strategyInfo = getBackoffStrategyInfo(backoffType, context.attempt, retryDelay, backoffMaxDelay, mergedOpts.backoffDelays, mergedOpts.initialDelay);
+								console.info(`🔄 [Luminara] Attempt ${context.attempt}: Retry after ${delay}ms delay${strategyInfo}`);
+							}
+							
+							return delay;
+						};
+					} else {
+						ofetchOptions.retryDelay = backoffDelayFunction;
+					}
 				}
 			} else if (retryDelay !== undefined) {
 				// Use static retry delay

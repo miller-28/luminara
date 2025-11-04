@@ -41,11 +41,24 @@ export class LuminaraClient {
 
 	async #executeWithRetry(context) {
 		const maxAttempts = context.req.retry ? context.req.retry + 1 : 1;
+		let requestStartTime = Date.now();
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
 			context.attempt = attempt;
 			context.error = null;
 			context.res = null;
+
+			// Verbose logging for attempt timing
+			if (context.req.verbose) {
+				const currentTime = Date.now();
+				if (attempt === 1) {
+					console.info(`🚀 [Luminara] Attempt ${attempt}: Initial request`);
+					requestStartTime = currentTime;
+				} else {
+					const timeSinceStart = currentTime - requestStartTime;
+					console.info(`⏳ [Luminara] Starting attempt ${attempt} (${timeSinceStart}ms since initial request)`);
+				}
+			}
 
 			try {
 				// On retry, re-run request interceptors for fresh tokens/headers

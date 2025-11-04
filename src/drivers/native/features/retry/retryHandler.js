@@ -9,6 +9,7 @@ import {
 	createRetryPolicy, 
 	calculateRetryDelayWithHeaders 
 } from "./retryPolicy.js";
+import { getBackoffStrategyInfo } from "./verboseLogger.js";
 
 export function shouldRetryRequest(error, context, customRetryPolicy) {
 	// Use custom retry policy if provided, otherwise use default
@@ -16,17 +17,26 @@ export function shouldRetryRequest(error, context, customRetryPolicy) {
 	return retryPolicy(error, context);
 }
 
-export async function calculateRetryDelay(attempt, retryDelay, backoffType, backoffMaxDelay, retryContext, response = null) {
+export async function calculateRetryDelay(attempt, retryDelay, backoffType, backoffMaxDelay, retryContext, response = null, luminaraContext = null) {
 	let baseDelay = retryDelay;
+	const startTime = Date.now();
+	
+	// Extract new backoff options from Luminara context
+	const backoffDelays = luminaraContext?.req?.backoffDelays;
+	const initialDelay = luminaraContext?.req?.initialDelay;
 	
 	// Handle custom retry delay function
 	if (typeof retryDelay === 'function') {
-		baseDelay = await retryDelay(retryContext);
+		// Pass the appropriate context to the custom function
+		const contextToPass = luminaraContext || retryContext;
+		baseDelay = await retryDelay(contextToPass);
 	} else if (backoffType) {
 		// Use Luminara's backoff strategy
-		const backoffHandler = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay);
+		const backoffHandler = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay, backoffDelays, initialDelay);
 		if (backoffHandler) {
-			baseDelay = backoffHandler(retryContext) || retryDelay;
+			// Pass the Luminara context to the backoff handler if available, otherwise create a minimal one
+			const contextForBackoff = luminaraContext || { attempt };
+			baseDelay = backoffHandler(contextForBackoff) || retryDelay;
 		}
 	}
 

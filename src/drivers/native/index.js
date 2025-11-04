@@ -173,8 +173,8 @@ export function NativeFetchDriver(config = {}) {
 				context.error
 			);
 			
-			// Use driver's sophisticated delay calculation
-			return await calculateRetryDelay(context.attempt || 1, retryDelay, backoffType, backoffMaxDelay, retryContext);
+			// Use driver's sophisticated delay calculation, passing both retry context and Luminara context
+			return await calculateRetryDelay(context.attempt || 1, retryDelay, backoffType, backoffMaxDelay, retryContext, null, context);
 		}
 	};
 }
