@@ -6,6 +6,7 @@ class SandboxUI {
 		this.container = document.getElementById('examples-container');
 		this.runAllBtn = document.getElementById('run-all');
 		this.clearAllBtn = document.getElementById('clear-all');
+		this.verboseToggle = document.getElementById('verbose-toggle');
 		this.outputElements = new Map();
 		this.runButtonElements = new Map();
 		this.stopButtonElements = new Map();
@@ -110,6 +111,7 @@ class SandboxUI {
 	attachEventListeners() {
 		this.runAllBtn.onclick = () => this.handleRunAll();
 		this.clearAllBtn.onclick = () => this.handleClearAll();
+		this.verboseToggle.addEventListener('change', (e) => this.handleVerboseToggle(e.target.checked));
 	}
 
 	// UI Handlers - delegate logic to examples controller
@@ -201,6 +203,21 @@ class SandboxUI {
 			if (stopButton) {
 				stopButton.style.display = 'none';
 			}
+		}
+	}
+
+	handleVerboseToggle(isVerbose) {
+		// Update examples controller with verbose state
+		this.examplesController.setVerboseMode(isVerbose);
+		
+		// Update UI to show verbose state
+		const toggleLabel = document.querySelector('.toggle-label');
+		if (isVerbose) {
+			toggleLabel.textContent = '🔍 Verbose Logging (Active)';
+			console.info('🔍 [Sandbox] Verbose logging enabled - check console for detailed logs');
+		} else {
+			toggleLabel.textContent = '🔍 Verbose Logging';
+			console.info('🔍 [Sandbox] Verbose logging disabled');
 		}
 	}
 }

@@ -6,8 +6,8 @@ export const backoffStrategies = {
 		{
 			id: "backoff-linear",
 			title: "Linear Backoff",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
 
 				try {

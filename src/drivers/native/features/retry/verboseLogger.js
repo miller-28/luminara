@@ -1,7 +1,154 @@
 /**
- * Verbose logging utilities for retry strategies
- * Shared between different drivers and retry handlers
+ * Retry feature verbose logger
+ * Handles detailed logging for retry strategies, backoff calculations, and retry decisions
  */
+
+import { verboseLog } from '../../../../core/verboseLogger.js';
+
+export class RetryVerboseLogger {
+	/**
+	 * Log retry configuration setup
+	 */
+	static logRetrySetup(context, retryCount, retryDelay, backoffType) {
+		if (!context?.req?.verbose) return;
+		
+		verboseLog(context, 'RETRY', `Retry configuration`, {
+			maxRetries: retryCount,
+			retryDelay: `${retryDelay}ms`,
+			backoffType: backoffType || 'static',
+			strategy: backoffType ? 'dynamic' : 'static'
+		});
+	}
+
+	/**
+	 * Log retry attempt start
+	 */
+	static logRetryAttempt(context, attemptNumber, isInitial = false) {
+		if (!context?.req?.verbose) return;
+		
+		if (isInitial) {
+			verboseLog(context, 'RETRY', `Attempt ${attemptNumber}: Initial request`, {
+				attempt: attemptNumber,
+				type: 'initial',
+				totalAllowed: (context.req.retry || 0) + 1
+			});
+		} else {
+			verboseLog(context, 'RETRY', `Attempt ${attemptNumber}: Retry attempt`, {
+				attempt: attemptNumber,
+				type: 'retry',
+				remaining: (context.req.retry || 0) - (attemptNumber - 1)
+			});
+		}
+	}
+
+	/**
+	 * Log backoff strategy calculation
+	 */
+	static logBackoffCalculation(context, attemptNumber, backoffType, calculatedDelay, expectedDelay, details = {}) {
+		if (!context?.req?.verbose) return;
+		
+		const strategyInfo = getBackoffStrategyInfo(backoffType, attemptNumber, details.baseDelay, details.maxDelay, details.backoffDelays, details.initialDelay);
+		
+		verboseLog(context, 'RETRY', `Backoff calculation: ${calculatedDelay}ms${strategyInfo}`, {
+			attempt: attemptNumber,
+			strategy: backoffType,
+			calculated: calculatedDelay,
+			expected: expectedDelay,
+			formula: strategyInfo.trim()
+		});
+	}
+
+	/**
+	 * Log retry delay execution
+	 */
+	static logRetryDelay(context, attemptNumber, delayMs, backoffType) {
+		if (!context?.req?.verbose) return;
+		
+		const strategyInfo = getBackoffStrategyInfo(backoffType, attemptNumber, context.req.retryDelay, context.req.backoffMaxDelay, context.req.backoffDelays, context.req.initialDelay);
+		
+		verboseLog(context, 'RETRY', `Retry after ${delayMs}ms delay${strategyInfo}`, {
+			attempt: attemptNumber,
+			delay: delayMs,
+			strategy: backoffType || 'static'
+		});
+	}
+
+	/**
+	 * Log retry policy evaluation
+	 */
+	static logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy = 'default') {
+		if (!context?.req?.verbose) return;
+		
+		verboseLog(context, 'RETRY', `Retry policy evaluation: ${willRetry ? 'retry' : 'stop'}`, {
+			policy: retryPolicy,
+			decision: willRetry ? 'retry' : 'stop',
+			reason: reason,
+			errorType: error?.name,
+			status: error?.status,
+			attempt: context.attempt
+		});
+	}
+
+	/**
+	 * Log custom retry delay function usage
+	 */
+	static logCustomRetryFunction(context, customDelay, functionResult) {
+		if (!context?.req?.verbose) return;
+		
+		verboseLog(context, 'RETRY', `Custom retry function executed`, {
+			attempt: context.attempt,
+			function: 'custom',
+			result: functionResult,
+			type: typeof functionResult
+		});
+	}
+
+	/**
+	 * Log retry headers analysis (Retry-After)
+	 */
+	static logRetryHeaders(context, retryAfterHeader, respectedHeader, finalDelay) {
+		if (!context?.req?.verbose) return;
+		
+		if (retryAfterHeader) {
+			verboseLog(context, 'RETRY', `Retry-After header: ${retryAfterHeader}`, {
+				header: retryAfterHeader,
+				respected: respectedHeader,
+				finalDelay: finalDelay,
+				source: respectedHeader ? 'header' : 'strategy'
+			});
+		}
+	}
+
+	/**
+	 * Log retry exhaustion
+	 */
+	static logRetryExhaustion(context, totalAttempts, totalTime) {
+		if (!context?.req?.verbose) return;
+		
+		verboseLog(context, 'RETRY', `All retries exhausted after ${totalAttempts} attempts`, {
+			attempts: totalAttempts,
+			totalTime: totalTime ? `${totalTime}ms` : 'unknown',
+			result: 'failed',
+			exhausted: true
+		});
+	}
+
+	/**
+	 * Log retry success
+	 */
+	static logRetrySuccess(context, totalAttempts, totalTime) {
+		if (!context?.req?.verbose) return;
+		
+		if (totalAttempts > 1) {
+			verboseLog(context, 'RETRY', `Request succeeded after ${totalAttempts} attempts`, {
+				attempts: totalAttempts,
+				totalTime: totalTime ? `${totalTime}ms` : 'unknown',
+				result: 'success',
+				recovered: true
+			});
+		}
+	}
+}
 
 export function getBackoffStrategyInfo(backoffType, attempt, baseDelay, maxDelay, backoffDelays = null, initialDelay = null) {
 	// For verbose logging, we need to show what the calculation SHOULD be
@@ -66,4 +213,25 @@ function calculateFibonacci(num) {
 	if (num === 1) return 1;
 	if (num === 2) return 1;
 	return calculateFibonacci(num - 1) + calculateFibonacci(num - 2);
+}
+
+// Convenience functions for direct usage
+export function logRetryAttempt(context, attemptNumber, isInitial) {
+	RetryVerboseLogger.logRetryAttempt(context, attemptNumber, isInitial);
+}
+
+export function logRetryDelay(context, attemptNumber, delayMs, backoffType) {
+	RetryVerboseLogger.logRetryDelay(context, attemptNumber, delayMs, backoffType);
+}
+
+export function logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy) {
+	RetryVerboseLogger.logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy);
+}
+
+export function logRetryExhaustion(context, totalAttempts, totalTime) {
+	RetryVerboseLogger.logRetryExhaustion(context, totalAttempts, totalTime);
+}
+
+export function logRetrySuccess(context, totalAttempts, totalTime) {
+	RetryVerboseLogger.logRetrySuccess(context, totalAttempts, totalTime);
 }

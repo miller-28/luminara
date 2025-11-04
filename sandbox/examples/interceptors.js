@@ -6,8 +6,8 @@ export const interceptors = {
 		{
 			id: "interceptor-request",
 			title: "Request Interceptor",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let interceptorLog = [];
 				
 				client.use({
@@ -25,8 +25,8 @@ export const interceptors = {
 		{
 			id: "interceptor-response",
 			title: "Response Interceptor",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let transformLog = [];
 
 				client.use({
@@ -45,8 +45,8 @@ export const interceptors = {
 		{
 			id: "interceptor-error",
 			title: "Error Interceptor",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				let errorLog = [];
 
 				client.use({
@@ -67,12 +67,13 @@ export const interceptors = {
 		{
 			id: "interceptor-execution-order",
 			title: "Deterministic Execution Order",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',
 					retry: 2,
 					retryDelay: 500,
-					retryStatusCodes: [500, 502, 503]
+					retryStatusCodes: [500, 502, 503],
+					verbose: options.verbose || false
 				});
 
 				let output = 'Demonstrating deterministic interceptor execution order:\n\n';
@@ -170,9 +171,10 @@ export const interceptors = {
 		{
 			id: "shared-context-metadata",
 			title: "Shared Context Between Interceptors",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
-					baseURL: 'https://httpbingo.org'
+					baseURL: 'https://httpbingo.org',
+					verbose: options.verbose || false
 				});
 
 				let output = 'Demonstrating shared context between interceptors:\n\n';
@@ -257,11 +259,12 @@ export const interceptors = {
 		{
 			id: "retry-aware-auth",
 			title: "Retry-Aware Authentication",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',
 					retry: 2,
-					retryDelay: 1000
+					retryDelay: 1000,
+					verbose: options.verbose || false
 				});
 
 				let output = 'Demonstrating retry-aware authentication:\n\n';
@@ -324,9 +327,10 @@ export const interceptors = {
 		{
 			id: "conditional-interceptor-processing",
 			title: "Conditional Interceptor Processing",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
-					baseURL: 'https://httpbingo.org'
+					baseURL: 'https://httpbingo.org',
+					verbose: options.verbose || false
 				});
 
 				let output = 'Demonstrating conditional interceptor processing:\n\n';

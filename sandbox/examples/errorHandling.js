@@ -6,10 +6,10 @@ export const errorHandling = {
 		{
 			id: "http-error-json",
 			title: "HTTP Error with JSON Data",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing HTTP error with JSON response...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					// This should return a 400 error with JSON data
@@ -36,10 +36,10 @@ export const errorHandling = {
 		{
 			id: "network-error",
 			title: "Network Error",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing network error...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					// Use a non-existent domain to trigger network error
@@ -64,10 +64,10 @@ export const errorHandling = {
 		{
 			id: "timeout-error",
 			title: "Timeout Error",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing timeout error...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					// This should timeout after 100ms
@@ -95,10 +95,10 @@ export const errorHandling = {
 		{
 			id: "abort-error",
 			title: "Abort Error",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing abort error...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				const controller = new AbortController();
 				
 				// Abort the request after 100ms
@@ -128,10 +128,10 @@ export const errorHandling = {
 		{
 			id: "retry-error-tracking",
 			title: "Error Tracking Across Retries",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing error tracking across retries...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				let attemptCount = 0;
 				
 				// Add interceptor to track attempts
@@ -173,10 +173,10 @@ export const errorHandling = {
 		{
 			id: "ignore-response-error",
 			title: "Ignore Response Errors",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing ignoreResponseError option...");
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					// This should return the error response without throwing

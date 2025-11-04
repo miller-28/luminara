@@ -6,8 +6,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-text',
 		title: 'responseType: "text"',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('📝 Testing responseType: "text" - forcing text response...');
 			
@@ -35,8 +35,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-json',
 		title: 'responseType: "json"',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('🔧 Testing responseType: "json" - explicit JSON parsing...');
 			
@@ -64,8 +64,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-blob',
 		title: 'responseType: "blob"',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('📦 Testing responseType: "blob" - getting Blob object...');
 			
@@ -99,8 +99,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-stream',
 		title: 'responseType: "stream"',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('🌊 Testing responseType: "stream" - getting ReadableStream...');
 			
@@ -142,8 +142,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-arraybuffer',
 		title: 'responseType: "arrayBuffer"',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('🔢 Testing responseType: "arrayBuffer" - getting ArrayBuffer...');
 			
@@ -171,8 +171,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-auto',
 		title: 'responseType: "auto" (default)',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('🤖 Testing responseType: "auto" - automatic content detection...');
 			
@@ -200,8 +200,8 @@ export const responseTypes = {
 	{
 		id: 'response-type-default',
 		title: 'Default behavior (no responseType)',
-		run: async (updateOutput, signal) => {
-			const luminara = createLuminara();
+		run: async (updateOutput, signal, options = {}) => {
+			const luminara = createLuminara({ verbose: options.verbose || false });
 			
 			updateOutput('📝 Testing default behavior - no responseType specified...');
 			

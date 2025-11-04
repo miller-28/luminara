@@ -1,4 +1,4 @@
-// Examples Controller - Handles example execution logic
+// Test Controller - Handles test execution logic
 import { basicUsage } from './examples/basicUsage.js';
 import { baseUrlAndQuery } from './examples/baseUrlAndQuery.js';
 import { timeout } from './examples/timeout.js';
@@ -24,24 +24,19 @@ export const examples = {
 	verboseLogging
 };
 
-// Examples Controller Class
-export class ExamplesController {
+// Test Controller Class
+export class TestController {
 	constructor() {
 		this.abortControllers = new Map();
-		this.verboseMode = false;
 	}
 
-	setVerboseMode(isVerbose) {
-		this.verboseMode = isVerbose;
-	}
+	async runTest(testId, updateOutput, onStatusChange) {
+		const test = this.findTest(testId);
+		if (!test) return;
 
-	async runExample(exampleId, updateOutput, onStatusChange) {
-		const example = this.findExample(exampleId);
-		if (!example) return;
-
-		// Create AbortController for this example
+		// Create AbortController for this test
 		const abortController = new AbortController();
-		this.abortControllers.set(exampleId, abortController);
+		this.abortControllers.set(testId, abortController);
 
 		// Notify UI of status change
 		if (onStatusChange) {
@@ -49,14 +44,14 @@ export class ExamplesController {
 		}
 
 		try {
-			const result = await example.run(updateOutput, abortController.signal, { verbose: this.verboseMode });
+			const result = await test.run(updateOutput, abortController.signal);
 			
 			// Check if it was aborted
 			if (abortController.signal.aborted) {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
-				return { status: 'stopped', message: `${example.title} was stopped by user.` };
+				return { status: 'stopped', message: `${test.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('success');
@@ -68,7 +63,7 @@ export class ExamplesController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
-				return { status: 'stopped', message: `${example.title} was stopped by user.` };
+				return { status: 'stopped', message: `${test.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('error');
@@ -76,49 +71,47 @@ export class ExamplesController {
 				return { status: 'error', message: error.message, stack: error.stack };
 			}
 		} finally {
-			this.abortControllers.delete(exampleId);
+			this.abortControllers.delete(testId);
 		}
 	}
 
-	stopExample(exampleId) {
-		const abortController = this.abortControllers.get(exampleId);
+	stopTest(testId) {
+		const abortController = this.abortControllers.get(testId);
 		if (abortController) {
 			abortController.abort();
 		}
 	}
 
-	async runFeature(featureKey, runExampleCallback) {
+	async runFeature(featureKey, runTestCallback) {
 		const feature = examples[featureKey];
 		if (!feature) return;
 
-		const promises = feature.examples.map(example => runExampleCallback(example.id));
+		const promises = feature.examples.map(test => runTestCallback(test.id));
 		await Promise.all(promises);
 	}
 
-	async runAll(runExampleCallback) {
-		const allExamples = [];
+	async runAll(runTestCallback) {
+		const allTests = [];
 		for (const feature of Object.values(examples)) {
-			for (const example of feature.examples) {
-				allExamples.push(runExampleCallback(example.id));
+			for (const test of feature.examples) {
+				allTests.push(runTestCallback(test.id));
 			}
 		}
-		await Promise.all(allExamples);
+		await Promise.all(allTests);
 	}
 
 	stopAll() {
-		for (const [exampleId, abortController] of this.abortControllers) {
+		for (const [testId, abortController] of this.abortControllers) {
 			abortController.abort();
 		}
 		this.abortControllers.clear();
 	}
 
-	findExample(exampleId) {
+	findTest(testId) {
 		for (const feature of Object.values(examples)) {
-			const example = feature.examples.find(e => e.id === exampleId);
-			if (example) return example;
+			const test = feature.examples.find(t => t.id === testId);
+			if (test) return test;
 		}
 		return null;
 	}
 }
-
-

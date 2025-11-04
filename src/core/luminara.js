@@ -1,4 +1,5 @@
 import { NativeFetchDriver } from "../drivers/native/index.js";
+import { logRequest, logPlugin, logError, verboseLog } from "./verboseLogger.js";
 
 export class LuminaraClient {
 
@@ -6,16 +7,49 @@ export class LuminaraClient {
 		this.driver = driver;
 		this.plugins = plugins;
 		this.config = config; // Store global configuration
+		
+		// Log client configuration if verbose is enabled
+		if (config.verbose) {
+			verboseLog(config, 'REQUEST', 'Luminara client configured', {
+				driver: driver.constructor.name || 'unknown',
+				plugins: plugins.length,
+				hasGlobalConfig: Object.keys(config).length > 1, // More than just verbose
+				verboseEnabled: true
+			});
+		}
 	}
 
 	use(plugin) {
-		this.plugins.push(plugin); 
+		this.plugins.push(plugin);
+		
+		// Log plugin registration if verbose is enabled globally
+		if (this.config.verbose) {
+			verboseLog(this.config, 'PLUGIN', `Registered plugin: ${plugin.name || 'anonymous'}`, {
+				pluginName: plugin.name || 'anonymous',
+				totalPlugins: this.plugins.length,
+				hasOnRequest: !!plugin.onRequest,
+				hasOnResponse: !!plugin.onResponse,
+				hasOnSuccess: !!plugin.onSuccess,
+				hasOnError: !!plugin.onError,
+				hasOnResponseError: !!plugin.onResponseError
+			});
+		}
+		
 		return this; 
 	}
 
 	async request(req) {
 		// Merge global config with per-request options (per-request takes priority)
 		const mergedReq = { ...this.config, ...req };
+		
+		// Log driver selection if verbose is enabled
+		if (mergedReq.verbose) {
+			verboseLog(mergedReq, 'REQUEST', `Using ${this.driver.constructor.name || 'unknown'} driver`, {
+				driver: this.driver.constructor.name || 'unknown',
+				hasCustomDriver: this.driver.constructor.name !== 'NativeFetchDriver',
+				driverFeatures: this.#getDriverFeatures()
+			});
+		}
 		
 		// Always use enhanced interceptor system - no legacy mode
 		let context = {
@@ -24,7 +58,7 @@ export class LuminaraClient {
 			error: null,
 			attempt: 1,
 			controller: new AbortController(),
-			meta: {}
+			meta: { requestStartTime: Date.now() }
 		};
 
 		// Merge user's AbortController signal if provided
@@ -32,6 +66,15 @@ export class LuminaraClient {
 			const userSignal = mergedReq.signal;
 			const cleanup = () => context.controller.abort();
 			userSignal.addEventListener('abort', cleanup);
+			
+			// Log signal combination if verbose
+			if (mergedReq.verbose) {
+				verboseLog(context, 'REQUEST', 'Combined user abort signal with internal signal', {
+					hasUserSignal: true,
+					signalAborted: userSignal.aborted,
+					combinedSignals: 'user + internal'
+				});
+			}
 		}
 
 		context.req.signal = context.controller.signal;
@@ -39,26 +82,28 @@ export class LuminaraClient {
 		return this.#executeWithRetry(context);
 	}
 
+	#getDriverFeatures() {
+		const features = [];
+		if (this.driver.calculateRetryDelay) features.push('retry-calculation');
+		if (this.driver.request) features.push('request');
+		if (this.driver.constructor.name === 'OfetchDriver') features.push('ofetch-based');
+		if (this.driver.constructor.name === 'NativeFetchDriver') features.push('native-fetch');
+		return features;
+	}
+
 	async #executeWithRetry(context) {
 		const maxAttempts = context.req.retry ? context.req.retry + 1 : 1;
-		let requestStartTime = Date.now();
+
+		// Log initial request start
+		logRequest(context, 'start');
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
 			context.attempt = attempt;
 			context.error = null;
 			context.res = null;
 
-			// Verbose logging for attempt timing
-			if (context.req.verbose) {
-				const currentTime = Date.now();
-				if (attempt === 1) {
-					console.info(`🚀 [Luminara] Attempt ${attempt}: Initial request`);
-					requestStartTime = currentTime;
-				} else {
-					const timeSinceStart = currentTime - requestStartTime;
-					console.info(`⏳ [Luminara] Starting attempt ${attempt} (${timeSinceStart}ms since initial request)`);
-				}
-			}
+			// Log each attempt
+			logRequest(context, 'attempt');
 
 			try {
 				// On retry, re-run request interceptors for fresh tokens/headers
@@ -67,6 +112,13 @@ export class LuminaraClient {
 				}
 
 				// 1) onRequest interceptors (L→R order)
+				const requestPlugins = this.plugins.filter(p => p.onRequest);
+				if (requestPlugins.length > 0) {
+					logPlugin(context, 'onRequest', {
+						count: requestPlugins.length,
+						names: requestPlugins.map(p => p.name || 'anonymous')
+					});
+				}
 				for (const plugin of this.plugins) {
 					if (plugin.onRequest) {
 						// Check if this is a legacy plugin by inspecting function signature
@@ -93,6 +145,13 @@ export class LuminaraClient {
 				context.res = await this.driver.request(context.req);
 
 				// 3) Legacy onSuccess plugins first (L→R order)
+				const successPlugins = this.plugins.filter(p => p.onSuccess && !p.onResponse && !p.onResponseError);
+				if (successPlugins.length > 0) {
+					logPlugin(context, 'onSuccess', {
+						count: successPlugins.length,
+						names: successPlugins.map(p => p.name || 'anonymous')
+					});
+				}
 				for (const plugin of this.plugins) {
 					if (plugin.onSuccess && !plugin.onResponse && !plugin.onResponseError) {
 						// Pure legacy plugin: onSuccess(response, request)
@@ -101,6 +160,13 @@ export class LuminaraClient {
 				}
 
 				// 4) Enhanced onResponse interceptors (R→L order - reverse execution)
+				const responsePlugins = this.plugins.filter(p => p.onResponse);
+				if (responsePlugins.length > 0) {
+					logPlugin(context, 'onSuccess', {
+						count: responsePlugins.length,
+						names: responsePlugins.map(p => p.name || 'anonymous')
+					});
+				}
 				for (let i = this.plugins.length - 1; i >= 0; i--) {
 					const plugin = this.plugins[i];
 					if (plugin.onResponse) {
@@ -108,14 +174,53 @@ export class LuminaraClient {
 					}
 				}
 
-				// Success - return the response
+				// Success - log completion and return the response
+				const duration = Date.now() - context.meta.requestStartTime;
+				logRequest(context, 'complete', { 
+					duration, 
+					status: context.res?.status || 200,
+					attempt: context.attempt,
+					retries: context.attempt - 1,
+					responseType: typeof context.res?.data,
+					url: context.req.url,
+					method: context.req.method || 'GET'
+				});
+				
+				// Log additional response details if verbose
+				if (context.req.verbose) {
+					verboseLog(context, 'RESPONSE', `Request completed successfully`, {
+						finalAttempt: context.attempt,
+						totalRetries: context.attempt - 1,
+						responseStatus: context.res?.status,
+						responseSize: context.res?.data ? (typeof context.res.data === 'string' ? context.res.data.length : 'object') : 'none',
+						totalDuration: `${duration}ms`,
+						successful: true
+					});
+				}
+				
 				return context.res;
 
 			} catch (error) {
 				context.error = error;
 
+				// Log error details
+				logError(context, 'caught', {
+					type: error.name || 'Error',
+					message: error.message,
+					status: error.status,
+					retryable: attempt < maxAttempts && this.#shouldRetry(error, context)
+				});
+
 				// 4) onResponseError interceptors (R→L order - reverse execution)
 				// Also support legacy onError for backward compatibility
+				const errorPlugins = this.plugins.filter(p => p.onResponseError || p.onError);
+				if (errorPlugins.length > 0) {
+					logPlugin(context, 'onResponseError', {
+						count: errorPlugins.length,
+						names: errorPlugins.map(p => p.name || 'anonymous'),
+						status: error.status
+					});
+				}
 				for (let i = this.plugins.length - 1; i >= 0; i--) {
 					const plugin = this.plugins[i];
 					if (plugin.onResponseError) {
@@ -136,7 +241,10 @@ export class LuminaraClient {
 					continue; // Retry
 				}
 
-				// No more retries - throw the error
+				// No more retries - log final error and throw
+				logError(context, 'final', {
+					message: context.error.message
+				});
 				throw context.error;
 			}
 		}

@@ -1,6 +1,8 @@
 import { ofetch } from "ofetch";
 import { createBackoffHandler } from "../native/features/retry/backoff.js";
 import { getBackoffStrategyInfo } from "../native/features/retry/verboseLogger.js";
+import { verboseLog } from "../../core/verboseLogger.js";
+import { ErrorVerboseLogger } from "../native/features/error/verboseLogger.js";
 
 export function OfetchDriver(config = {}) {
 	// Store global configuration
@@ -28,6 +30,21 @@ export function OfetchDriver(config = {}) {
 				ignoreResponseError
 			} = mergedOpts;
 			
+			// Create context for verbose logging
+			const context = { req: mergedOpts };
+			
+			// Log driver selection if verbose
+			if (mergedOpts.verbose) {
+				verboseLog(context, 'REQUEST', 'Using ofetch driver for request execution', {
+					driver: 'OfetchDriver',
+					url: url,
+					method: method.toUpperCase(),
+					hasRetry: !!retry,
+					hasTimeout: !!timeout,
+					hasBackoff: !!backoffType
+				});
+			}
+			
 			// Map Luminara's options to ofetch's options
 			const ofetchOptions = { method, headers, query, body, signal };
 			
@@ -51,6 +68,15 @@ export function OfetchDriver(config = {}) {
 			let combinedSignal = signal;
 			
 			if (timeout !== undefined && timeout > 0) {
+				// Log timeout setup if verbose
+				if (mergedOpts.verbose) {
+					verboseLog(context, 'TIMEOUT', `Setting up manual timeout: ${timeout}ms`, {
+						timeout: timeout,
+						reason: 'ofetch-timeout-unreliable',
+						implementation: 'manual'
+					});
+				}
+				
 				const timeoutController = new AbortController();
 				timeoutId = setTimeout(() => {
 					timeoutController.abort();
@@ -63,8 +89,24 @@ export function OfetchDriver(config = {}) {
 					signal.addEventListener('abort', cleanup);
 					timeoutController.signal.addEventListener('abort', cleanup);
 					combinedSignal = combinedController.signal;
+					
+					// Log signal combination if verbose
+					if (mergedOpts.verbose) {
+						verboseLog(context, 'TIMEOUT', 'Combined timeout signal with user signal', {
+							signals: 'timeout + user',
+							hasUserSignal: true
+						});
+					}
 				} else {
 					combinedSignal = timeoutController.signal;
+					
+					// Log timeout-only signal if verbose
+					if (mergedOpts.verbose) {
+						verboseLog(context, 'TIMEOUT', 'Using timeout signal only', {
+							signals: 'timeout only',
+							hasUserSignal: false
+						});
+					}
 				}
 			}
 			

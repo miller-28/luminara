@@ -6,8 +6,8 @@ export const basicUsage = {
 		{
 			id: "get-json",
 			title: "GET JSON",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const jsonResponse = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
 				return `Status: ${jsonResponse.status}\nTodo ID: ${jsonResponse.data.id}\nTitle: ${jsonResponse.data.title}`;
 			}
@@ -15,8 +15,8 @@ export const basicUsage = {
 		{
 			id: "get-text",
 			title: "GET Text",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const textResponse = await client.getText('https://httpbingo.org/get', { signal });
 				return `Status: ${textResponse.status}\nContent Length: ${String(textResponse.data).length} characters`;
 			}
@@ -24,8 +24,8 @@ export const basicUsage = {
 		{
 			id: "post-json",
 			title: "POST JSON",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const postResponse = await client.postJson('https://jsonplaceholder.typicode.com/posts', {
 					title: 'Luminara Test',
 					body: 'Testing POST request'
@@ -36,8 +36,8 @@ export const basicUsage = {
 		{
 			id: "post-form",
 			title: "POST Form Data",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const formResponse = await client.postForm('https://httpbingo.org/post', {
 					hello: 'world',
 					framework: 'luminara'

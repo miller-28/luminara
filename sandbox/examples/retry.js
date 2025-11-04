@@ -6,8 +6,8 @@ export const retry = {
 		{
 			id: "retry-basic",
 			title: "Basic Retry (3 attempts)",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const retryLog = [];
 				let requestCount = 0;
 				
@@ -53,10 +53,10 @@ export const retry = {
 		{
 			id: "retry-status-codes",
 			title: "Retry with Status Codes",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput(`🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n⏳ Creating client and making request...`);
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				const startTime = Date.now();
 				
 				try {
@@ -85,8 +85,8 @@ export const retry = {
 		{
 			id: "custom-retry-function",
 			title: "Custom retryDelay Function",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				const retryLog = [];
 				
 				// Custom retryDelay function that logs each retry
@@ -117,10 +117,10 @@ export const retry = {
 		{
 			id: "default-retry-policy",
 			title: "Default Retry Policy (Idempotent Methods)",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing default retry policy with idempotent methods...\n');
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					// GET is idempotent, so it should retry on 500 errors
@@ -167,7 +167,7 @@ export const retry = {
 		{
 			id: "custom-retry-policy",
 			title: "Custom Retry Policy Override",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing custom retry policy that overrides defaults...\n');
 				
 				// Custom policy that retries any POST on 400 errors (normally not retried)
@@ -183,7 +183,7 @@ export const retry = {
 					return false;
 				};
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
 					await client.post('https://httpbingo.org/status/400', { test: 'data' }, {
@@ -204,10 +204,10 @@ export const retry = {
 		{
 			id: "retry-status-policies",
 			title: "Retry Status Code Policies",
-			run: async (updateOutput, signal) => {
+			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing retry behavior for different status codes...\n');
 				
-				const client = createLuminara();
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				const testCases = [
 					{ status: 408, description: 'Request Timeout', shouldRetry: true },

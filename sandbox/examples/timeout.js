@@ -6,8 +6,8 @@ export const timeout = {
 		{
 			id: "timeout-success",
 			title: "Timeout Success (2s delay, 5s timeout)",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				if (updateOutput) {
 					updateOutput(`Status: Pending\nTimeout: 5000ms\nDelay: 2s\n\n⏳ Waiting for response...\n\nThe server will delay 2 seconds.\nRequest will timeout after 5 seconds.`);
@@ -24,8 +24,8 @@ export const timeout = {
 		{
 			id: "timeout-fail",
 			title: "Timeout Failure (3s delay, 1s timeout)",
-			run: async (updateOutput, signal) => {
-				const client = createLuminara();
+			run: async (updateOutput, signal, options = {}) => {
+				const client = createLuminara({ verbose: options.verbose || false });
 				
 				if (updateOutput) {
 					updateOutput(`Status: Pending\nTimeout: 1000ms\nDelay: 3s\n\n⏳ Waiting for response...\n\nThe server will delay 3 seconds.\nRequest will timeout after 1 second.`);
