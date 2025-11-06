@@ -40,6 +40,8 @@ npx serve .
 
 ## 📦 Example Categories
 
+**59 interactive examples across 12 feature categories**
+
 ### 📦 **Basic Usage**
 Core HTTP operations with Luminara's helper methods:
 - **GET JSON** - Fetch and automatically parse JSON responses
@@ -59,7 +61,7 @@ Request timeout scenarios:
 
 ### 🔄 **Retry Logic**
 Comprehensive retry mechanisms:
-- **Basic Retry** - Simple retry with configurable attempts
+- **Basic Retry (3 attempts)** - Simple retry with configurable attempts
 - **Retry with Status Codes** - Conditional retry based on HTTP status
 - **Custom retryDelay Function** - Dynamic delay calculation
 - **Default Retry Policy** - Automatic retry for idempotent methods
@@ -67,16 +69,31 @@ Comprehensive retry mechanisms:
 - **Retry Status Code Policies** - Granular control over retry triggers
 
 ### 📈 **Backoff Strategies**
-Advanced retry delay patterns:
+Advanced retry delay patterns (9 examples):
 - **Linear Backoff** - Fixed delay intervals between retries
 - **Exponential Backoff** - Exponentially increasing delays (2^n pattern)
 - **Exponential Capped** - Exponential growth with maximum delay limit
 - **Fibonacci Backoff** - Delays following Fibonacci sequence progression
 - **Jitter Backoff** - Randomized delays to prevent thundering herd
 - **Exponential Jitter** - Combines exponential growth with randomization
+- **Initial Delay Control** - Configure starting delay for all strategies
+- **Custom Delay Array** - Predefined delay sequence
+- **Combined Features** - Multiple backoff configurations together
+
+### 🚦 **Rate Limiting**
+Token bucket algorithm with flexible scoping:
+- **Simple Rate Limit Test** - Basic 1 RPS with 2 sequential requests
+- **2 Requests Per Second** - Rate limiting with 2 RPS showing throttling behavior
+- **Token Bucket with Burst** - Demonstrates burst capacity with immediate token consumption
+- **Global vs Domain Scoping** - Shows how rate limiting applies to different scopes
+- **Rate Limiting Debug Test** - Comprehensive verification with stats API
+- Global/domain/endpoint scoping options
+- Pattern-based include/exclude rules  
+- Real-time statistics and monitoring
+- Dynamic configuration updates
 
 ### 📦 **Response Type Options**
-Response parsing and handling:
+Response parsing and handling (7 examples):
 - **responseType: "text"** - Force text parsing for any response
 - **responseType: "json"** - Force JSON parsing with error handling
 - **responseType: "blob"** - Handle binary data as Blob objects
@@ -86,17 +103,17 @@ Response parsing and handling:
 - **Default Behavior** - Smart content-type based parsing
 
 ### 🔌 **Interceptors**
-Powerful request/response interception system:
+Powerful request/response interception system (7 examples):
 - **Request Interceptor** - Modify requests before transmission
 - **Response Interceptor** - Transform responses after receipt
 - **Error Interceptor** - Handle and process errors globally
-- **Deterministic Execution Order** - Guaranteed interceptor sequence
-- **Shared Context** - Pass data between interceptors via context.meta
+- **Execution Order Demonstration** - Deterministic interceptor sequence
+- **Shared Context Metadata** - Pass data between interceptors via context.meta
 - **Retry-Aware Authentication** - Token refresh on retry attempts
-- **Conditional Processing** - Dynamic interceptor behavior
+- **Conditional Interceptor Processing** - Dynamic interceptor behavior
 
 ### 🛠️ **Error Handling**
-Comprehensive error management:
+Comprehensive error management (6 examples):
 - **HTTP Error with JSON Data** - Structured server error responses
 - **Network Error** - Connection failure handling
 - **Timeout Error** - Request timeout scenarios
@@ -104,31 +121,26 @@ Comprehensive error management:
 - **Error Tracking Across Retries** - Error state through retry attempts
 - **Ignore Response Errors** - Bypass error throwing with ignoreResponseError
 
-### � **Stats System**
-Real-time metrics and analytics:
+### 📊 **Stats System**
+Real-time metrics and analytics (7 examples):
 - **Stats Enabled by Default** - Automatic request tracking
 - **Stats Disabled** - Performance optimization for production
 - **Runtime Control** - Enable/disable stats dynamically
+- **Method Chaining** - Fluent API for stats operations
 - **Separate Instances** - Independent stats per client
+- **Interface When Disabled** - Stats API behavior without tracking
 - **Verbose Logging** - Detailed stats operation logging
-- **Basic Counters** - Track total, success, fail, inflight requests
-- **Performance Metrics** - Response time analytics (min, avg, p50, p95, p99, max)
-- **Rate Metrics** - Requests per second/minute with different calculation modes
-- **Error Analytics** - Error categorization and top error codes
-- **Retry Statistics** - Retry attempts, backoff timing, success rates
-- **Query Interface** - Advanced filtering and grouping capabilities
-- **Reset Functionality** - Global and individual metric resets
-- **Snapshot Capture** - Point-in-time data snapshots
+- Includes: Basic counters, performance metrics, rate metrics, error analytics
+- Query interface with filtering, reset functionality, snapshot capture
 
 ### 📝 **Verbose Logging**
-Detailed debugging and tracing:
-- **Request Lifecycle Logging** - Complete request/response flow
-- **Performance Insights** - Timing breakdowns and bottleneck identification
-- **Error Context** - Rich error information with request context
-- **Stats Operations** - Detailed stats system activity logging
+Detailed debugging and tracing (3 examples):
+- **Comprehensive Verbose Logging** - Complete request/response flow
+- **Verbose Error Handling** - Rich error context and stack traces
+- **Verbose Feature Showcase** - Logging across all Luminara features
 
-### �🚗 **Custom Driver**
-Driver extensibility demonstration:
+### 🚗 **Custom Driver**
+Driver extensibility demonstration (1 example):
 - **Browser Fetch Driver** - Custom HTTP driver implementation
 
 ## 🏗️ Architecture
@@ -148,6 +160,7 @@ sandbox/
     ├── timeout.js           # ⏱️ Timeout scenarios
     ├── retry.js             # 🔄 Retry mechanisms
     ├── backoffStrategies.js # 📈 Backoff algorithms
+    ├── rateLimiting.js      # 🚦 Rate limiting with token bucket
     ├── responseTypes.js     # 📦 Response parsing options
     ├── interceptors.js      # 🔌 Interceptor patterns
     ├── errorHandling.js     # 🛠️ Error scenarios
@@ -259,10 +272,11 @@ The sandbox demonstrates the universal API that works consistently across all th
 3. **⏱️ Timeout** - Understand timeout handling
 4. **🔄 Retry** - Explore retry mechanisms
 5. **📈 Backoff Strategies** - Master advanced retry patterns
-6. **📦 Response Types** - Learn response handling options
-7. **🔌 Interceptors** - Implement request/response middleware
-8. **🛠️ Error Handling** - Master comprehensive error scenarios
-9. **� Stats System** - Explore real-time metrics and analytics
+6. **� Rate Limiting** - Control request flow with token bucket algorithm
+7. **�📦 Response Types** - Learn response handling options
+8. **🔌 Interceptors** - Implement request/response middleware
+9. **🛠️ Error Handling** - Master comprehensive error scenarios
+10. **📊 Stats System** - Explore real-time metrics and analytics
 10. **📝 Verbose Logging** - Learn debugging and tracing techniques
 11. **�🚗 Custom Driver** - Explore extensibility options
 

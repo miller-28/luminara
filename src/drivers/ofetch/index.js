@@ -1,7 +1,7 @@
 import { ofetch } from "ofetch";
 import { createBackoffHandler } from "../native/features/retry/backoff.js";
 import { getBackoffStrategyInfo } from "../native/features/retry/verboseLogger.js";
-import { verboseLog } from "../../core/verboseLogger.js";
+import { verboseLog } from "../../core/verbose/verboseLogger.js";
 import { ErrorVerboseLogger } from "../native/features/error/verboseLogger.js";
 
 export function OfetchDriver(config = {}) {
@@ -112,7 +112,7 @@ export function OfetchDriver(config = {}) {
 			
 			ofetchOptions.signal = combinedSignal;
 			
-			// Handle retry options for legacy requests (enhanced interceptors handle their own retry)
+			// Handle retry options
 			if (retry !== undefined) {
 				ofetchOptions.retry = retry;
 			}

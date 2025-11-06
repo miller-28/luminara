@@ -3,12 +3,12 @@ import { createTimeoutHandler } from "./features/timeout/index.js";
 import { parseResponseData } from "./features/response/index.js";
 import { createLuminaraError, createHttpError, createTimeoutError, createParseError, createAbortError, createNetworkError } from "./features/error/index.js";
 import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from "./features/retry/index.js";
-import { verboseLog } from "../../core/verboseLogger.js";
-import { UrlVerboseLogger } from "./features/url/verboseLogger.js";
-import { TimeoutVerboseLogger } from "./features/timeout/verboseLogger.js";
-import { ResponseVerboseLogger } from "./features/response/verboseLogger.js";
-import { ErrorVerboseLogger } from "./features/error/verboseLogger.js";
-import { RetryVerboseLogger } from "./features/retry/verboseLogger.js";
+import { verboseLog } from "../../core/verbose/verboseLogger.js";
+import { urlLogger } from "./features/url/verboseLogger.js";
+import { timeoutLogger } from "./features/timeout/verboseLogger.js";
+import { responseLogger } from "./features/response/verboseLogger.js";
+import { errorLogger } from "./features/error/verboseLogger.js";
+import { retryLogger } from "./features/retry/verboseLogger.js";
 
 export function NativeFetchDriver(config = {}) {
 	// Store global configuration
@@ -40,7 +40,7 @@ export function NativeFetchDriver(config = {}) {
 			
 			// Log URL building if verbose
 			if (mergedOpts.verbose) {
-				UrlVerboseLogger.logFinalUrl(context, fullUrl, {
+				urlLogger.logFinalUrlConstruction(context, fullUrl, {
 					protocol: new URL(fullUrl).protocol,
 					host: new URL(fullUrl).host,
 					pathname: new URL(fullUrl).pathname,
@@ -53,7 +53,7 @@ export function NativeFetchDriver(config = {}) {
 			
 			// Log timeout configuration if verbose
 			if (mergedOpts.verbose && timeout) {
-				TimeoutVerboseLogger.logTimeoutSetup(context, timeout, 'driver');
+				timeoutLogger.logTimeoutSetup(context, timeout, 'driver');
 			}
 			
 			// Prepare fetch options
@@ -108,8 +108,8 @@ export function NativeFetchDriver(config = {}) {
 				
 				// Log response received if verbose
 				if (mergedOpts.verbose) {
-					ResponseVerboseLogger.logResponseReceived(context, response, 'unknown');
-					ResponseVerboseLogger.logResponseHeaders(context, response.headers, ['content-type', 'content-length', 'cache-control']);
+					responseLogger.logResponseReceived(context, response, 'unknown');
+					responseLogger.logResponseHeaders(context, response.headers, ['content-type', 'content-length', 'cache-control']);
 				}
 				
 				// Parse response data based on parseResponse and responseType options
@@ -119,12 +119,12 @@ export function NativeFetchDriver(config = {}) {
 					
 					// Log successful parsing if verbose
 					if (mergedOpts.verbose) {
-						ResponseVerboseLogger.logResponseParsingSuccess(context, mergedOpts.responseType || 'auto', typeof data, JSON.stringify(data).length);
+						responseLogger.logResponseParsingSuccess(context, mergedOpts.responseType || 'auto', typeof data, JSON.stringify(data).length);
 					}
 				} catch (parseError) {
 					// Log parsing error if verbose
 					if (mergedOpts.verbose) {
-						ResponseVerboseLogger.logResponseParsingError(context, mergedOpts.responseType || 'auto', parseError, 'error');
+						responseLogger.logResponseParsingError(context, mergedOpts.responseType || 'auto', parseError, 'error');
 					}
 					throw await createParseError(parseError, response, requestContext, currentAttempt);
 				}
@@ -133,7 +133,7 @@ export function NativeFetchDriver(config = {}) {
 				if (!response.ok && !mergedOpts.ignoreResponseError) {
 					// Log HTTP error if verbose
 					if (mergedOpts.verbose) {
-						ErrorVerboseLogger.logHttpError(context, response, { status: response.status, data });
+						errorLogger.logHttpError(context, response, { status: response.status, data });
 					}
 					throw await createHttpError(response, requestContext, currentAttempt);
 				}
@@ -150,7 +150,7 @@ export function NativeFetchDriver(config = {}) {
 				
 				// Log error caught in driver if verbose
 				if (mergedOpts.verbose) {
-					ErrorVerboseLogger.logErrorCaught(context, error, 'native-driver');
+					errorLogger.logErrorCaught(context, error, 'native-driver');
 				}
 				
 				// Handle AbortError specifically
@@ -158,15 +158,15 @@ export function NativeFetchDriver(config = {}) {
 					// Check if this was a timeout abort
 					if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
 						if (mergedOpts.verbose) {
-							ErrorVerboseLogger.logTimeoutError(context, error, timeout);
-							ErrorVerboseLogger.logErrorTransformation(context, error, { name: 'TimeoutError' }, 'abort-to-timeout');
+							errorLogger.logTimeoutError(context, error, timeout);
+							errorLogger.logErrorTransformation(context, error, { name: 'TimeoutError' }, 'abort-to-timeout');
 						}
 						throw createTimeoutError(timeout, requestContext, currentAttempt);
 					}
 					// Otherwise it's a user-initiated abort
 					if (mergedOpts.verbose) {
-						ErrorVerboseLogger.logAbortError(context, error, 'user');
-						ErrorVerboseLogger.logErrorTransformation(context, error, { name: 'AbortError' }, 'abort-signal');
+						errorLogger.logAbortError(context, error, 'user');
+						errorLogger.logErrorTransformation(context, error, { name: 'AbortError' }, 'abort-signal');
 					}
 					throw createAbortError(error, requestContext, currentAttempt);
 				}
@@ -174,7 +174,7 @@ export function NativeFetchDriver(config = {}) {
 				// Handle string abort reasons (convert to proper Error objects)
 				if (typeof error === 'string') {
 					if (mergedOpts.verbose) {
-						ErrorVerboseLogger.logErrorTransformation(context, { name: 'String', message: error }, { name: 'AbortError' }, 'string-to-abort');
+						errorLogger.logErrorTransformation(context, { name: 'String', message: error }, { name: 'AbortError' }, 'string-to-abort');
 					}
 					throw createAbortError(error, requestContext, currentAttempt);
 				}
@@ -182,8 +182,8 @@ export function NativeFetchDriver(config = {}) {
 				// Handle TypeError (usually network errors)
 				if (error.name === 'TypeError') {
 					if (mergedOpts.verbose) {
-						ErrorVerboseLogger.logNetworkError(context, error);
-						ErrorVerboseLogger.logErrorTransformation(context, error, { name: 'NetworkError' }, 'type-error-to-network');
+						errorLogger.logNetworkError(context, error);
+						errorLogger.logErrorTransformation(context, error, { name: 'NetworkError' }, 'type-error-to-network');
 					}
 					throw createNetworkError(error, requestContext, currentAttempt);
 				}
@@ -195,7 +195,7 @@ export function NativeFetchDriver(config = {}) {
 				
 				// For any other error, create a generic LuminaraError
 				if (mergedOpts.verbose) {
-					ErrorVerboseLogger.logErrorTransformation(context, error, { name: 'LuminaraError' }, 'generic-error');
+					errorLogger.logErrorTransformation(context, error, { name: 'LuminaraError' }, 'generic-error');
 				}
 				throw createLuminaraError(error.message, {
 					request: requestContext,
@@ -233,7 +233,7 @@ export function NativeFetchDriver(config = {}) {
 			
 			// Log retry decision if verbose
 			if (context.req?.verbose) {
-				RetryVerboseLogger.logRetryPolicyEvaluation(context, error, willRetry, `native-driver-policy`, 'native');
+				retryLogger.logRetryPolicyEvaluation(context, error, willRetry, `native-driver-policy`, 'native');
 			}
 			
 			return willRetry;
@@ -259,7 +259,7 @@ export function NativeFetchDriver(config = {}) {
 			
 			// Log delay calculation if verbose
 			if (context.req?.verbose) {
-				RetryVerboseLogger.logRetryDelay(context, context.attempt || 1, delay, backoffType || 'static');
+				retryLogger.logRetryDelay(context, context.attempt || 1, delay, backoffType || 'static');
 			}
 			
 			return delay;

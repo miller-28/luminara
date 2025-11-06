@@ -1,138 +1,70 @@
-/**
+﻿/**
  * Timeout feature verbose logger
  * Handles detailed logging for timeout configuration, setup, and timeout events
  */
 
-import { verboseLog, logTimeout } from '../../../../core/verboseLogger.js';
+import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
-export class TimeoutVerboseLogger {
+export class TimeoutVerboseLogger extends BaseVerboseLogger {
+	constructor() {
+		super('TIMEOUT');
+	}
+
 	/**
 	 * Log timeout configuration setup
 	 */
-	static logTimeoutSetup(context, timeoutValue, source = 'options') {
-		if (!context?.req?.verbose) return;
-		
-		logTimeout(context, 'setup', { 
+	logTimeoutSetup(context, timeoutValue, source = 'options') {
+		this.config(context, { 
 			timeout: timeoutValue,
-			source: source // 'options', 'default', 'global'
-		});
+			source: source
+		}, `Timeout configured: ${timeoutValue}ms from ${source}`);
 	}
 
 	/**
 	 * Log timeout controller creation
 	 */
-	static logTimeoutControllerCreated(context, timeoutValue) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'TIMEOUT', `Created AbortController for ${timeoutValue}ms timeout`, {
+	logTimeoutControllerCreated(context, timeoutValue) {
+		this.log(context, 'CONTROLLER', `Created AbortController for ${timeoutValue}ms timeout`, {
 			controllerId: 'timeout',
-			signal: 'active'
+			signal: 'active',
+			timeout: timeoutValue
 		});
 	}
 
 	/**
-	 * Log timeout signal combination with user signal
+	 * Log timeout triggered
 	 */
-	static logSignalCombination(context, hasUserSignal) {
-		if (!context?.req?.verbose) return;
-		
-		if (hasUserSignal) {
-			verboseLog(context, 'TIMEOUT', 'Combined timeout signal with user abort signal', {
-				signals: 'timeout + user'
-			});
-		} else {
-			verboseLog(context, 'TIMEOUT', 'Using timeout signal only', {
-				signals: 'timeout only'
-			});
-		}
-	}
-
-	/**
-	 * Log timeout timer start
-	 */
-	static logTimeoutTimerStart(context, timeoutValue) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'TIMEOUT', `Started timeout timer: ${timeoutValue}ms`, {
-			startTime: Date.now(),
-			timeoutId: 'active'
+	logTimeoutTriggered(context, timeoutValue, elapsedTime) {
+		this.error(context, 'TRIGGERED', `Request timed out after ${elapsedTime}ms`, {
+			configuredTimeout: timeoutValue,
+			elapsedTime: elapsedTime,
+			exceeded: elapsedTime >= timeoutValue
 		});
 	}
 
 	/**
-	 * Log timeout triggered event
+	 * Log timeout aborted (request completed before timeout)
 	 */
-	static logTimeoutTriggered(context, timeoutValue, elapsedTime) {
-		if (!context?.req?.verbose) return;
-		
-		logTimeout(context, 'triggered', {
-			timeout: timeoutValue,
-			elapsed: elapsedTime,
-			accuracy: Math.abs(elapsedTime - timeoutValue)
+	logTimeoutAborted(context, timeoutValue, completionTime) {
+		this.log(context, 'ABORTED', `Timeout cancelled - request completed in ${completionTime}ms`, {
+			configuredTimeout: timeoutValue,
+			completionTime: completionTime,
+			margin: timeoutValue - completionTime
 		});
 	}
 
 	/**
-	 * Log timeout cleared successfully
+	 * Log timeout cleanup
 	 */
-	static logTimeoutCleared(context, reason = 'success') {
-		if (!context?.req?.verbose) return;
-		
-		logTimeout(context, 'cleared', {
-			reason: reason // 'success', 'error', 'abort'
-		});
-	}
-
-	/**
-	 * Log timeout error creation
-	 */
-	static logTimeoutErrorCreated(context, timeoutValue, options) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'TIMEOUT', `Created TimeoutError after ${timeoutValue}ms`, {
-			errorName: 'TimeoutError',
-			status: null,
-			url: options?.url,
-			method: options?.method
-		});
-	}
-
-	/**
-	 * Log timeout detection from abort signal
-	 */
-	static logTimeoutDetection(context, signal, timeoutValue) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'TIMEOUT', 'Detected timeout from AbortSignal', {
-			signalAborted: signal?.aborted,
-			timeoutConfigured: timeoutValue !== undefined,
-			detection: 'abort-signal'
-		});
-	}
-
-	/**
-	 * Log timeout configuration validation
-	 */
-	static logTimeoutValidation(context, timeoutValue, isValid, reason) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'TIMEOUT', `Timeout validation: ${isValid ? 'valid' : 'invalid'}`, {
-			value: timeoutValue,
-			valid: isValid,
-			reason: reason
+	logTimeoutCleanup(context, reason = 'completed') {
+		this.debug(context, 'CLEANUP', `Timeout controller cleanup: ${reason}`, {
+			reason: reason,
+			signal: 'cleared'
 		});
 	}
 }
 
-// Convenience functions for direct usage
-export function logTimeoutSetup(context, timeoutValue, source) {
-	TimeoutVerboseLogger.logTimeoutSetup(context, timeoutValue, source);
-}
+// Create singleton instance
+const timeoutLogger = new TimeoutVerboseLogger();
 
-export function logTimeoutTriggered(context, timeoutValue, elapsedTime) {
-	TimeoutVerboseLogger.logTimeoutTriggered(context, timeoutValue, elapsedTime);
-}
-
-export function logTimeoutCleared(context, reason) {
-	TimeoutVerboseLogger.logTimeoutCleared(context, reason);
-}
+export { timeoutLogger };

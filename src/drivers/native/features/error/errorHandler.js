@@ -196,18 +196,3 @@ export function createNetworkError(originalError, requestContext, attempt = 1) {
 		originalError
 	});
 }
-
-// Legacy compatibility - keep existing function signatures for now
-export function enhanceError(error, requestContext, timeout) {
-	console.warn('enhanceError is deprecated, use createLuminaraError instead');
-	
-	// Convert to new format
-	return createLuminaraError(error.message, {
-		status: error.status,
-		data: error.data,
-		request: createRequestSnapshot(requestContext),
-		response: error.response ? createResponseSnapshot(error.response) : null,
-		attempt: 1,
-		originalError: error
-	});
-}

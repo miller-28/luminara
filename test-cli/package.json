@@ -17,6 +17,7 @@
 		"test:parse-response": "node --experimental-fetch tests/parseResponse.test.js",
 		"test:response-types": "node --experimental-fetch tests/responseTypes.test.js",
 		"test:stats": "node --experimental-fetch tests/stats.test.js",
+		"test:rate-limit": "node --experimental-fetch tests/rateLimit.test.js",
 		"test:watch": "nodemon --experimental-fetch testRunner.js"
 	},
 	"dependencies": {

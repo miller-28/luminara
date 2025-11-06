@@ -11,4 +11,4 @@ coverage
 *.log
 .vscode/chrome-debug-profile/
 .vite
-src/core/stats/design.md
+**/design-*.md

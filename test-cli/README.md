@@ -15,6 +15,7 @@ test-cli/
 │   ├── basic.test.js      # Basic HTTP operations
 │   ├── retry.test.js      # Retry system validation
 │   ├── backoff.test.js    # All backoff strategies
+│   ├── rateLimit.test.js  # Rate limiting with token bucket algorithm
 │   ├── interceptors.test.js    # Interceptor system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
@@ -40,6 +41,7 @@ npm test
 npm run test:basic
 npm run test:retry
 npm run test:backoff
+npm run test:rate-limit
 npm run test:interceptors
 npm run test:timeout
 npm run test:drivers
@@ -70,6 +72,15 @@ npm run test:watch
 - Exponential jitter combinations
 - Custom retry handlers
 - Status code filtering
+
+### Rate Limiting
+- Token bucket algorithm validation
+- Burst capacity enforcement
+- Request scheduling behavior
+- Global/domain/endpoint scoping
+- Pattern-based include/exclude rules
+- Statistics tracking accuracy
+- Dynamic configuration updates
 
 ### Interceptors
 - Request interceptors

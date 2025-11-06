@@ -25,8 +25,6 @@ export function enableConsoleSuppressionForTesting() {
 		'🌐 Fetch call',
 		'🌐 Fetch returning',
 		'💥 onResponseError called with attempt:',
-		'onSuccess called with response:',
-		'onSuccess returning:',
 		'onResponse called with context.res:',
 		'Final transformedResponse:',
 		'[API]' // React simulation debug logs
@@ -368,7 +366,72 @@ export class MockServer {
 					});
 					return;
 					
+				// New endpoints for comprehensive interceptor testing
+				case '/echo-headers':
+					res.writeHead(200, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						message: 'Headers echoed',
+						headers: req.headers,
+						method: req.method,
+						path
+					}));
+					break;
+					
+				// Error endpoints with specific status codes
+				case '/error/400':
+					res.writeHead(400, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Bad Request',
+						status: 400,
+						path,
+						method: req.method 
+					}));
+					break;
+					
+				case '/error/404':
+					res.writeHead(404, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Not Found',
+						status: 404,
+						path,
+						method: req.method 
+					}));
+					break;
+					
+				case '/error/500':
+					res.writeHead(500, { 'Content-Type': 'application/json' });
+					res.end(JSON.stringify({ 
+						error: 'Internal Server Error',
+						status: 500,
+						path,
+						method: req.method 
+					}));
+					break;
+					
+				// Error-then-success endpoint for retry testing
 				default:
+					if (path.startsWith('/error-then-success/')) {
+						const failureCount = parseInt(path.split('/')[2]) || 0;
+						const requestCount = this.requestCounts.get(`${req.method}:${path}`) || 0;
+						
+						if (requestCount <= failureCount) {
+							res.writeHead(500, { 'Content-Type': 'application/json' });
+							res.end(JSON.stringify({ 
+								error: 'Temporary failure',
+								attempt: requestCount,
+								willSucceedAfter: failureCount
+							}));
+						} else {
+							res.writeHead(200, { 'Content-Type': 'application/json' });
+							res.end(JSON.stringify({ 
+								message: 'Success after retries',
+								attempt: requestCount,
+								method: req.method
+							}));
+						}
+						break;
+					}
+					
 					res.writeHead(200, { 'Content-Type': 'application/json' });
 					res.end(JSON.stringify({ 
 						message: 'Default response',

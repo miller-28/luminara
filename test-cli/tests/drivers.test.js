@@ -160,12 +160,12 @@ suite.test('Plugin compatibility with custom driver', async () => {
 	const api = new LuminaraClient(mockDriver);
 	
 	api.use({
-		onRequest(request) {
+		onRequest(context) {
 			pluginCalled = true;
-			return {
-				...request,
+			context.req = {
+				...context.req,
 				headers: {
-					...request.headers,
+					...context.req.headers,
 					'X-Plugin-Added': 'true'
 				}
 			};

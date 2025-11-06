@@ -10,12 +10,7 @@ import { RetryModule } from "./modules/retry.js";
 import { ErrorModule } from "./modules/error.js";
 import { QueryEngine } from "./query/queryEngine.js";
 import { extractRequestMetadata } from "./query/selectors.js";
-import { 
-	logStatsUpdate, 
-	logStatsQuery, 
-	logStatsOperation,
-	logModuleActivity 
-} from "./verboseLogger.js";
+import { statsLogger } from "./verboseLogger.js";
 
 export class StatsHub {
 	constructor() {
@@ -67,7 +62,7 @@ export class StatsHub {
 		
 		// Log query if verbose is enabled
 		if (this.verboseEnabled) {
-			logStatsQuery(this._createVerboseContext(), options, result);
+
 		}
 		
 		return result;
@@ -299,19 +294,19 @@ export class StatsHub {
 			this.modules.counters.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const countersData = this.modules.counters.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'counters', 'request-success', countersData);
+
 			}
 			
 			this.modules.time.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const timeData = this.modules.time.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'time', 'request-success', timeData);
+
 			}
 			
 			this.modules.retry.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const retryData = this.modules.retry.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'retry', 'request-success', retryData);
+
 			}
 			
 			this.activeRequests.delete(id);
@@ -334,25 +329,25 @@ export class StatsHub {
 			this.modules.counters.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const countersData = this.modules.counters.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'counters', 'request-fail', countersData);
+
 			}
 			
 			this.modules.time.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const timeData = this.modules.time.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'time', 'request-fail', timeData);
+
 			}
 			
 			this.modules.retry.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const retryData = this.modules.retry.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'retry', 'request-fail', retryData);
+
 			}
 			
 			this.modules.error.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const errorData = this.modules.error.getMetrics('since-start');
-				logStatsUpdate(this._createVerboseContext(), 'error', 'request-fail', errorData);
+
 			}
 			
 			this.activeRequests.delete(id);

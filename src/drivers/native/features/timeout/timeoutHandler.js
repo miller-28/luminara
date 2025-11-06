@@ -3,7 +3,7 @@
  * Manages timeout setup and signal combination
  */
 
-import { logTimeout } from "../../../../core/verboseLogger.js";
+import { logTimeout } from "../../../../core/verbose/verboseLogger.js";
 
 export function createTimeoutHandler(timeout, userSignal, context = null) {
 	if (timeout === undefined || timeout <= 0) {

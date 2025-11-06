@@ -1,192 +1,90 @@
-/**
+﻿/**
  * Response feature verbose logger
  * Handles detailed logging for response parsing, type detection, and transformation
  */
 
-import { verboseLog, logResponse } from '../../../../core/verboseLogger.js';
+import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
-export class ResponseVerboseLogger {
+export class ResponseVerboseLogger extends BaseVerboseLogger {
+	constructor() {
+		super('RESPONSE');
+	}
+
 	/**
 	 * Log response received event
 	 */
-	static logResponseReceived(context, response, responseSize) {
-		if (!context?.req?.verbose) return;
-		
-		logResponse(context, 'received', {
+	logResponseReceived(context, response, responseSize) {
+		this.log(context, 'RECEIVED', `Response received: ${response?.status} ${response?.statusText}`, {
 			status: response?.status,
 			statusText: response?.statusText,
 			type: response?.type,
-			size: responseSize
+			size: responseSize,
+			ok: response?.ok
 		});
 	}
 
 	/**
 	 * Log response headers analysis
 	 */
-	static logResponseHeaders(context, headers, relevantHeaders = []) {
-		if (!context?.req?.verbose) return;
-		
+	logResponseHeaders(context, headers, relevantHeaders = []) {
 		const headerInfo = {};
 		relevantHeaders.forEach(headerName => {
-			const value = headers?.get?.(headerName) || headers?.[headerName];
-			if (value) {
-				headerInfo[headerName] = value;
-			}
+			headerInfo[headerName] = headers.get(headerName);
 		});
-
-		verboseLog(context, 'RESPONSE', 'Analyzing response headers', {
-			contentType: headers?.get?.('content-type') || headers?.['content-type'],
-			contentLength: headers?.get?.('content-length') || headers?.['content-length'],
-			...headerInfo
+		
+		this.debug(context, 'HEADERS', `Response headers analyzed`, {
+			...headerInfo,
+			totalHeaders: headers.size || Object.keys(headers).length
 		});
 	}
 
 	/**
 	 * Log response type detection
 	 */
-	static logResponseTypeDetection(context, detectedType, contentType, requestedType) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RESPONSE', `Detected response type: ${detectedType}`, {
-			detected: detectedType,
+	logResponseTypeDetection(context, contentType, detectedType, confidence) {
+		this.log(context, 'TYPE', `Response type detected: ${detectedType}`, {
 			contentType: contentType,
-			requested: requestedType || 'auto',
-			source: requestedType ? 'explicit' : 'content-type'
+			detected: detectedType,
+			confidence: confidence,
+			source: 'content-type-header'
 		});
 	}
 
 	/**
-	 * Log response parsing start
+	 * Log response parsing attempt
 	 */
-	static logResponseParsingStart(context, parseType, contentType) {
-		if (!context?.req?.verbose) return;
-		
-		logResponse(context, 'parsing', {
-			type: parseType,
-			contentType: contentType
+	logResponseParsingAttempt(context, parserType, responseSize) {
+		this.debug(context, 'PARSING', `Parsing response as ${parserType}`, {
+			parser: parserType,
+			size: responseSize,
+			attempt: 'started'
 		});
 	}
 
 	/**
 	 * Log response parsing success
 	 */
-	static logResponseParsingSuccess(context, parseType, resultType, dataSize) {
-		if (!context?.req?.verbose) return;
-		
-		logResponse(context, 'parsed', {
-			type: parseType,
-			resultType: resultType,
-			size: dataSize
+	logResponseParsingSuccess(context, parserType, resultSize) {
+		this.log(context, 'PARSED', `Response successfully parsed as ${parserType}`, {
+			parser: parserType,
+			resultSize: resultSize,
+			status: 'success'
 		});
 	}
 
 	/**
 	 * Log response parsing error
 	 */
-	static logResponseParsingError(context, parseType, error, fallbackType) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RESPONSE', `Failed to parse as ${parseType}: ${error.message}`, {
-			parseType: parseType,
-			error: error.name,
-			fallback: fallbackType
-		});
-	}
-
-	/**
-	 * Log response transformation
-	 */
-	static logResponseTransformation(context, fromType, toType, transformer) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RESPONSE', `Transforming response: ${fromType} → ${toType}`, {
-			from: fromType,
-			to: toType,
-			transformer: transformer
-		});
-	}
-
-	/**
-	 * Log custom parseResponse function usage
-	 */
-	static logCustomParseResponse(context, hasCustomParser) {
-		if (!context?.req?.verbose) return;
-		
-		if (hasCustomParser) {
-			verboseLog(context, 'RESPONSE', 'Using custom parseResponse function', {
-				parser: 'custom',
-				source: 'options.parseResponse'
-			});
-		} else {
-			verboseLog(context, 'RESPONSE', 'Using built-in response parsing', {
-				parser: 'built-in',
-				source: 'luminara'
-			});
-		}
-	}
-
-	/**
-	 * Log response size information
-	 */
-	static logResponseSize(context, bodySize, headers) {
-		if (!context?.req?.verbose) return;
-		
-		const contentLength = headers?.get?.('content-length') || headers?.['content-length'];
-		const actualSize = bodySize;
-		
-		verboseLog(context, 'RESPONSE', 'Response size information', {
-			declared: contentLength ? `${contentLength} bytes` : 'unknown',
-			actual: actualSize ? `${actualSize} bytes` : 'unknown',
-			compression: headers?.get?.('content-encoding') || 'none'
-		});
-	}
-
-	/**
-	 * Log response caching information
-	 */
-	static logResponseCaching(context, headers) {
-		if (!context?.req?.verbose) return;
-		
-		const cacheControl = headers?.get?.('cache-control') || headers?.['cache-control'];
-		const etag = headers?.get?.('etag') || headers?.['etag'];
-		const lastModified = headers?.get?.('last-modified') || headers?.['last-modified'];
-		
-		if (cacheControl || etag || lastModified) {
-			verboseLog(context, 'RESPONSE', 'Response caching headers detected', {
-				cacheControl: cacheControl || 'none',
-				etag: etag ? 'present' : 'none',
-				lastModified: lastModified ? 'present' : 'none'
-			});
-		}
-	}
-
-	/**
-	 * Log response streaming information
-	 */
-	static logResponseStreaming(context, isStreamable, transferEncoding) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RESPONSE', `Response streaming: ${isStreamable ? 'supported' : 'not supported'}`, {
-			streamable: isStreamable,
-			transferEncoding: transferEncoding || 'none',
-			bodyUsed: 'checking...'
+	logResponseParsingError(context, parserType, error) {
+		this.error(context, 'PARSE_ERROR', `Failed to parse response as ${parserType}`, {
+			parser: parserType,
+			error: error.message,
+			errorType: error.name
 		});
 	}
 }
 
-// Convenience functions for direct usage
-export function logResponseReceived(context, response, responseSize) {
-	ResponseVerboseLogger.logResponseReceived(context, response, responseSize);
-}
+// Create singleton instance
+const responseLogger = new ResponseVerboseLogger();
 
-export function logResponseTypeDetection(context, detectedType, contentType, requestedType) {
-	ResponseVerboseLogger.logResponseTypeDetection(context, detectedType, contentType, requestedType);
-}
-
-export function logResponseParsingSuccess(context, parseType, resultType, dataSize) {
-	ResponseVerboseLogger.logResponseParsingSuccess(context, parseType, resultType, dataSize);
-}
-
-export function logResponseParsingError(context, parseType, error, fallbackType) {
-	ResponseVerboseLogger.logResponseParsingError(context, parseType, error, fallbackType);
-}
+export { responseLogger };

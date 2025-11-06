@@ -10,6 +10,7 @@ import { responseTypes } from './examples/responseTypes.js';
 import { errorHandling } from './examples/errorHandling.js';
 import { verboseLogging } from './examples/verboseLogging.js';
 import { stats } from './examples/stats.js';
+import { rateLimitingExamples } from './examples/rateLimiting.js';
 
 // Aggregate all examples
 export const examples = {
@@ -23,7 +24,8 @@ export const examples = {
 	errorHandling,
 	customDriver,
 	verboseLogging,
-	stats
+	stats,
+	rateLimiting: rateLimitingExamples
 };
 
 // Examples Controller Class

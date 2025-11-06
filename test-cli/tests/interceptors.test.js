@@ -1,414 +1,436 @@
-import { createLuminara } from '../../src/index.js';
-import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
+﻿import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
+import { createLuminara } from '../../dist/index.mjs';
 import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
-const suite = new TestSuite('Interceptors');
-const mockServer = new MockServer(4224);
+const suite = new TestSuite('Modern Interceptors');
+const mockServer = new MockServer(4203);
 const BASE_URL = `http://localhost:${mockServer.port}`;
 
-// Test comprehensive interceptor system functionality
-suite.test('onRequest hook modifies requests', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
+// =============================================================================
+// onRequest Interceptor Tests (L→R execution order)
+// =============================================================================
+
+suite.test("onRequest interceptor modifies request", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
 	
-	// Add authentication interceptor
-	api.use({
-		onRequest(request) {
-			request.headers = request.headers || {};
-			request.headers['Authorization'] = 'Bearer test-token';
-			request.headers['X-Custom'] = 'interceptor-added';
-			return request;
+	client.use({
+		onRequest(context) {
+			context.req.headers = {
+				...context.req.headers,
+				'X-Test-Header': 'interceptor-added'
+			};
 		}
 	});
+
+	const response = await client.getJson('/echo-headers');
 	
-	const response = await api.getJson('/json');
-	
-	assert(response.status === 200, 'Should return 200 status');
-	assert(response.data.message === 'Success', 'Should get success message');
+	assert(response.data.headers['x-test-header'] === 'interceptor-added', "Header should be added by interceptor");
 });
 
-suite.test('onSuccess hook modifies responses', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
+suite.test("onRequest interceptors execute in Left→Right order", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
+	const executionOrder = [];
 	
-	// Add response transformation interceptor
-	api.use({
-		onSuccess(response, request) {
-			if (response.data && typeof response.data === 'object') {
-				response.data.interceptorAdded = true;
-				response.data.timestamp = Date.now();
-			}
-			return response;
+	// First interceptor (should execute first)
+	client.use({
+		name: 'first',
+		onRequest(context) {
+			executionOrder.push('first');
+			context.req.headers = {
+				...context.req.headers,
+				'X-Order': 'first'
+			};
 		}
 	});
 	
-	const response = await api.getJson('/json');
+	// Second interceptor (should execute second and override)
+	client.use({
+		name: 'second', 
+		onRequest(context) {
+			executionOrder.push('second');
+			context.req.headers = {
+				...context.req.headers,
+				'X-Order': 'second'
+			};
+		}
+	});
 	
-	assert(response.status === 200, 'Should return 200 status');
-	assertEqual(response.data.interceptorAdded, true, 'Should add interceptor flag');
-	assert(typeof response.data.timestamp === 'number', 'Should add timestamp');
-	assertEqual(response.data.message, 'Success', 'Should preserve original data');
+	// Third interceptor (should execute last and have final say)
+	client.use({
+		name: 'third',
+		onRequest(context) {
+			executionOrder.push('third');
+			context.req.headers = {
+				...context.req.headers,
+				'X-Order': 'third',
+				'X-Chain': `${context.req.headers['X-Order'] || 'none'} -> third`
+			};
+		}
+	});
+
+	const response = await client.getJson('/echo-headers');
+	
+	// Verify execution order
+	assertEqual(executionOrder, ['first', 'second', 'third'], "onRequest should execute in L→R order");
+	
+	// Verify final state (last interceptor wins)
+	assert(response.data.headers['x-order'] === 'third', "Last interceptor should have final say");
+	assert(response.data.headers['x-chain'] === 'second -> third', "Chain should show progression");
 });
 
-suite.test('onError hook handles errors', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
+suite.test("onRequest interceptor receives complete context", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
+	let capturedContext = null;
+	
+	client.use({
+		onRequest(context) {
+			capturedContext = { ...context };
+			// Verify context structure
+			assert(context.req !== undefined, "Context should have req object");
+			assert(context.meta !== undefined, "Context should have meta object");
+			assert(context.meta.requestId !== undefined, "Context should have requestId");
+			assert(context.controller !== undefined, "Context should have AbortController");
+			assert(context.attempt === 1, "Initial attempt should be 1");
+		}
 	});
+
+	await client.getJson('/json');
 	
-	let errorIntercepted = false;
+	assert(capturedContext !== null, "Context should be captured");
+	assert(capturedContext.req.method === 'GET', "Request method should be preserved");
+});
+
+// =============================================================================
+// onResponse Interceptor Tests (R→L execution order)
+// =============================================================================
+
+suite.test("onResponse interceptor modifies response", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
 	
-	// Add error handling interceptor
-	api.use({
-		onError(error, request) {
-			errorIntercepted = true;
-			// Transform 404 into custom error
-			if (error.status === 404) {
-				const customError = new Error('Resource not found');
-				customError.isCustom = true;
-				customError.originalStatus = error.status;
-				throw customError;
-			}
-			throw error;
+	client.use({
+		onResponse(context) {
+			context.res.data.modified = true;
+			context.res.data.timestamp = "2024-01-01";
+		}
+	});
+
+	const response = await client.getJson('/json');
+	
+	assert(response.data.message === 'Success', "Original data should be preserved");
+	assert(response.data.modified === true, "Data should be modified by interceptor");
+	assert(response.data.timestamp === "2024-01-01", "Timestamp should be added by interceptor");
+});
+
+suite.test("onResponse interceptors execute in Right→Left order", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
+	const executionOrder = [];
+	
+	// First interceptor registered (should execute LAST)
+	client.use({
+		name: 'first',
+		onResponse(context) {
+			executionOrder.push('first');
+			context.res.data.order = `${context.res.data.order || ''} first`.trim();
 		}
 	});
 	
+	// Second interceptor registered (should execute SECOND)
+	client.use({
+		name: 'second',
+		onResponse(context) {
+			executionOrder.push('second');
+			context.res.data.order = `${context.res.data.order || ''} second`.trim();
+		}
+	});
+	
+	// Third interceptor registered (should execute FIRST)
+	client.use({
+		name: 'third',
+		onResponse(context) {
+			executionOrder.push('third');
+			context.res.data.order = `${context.res.data.order || ''} third`.trim();
+		}
+	});
+
+	const response = await client.getJson('/json');
+	
+	// Verify execution order (reverse of registration)
+	assertEqual(executionOrder, ['third', 'second', 'first'], "onResponse should execute in R→L order");
+	
+	// Verify data accumulation (shows execution sequence)
+	assert(response.data.order === 'third second first', "Data should show R→L execution sequence");
+});
+
+suite.test("onResponse interceptor receives complete context with response", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
+	let capturedContext = null;
+	
+	client.use({
+		onResponse(context) {
+			capturedContext = { ...context };
+			// Verify context structure
+			assert(context.req !== undefined, "Context should have req object");
+			assert(context.res !== undefined, "Context should have res object");
+			assert(context.meta !== undefined, "Context should have meta object");
+			assert(context.controller !== undefined, "Context should have AbortController");
+			assert(context.res.status !== undefined, "Response should have status");
+			assert(context.res.data !== undefined, "Response should have data");
+		}
+	});
+
+	await client.getJson('/json');
+	
+	assert(capturedContext !== null, "Context should be captured");
+	assert(capturedContext.res.status === 200, "Response status should be available");
+});
+
+// =============================================================================
+// onResponseError Interceptor Tests
+// =============================================================================
+
+suite.test("onResponseError interceptor handles HTTP errors", async () => {
+	const client = createLuminara({ 
+		baseURL: BASE_URL,
+		ignoreResponseError: false // Ensure errors are thrown
+	});
+	
+	let errorHandled = false;
+	let capturedError = null;
+	
+	client.use({
+		onResponseError(context) {
+			errorHandled = true;
+			capturedError = context.error;
+			
+			// Verify error context structure
+			assert(context.error !== undefined, "Context should have error object");
+			assert(context.req !== undefined, "Context should have req object");
+			assert(context.meta !== undefined, "Context should have meta object");
+			
+			// Transform error or add additional data
+			context.error.handledByInterceptor = true;
+		}
+	});
+
 	try {
-		await api.getJson('/json?status=404');
-		assert(false, 'Should throw error');
+		await client.getJson('/error/500');
+		assert(false, "Should throw error for 500 status");
 	} catch (error) {
-		assertEqual(errorIntercepted, true, 'Should intercept error');
-		assertEqual(error.message, 'Resource not found', 'Should have custom error message');
-		assertEqual(error.isCustom, true, 'Should have custom flag');
-		assertEqual(error.originalStatus, 404, 'Should preserve original status');
+		assert(errorHandled, "Error should be handled by interceptor");
+		assert(capturedError !== null, "Error should be captured");
+		assert(error.handledByInterceptor === true, "Error should be modified by interceptor");
+		assert(error.status === 500, "Error should preserve status");
 	}
 });
 
-// Test middleware-like processing order: L->R for requests, R->L for responses
-suite.test('Multiple interceptors execute in correct order', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
+suite.test("onResponseError interceptors execute in R→L order", async () => {
+	const client = createLuminara({ 
+		baseURL: BASE_URL,
+		ignoreResponseError: false
 	});
 	
 	const executionOrder = [];
 	
-	// First interceptor (added first, executes first for requests, last for responses)
-	api.use({
-		onRequest(request) {
-			executionOrder.push('interceptor1-request');
-			request.headers = request.headers || {};
-			request.headers['X-Step1'] = 'first';
-			return request;
-		},
-		onSuccess(response, request) {
-			executionOrder.push('interceptor1-response');
-			response.data.step1 = 'processed-first';
-			return response;
+	// First interceptor registered (should execute LAST)
+	client.use({
+		name: 'first',
+		onResponseError(context) {
+			executionOrder.push('first');
+			context.error.handlerChain = `${context.error.handlerChain || ''} first`.trim();
 		}
 	});
 	
-	// Second interceptor (added second, executes second for requests, second for responses)
-	api.use({
-		onRequest(request) {
-			executionOrder.push('interceptor2-request');
-			request.headers = request.headers || {};
-			request.headers['X-Step2'] = 'second';
-			return request;
-		},
-		onSuccess(response, request) {
-			executionOrder.push('interceptor2-response');
-			response.data.step2 = 'processed-second';
-			return response;
+	// Second interceptor registered (should execute SECOND)
+	client.use({
+		name: 'second',
+		onResponseError(context) {
+			executionOrder.push('second');
+			context.error.handlerChain = `${context.error.handlerChain || ''} second`.trim();
 		}
 	});
 	
-	// Third interceptor (added last, executes last for requests, third for responses)
-	api.use({
-		onRequest(request) {
-			executionOrder.push('interceptor3-request');
-			request.headers = request.headers || {};
-			request.headers['X-Step3'] = 'third';
-			return request;
-		},
-		onSuccess(response, request) {
-			executionOrder.push('interceptor3-response');
-			response.data.step3 = 'processed-third';
-			return response;
+	// Third interceptor registered (should execute FIRST)
+	client.use({
+		name: 'third',
+		onResponseError(context) {
+			executionOrder.push('third');
+			context.error.handlerChain = `${context.error.handlerChain || ''} third`.trim();
 		}
 	});
-	
-	const response = await api.getJson('/json');
-	
-	// Verify request processing order (left-to-right: 1->2->3)
-	assert(executionOrder[0] === 'interceptor1-request', 'First interceptor should execute first on request');
-	assert(executionOrder[1] === 'interceptor2-request', 'Second interceptor should execute second on request');
-	assert(executionOrder[2] === 'interceptor3-request', 'Third interceptor should execute third on request');
-	
-	// Verify response processing order (left-to-right for legacy onSuccess: 1->2->3)
-	assert(executionOrder[3] === 'interceptor1-response', 'First interceptor should execute first on response');
-	assert(executionOrder[4] === 'interceptor2-response', 'Second interceptor should execute second on response');
-	assert(executionOrder[5] === 'interceptor3-response', 'Third interceptor should execute third on response');
-	
-	// Verify response transformations applied in correct order
-	assert(response.data.step1 === 'processed-first', 'Step 1 should be processed first');
-	assert(response.data.step2 === 'processed-second', 'Step 2 should be processed second');
-	assert(response.data.step3 === 'processed-third', 'Step 3 should be processed third');
-});
 
-// Test complex interceptor chains with conditional logic
-suite.test('Interceptor chain with conditional processing', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
-	
-	let authInterceptorCalled = false;
-	let validationInterceptorCalled = false;
-	let loggingInterceptorCalled = false;
-	
-	// Authentication interceptor
-	api.use({
-		onRequest(request) {
-			authInterceptorCalled = true;
-			if (request.url.includes('/secure')) {
-				request.headers = request.headers || {};
-				request.headers['Authorization'] = 'Bearer secure-token';
-			}
-			return request;
-		},
-		onError(error, request) {
-			if (error.status === 401) {
-				const authError = new Error('Authentication required');
-				authError.code = 'AUTH_REQUIRED';
-				throw authError;
-			}
-			throw error;
-		}
-	});
-	
-	// Validation interceptor
-	api.use({
-		onRequest(request) {
-			validationInterceptorCalled = true;
-			if (request.method === 'POST' && !request.body) {
-				const validationError = new Error('Request body required for POST');
-				validationError.code = 'VALIDATION_ERROR';
-				throw validationError;
-			}
-			return request;
-		}
-	});
-	
-	// Logging interceptor
-	api.use({
-		onRequest(request) {
-			loggingInterceptorCalled = true;
-			request.headers = request.headers || {};
-			request.headers['X-Request-ID'] = `req-${Date.now()}`;
-			return request;
-		},
-		onSuccess(response, request) {
-			response.data.logged = true;
-			response.data.requestId = request.headers['X-Request-ID'];
-			return response;
-		}
-	});
-	
-	const response = await api.getJson('/json');
-	
-	assert(authInterceptorCalled, 'Auth interceptor should be called');
-	assert(validationInterceptorCalled, 'Validation interceptor should be called');
-	assert(loggingInterceptorCalled, 'Logging interceptor should be called');
-	assert(response.data.logged === true, 'Response should be logged');
-	assert(response.data.requestId.startsWith('req-'), 'Should have request ID');
-});
-
-// Test interceptor error handling and propagation  
-suite.test('Error propagation through interceptor chain', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
-	
-	const errorFlow = [];
-	
-	// First error interceptor (added first, executes last in error chain)
-	api.use({
-		onError(error, request) {
-			errorFlow.push('interceptor1-error');
-			if (error.status === 500) {
-				error.retryable = true;
-			}
-			// Don't re-throw here, let the error handling continue
-		}
-	});
-	
-	// Second error interceptor (added second, executes second-to-last in error chain)
-	api.use({
-		onError(error, request) {
-			errorFlow.push('interceptor2-error');
-			if (error.status === 404) {
-				// Transform 404 to a more specific error
-				const notFoundError = new Error(`Resource not found: ${request.url}`);
-				notFoundError.code = 'RESOURCE_NOT_FOUND';
-				notFoundError.originalError = error;
-				// Store the new error but continue chain
-				Object.assign(error, notFoundError);
-				error.code = 'RESOURCE_NOT_FOUND';
-				error.originalError = { status: 404 };
-			}
-		}
-	});
-	
-	// Third error interceptor (added last, executes first in error chain)
-	api.use({
-		onError(error, request) {
-			errorFlow.push('interceptor3-error');
-			// Log all errors but don't transform
-			error.logged = true;
-		}
-	});
-	
 	try {
-		await api.getJson('/json?status=404');
-		assert(false, 'Should throw error');
+		await client.getJson('/error/400');
+		assert(false, "Should throw error");
 	} catch (error) {
-		// Verify error processing order (right-to-left: 3->2->1)
-		assert(errorFlow[0] === 'interceptor3-error', 'Third interceptor should handle error first');
-		assert(errorFlow[1] === 'interceptor2-error', 'Second interceptor should handle error second');
-		assert(errorFlow[2] === 'interceptor1-error', 'First interceptor should handle error third');
+		// Verify execution order (reverse of registration)
+		assertEqual(executionOrder, ['third', 'second', 'first'], "onResponseError should execute in R→L order");
 		
-		// Verify error transformation (might be applied to original error)
-		assert(error.logged === true, 'Error should be logged');
-		// The error properties might be on the original error object
-		const hasTransformation = error.code === 'RESOURCE_NOT_FOUND' || error.message.includes('Resource not found');
-		assert(hasTransformation, 'Should have some error transformation');
+		// Verify error chain accumulation
+		assert(error.handlerChain === 'third second first', "Error should show R→L execution sequence");
 	}
 });
 
-// Test interceptor context preservation  
-suite.test('Request context preservation across interceptors', async () => {
-	// Create a fresh API instance to avoid interference
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
+// =============================================================================
+// Mixed Interceptor Tests (Complex Scenarios)
+// =============================================================================
+
+suite.test("Complete interceptor pipeline: onRequest → driver → onResponse", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
+	const pipeline = [];
 	
-	// Single interceptor that modifies response
-	api.use({
-		onSuccess(response, request) {
-			// Simple modification that should work
-			response.interceptorWorked = true;
-			return response;
+	client.use({
+		name: 'interceptor1',
+		onRequest(context) {
+			pipeline.push('req1');
+			context.req.headers = {
+				...context.req.headers,
+				'X-Request-1': 'true'
+			};
+		},
+		onResponse(context) {
+			pipeline.push('res1');
+			context.res.data.response1 = 'processed';
 		}
 	});
 	
-	const response = await api.getJson('/json');
+	client.use({
+		name: 'interceptor2',
+		onRequest(context) {
+			pipeline.push('req2');
+			context.req.headers = {
+				...context.req.headers,
+				'X-Request-2': 'true'
+			};
+		},
+		onResponse(context) {
+			pipeline.push('res2');
+			context.res.data.response2 = 'processed';
+		}
+	});
+
+	const response = await client.getJson('/echo-headers');
 	
-	// Simple assertion that should pass
-	assert(response.interceptorWorked === true, 'Interceptor should have modified response');
+	// Verify pipeline execution order: req1 → req2 → driver → res2 → res1
+	assertEqual(pipeline, ['req1', 'req2', 'res2', 'res1'], "Pipeline should execute in correct order");
+	
+	// Verify request modifications
+	assert(response.data.headers['x-request-1'] === 'true', "First request interceptor should execute");
+	assert(response.data.headers['x-request-2'] === 'true', "Second request interceptor should execute");
 });
 
-// Test interceptor async operations
-suite.test('Async interceptor operations', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
+suite.test("Interceptors with retry attempts", async () => {
+	const client = createLuminara({ 
+		baseURL: BASE_URL,
+		retry: 2,
+		ignoreResponseError: false
 	});
 	
-	// Async request interceptor
-	api.use({
-		async onRequest(request) {
-			// Simulate async token refresh
-			await new Promise(resolve => setTimeout(resolve, 10));
-			request.headers = request.headers || {};
-			request.headers['X-Async-Token'] = 'async-token-123';
-			return request;
+	const requestAttempts = [];
+	const responseAttempts = [];
+	const errorAttempts = [];
+	
+	client.use({
+		onRequest(context) {
+			requestAttempts.push(context.attempt);
 		},
-		async onSuccess(response, request) {
-			// Simulate async response processing
-			await new Promise(resolve => setTimeout(resolve, 10));
-			response.data.asyncProcessed = true;
-			return response;
+		onResponse(context) {
+			responseAttempts.push(context.attempt);
+		},
+		onResponseError(context) {
+			errorAttempts.push(context.attempt);
 		}
 	});
+
+	try {
+		// This should fail on attempts 1 and 2, succeed on attempt 3
+		await client.getJson('/error-then-success/2');
+	} catch (error) {
+		// Might fail if all retries are exhausted
+	}
 	
-	const response = await api.getJson('/json');
-	
-	assert(response.status === 200, 'Should complete successfully');
-	assert(response.data.asyncProcessed === true, 'Should be processed asynchronously');
+	// Verify interceptors are called for each attempt
+	assert(requestAttempts.length >= 2, "onRequest should be called for each retry attempt");
+	assert(requestAttempts[0] === 1, "First attempt should be 1");
+	assert(requestAttempts[1] === 2, "Second attempt should be 2");
 });
 
-// Test interceptor chain execution flow
-suite.test('Interceptor execution flow with header tracking', async () => {
-	const api = createLuminara({
-		baseURL: BASE_URL
-	});
+suite.test("Interceptor context modifications persist through pipeline", async () => {
+	const client = createLuminara({ baseURL: BASE_URL });
 	
-	const interceptorFlow = [];
-	
-	// First interceptor - normal processing
-	api.use({
-		onRequest(request) {
-			interceptorFlow.push('interceptor1-request');
-			request.headers = request.headers || {};
-			request.headers['X-Step-1'] = 'executed';
-			return request;
+	client.use({
+		name: 'auth',
+		onRequest(context) {
+			// Add auth token
+			context.req.headers = {
+				...context.req.headers,
+				'Authorization': 'Bearer interceptor-token'
+			};
+			// Add custom metadata
+			context.meta.authAdded = true;
 		},
-		onSuccess(response, request) {
-			interceptorFlow.push('interceptor1-response');
-			response.data.step1Executed = true;
-			return response;
+		onResponse(context) {
+			// Verify metadata persisted
+			assert(context.meta.authAdded === true, "Metadata should persist to response");
+			context.res.data.authVerified = context.meta.authAdded;
 		}
 	});
 	
-	// Cache interceptor - adds cache check header
-	api.use({
-		onRequest(request) {
-			interceptorFlow.push('cache-interceptor-request');
-			request.headers = request.headers || {};
-			request.headers['X-Cache-Check'] = 'performed';
-			return request;
+	client.use({
+		name: 'logger',
+		onRequest(context) {
+			// Verify auth was added by previous interceptor
+			assert(context.req.headers.Authorization === 'Bearer interceptor-token', "Auth should be added by previous interceptor");
+			context.meta.loggedRequest = true;
 		},
-		onSuccess(response, request) {
-			interceptorFlow.push('cache-interceptor-response');
-			if (request.headers && request.headers['X-Cache-Check']) {
-				response.data.cacheChecked = true;
+		onResponse(context) {
+			// Verify all metadata is available
+			assert(context.meta.authAdded === true, "Auth metadata should be available");
+			assert(context.meta.loggedRequest === true, "Logger metadata should be available");
+			context.res.data.logged = true;
+		}
+	});
+
+	const response = await client.getJson('/echo-headers');
+	
+	// Verify request modifications made it through
+	assert(response.data.headers.authorization === 'Bearer interceptor-token', "Auth header should be present");
+	
+	// Verify response modifications
+	assert(response.data.authVerified === true, "Auth verification should be added");
+	assert(response.data.logged === true, "Logging flag should be added");
+});
+
+// =============================================================================
+// Error Recovery and Transformation Tests
+// =============================================================================
+
+suite.test("onResponseError can transform errors", async () => {
+	const client = createLuminara({ 
+		baseURL: BASE_URL,
+		ignoreResponseError: false
+	});
+	
+	client.use({
+		onResponseError(context) {
+			// Transform 404 errors into user-friendly messages
+			if (context.error.status === 404) {
+				context.error.message = "Resource not found - please check the URL";
+				context.error.userFriendly = true;
 			}
-			return response;
 		}
 	});
-	
-	// Third interceptor - monitoring
-	api.use({
-		onRequest(request) {
-			interceptorFlow.push('interceptor3-request');
-			request.headers = request.headers || {};
-			request.headers['X-Monitor'] = 'active';
-			return request;
-		},
-		onSuccess(response, request) {
-			interceptorFlow.push('interceptor3-response');
-			response.data.monitored = true;
-			return response;
-		}
-	});
-	
-	const response = await api.getJson('/json');
-	
-	// Verify all interceptors executed in correct order
-	assert(interceptorFlow.includes('interceptor1-request'), 'First interceptor should execute');
-	assert(interceptorFlow.includes('cache-interceptor-request'), 'Cache interceptor should execute');
-	assert(interceptorFlow.includes('interceptor3-request'), 'Third interceptor should execute');
-	
-	// Verify response processing
-	assert(interceptorFlow.includes('interceptor1-response'), 'First interceptor response should execute');
-	assert(interceptorFlow.includes('cache-interceptor-response'), 'Cache interceptor response should execute');
-	assert(interceptorFlow.includes('interceptor3-response'), 'Third interceptor response should execute');
-	
-	assert(response.data.cacheChecked === true, 'Cache check should be performed');
-	assert(response.data.step1Executed === true, 'Step 1 should be executed');
-	assert(response.data.monitored === true, 'Should be monitored');
-});
 
-// Run tests if this file is executed directly
-await runTestSuiteIfDirect(import.meta.url, 'Interceptors', suite, mockServer);
+	try {
+		await client.getJson('/error/404');
+		assert(false, "Should throw error");
+	} catch (error) {
+		assert(error.message === "Resource not found - please check the URL", "Error message should be transformed");
+		assert(error.userFriendly === true, "Error should be marked as user-friendly");
+		assert(error.status === 404, "Original status should be preserved");
+	}
+});
 
 export { suite, mockServer };
+
+// Auto-run if this file is executed directly
+await runTestSuiteIfDirect(import.meta.url, 'Modern Interceptors', suite, mockServer);

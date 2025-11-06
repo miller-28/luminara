@@ -3,7 +3,7 @@
  * Handles responseType options and custom parseResponse functions
  */
 
-import { logResponse } from "../../../../core/verboseLogger.js";
+import { logResponse } from "../../../../core/verbose/verboseLogger.js";
 
 export async function parseResponseData(response, responseType = 'auto', parseResponse, context = null) {
 	// Log response received

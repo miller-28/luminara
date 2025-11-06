@@ -30,13 +30,13 @@ suite.test('Component initialization with useEffect pattern', async () => {
 			
 			// Add logging plugin like a real React app might
 			this.api.use({
-				onRequest: (request) => {
+				onRequest: (context) => {
 					// Debug logging suppressed during testing
-					return request;
+					return context.req;
 				},
-				onError: (error, request) => {
-					console.error(`[API Error] ${request.method} ${request.url}:`, error.message);
-					throw error;
+				onResponseError: (context) => {
+					console.error(`[API Error] ${context.req.method} ${context.req.url}:`, context.error.message);
+					throw context.error;
 				}
 			});
 			

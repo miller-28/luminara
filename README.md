@@ -15,7 +15,8 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
 - 🔄 **Dual export support** - ESM/CJS compatibility with auto-detection
 - 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
-- 🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
+- � **Advanced rate limiting** - Token bucket algorithm with global, domain, and endpoint scoping
+- �🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
 - 📝 **Verbose logging system** - Detailed debugging and request tracing
 - 🎯 **Response type handling** - JSON, text, form data, binary support
 - ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
@@ -92,6 +93,29 @@ await api.postForm("https://api.example.com/upload", {
   name: "John",
   email: "john@example.com"
 });
+
+// PUT/PATCH with JSON
+await api.putJson("https://api.example.com/users/1", { name: "Updated" });
+await api.patchJson("https://api.example.com/users/1", { email: "new@example.com" });
+
+// GET XML/HTML/Binary
+const xmlResponse = await api.getXml("https://api.example.com/feed.xml");
+const htmlResponse = await api.getHtml("https://example.com");
+const blobResponse = await api.getBlob("https://api.example.com/file.pdf");
+const bufferResponse = await api.getArrayBuffer("https://api.example.com/data.bin");
+
+// NDJSON (Newline Delimited JSON)
+const ndjsonResponse = await api.getNDJSON("https://api.example.com/stream");
+
+// Multipart form data
+const formData = new FormData();
+formData.append('file', fileBlob);
+await api.postMultipart("https://api.example.com/upload", formData);
+
+// SOAP requests
+await api.postSoap("https://api.example.com/soap", xmlPayload, {
+  soapVersion: '1.1' // or '1.2'
+});
 ```
 
 ### Configuration
@@ -102,10 +126,59 @@ const api = createLuminara({
   timeout: 10000,
   retry: 3,
   retryDelay: 1000,
+  backoffType: "exponential",
+  backoffMaxDelay: 30000,
+  retryStatusCodes: [408, 429, 500, 502, 503, 504],
   headers: {
     "Authorization": "Bearer YOUR_TOKEN"
+  },
+  verbose: true,                // Enable detailed logging
+  statsEnabled: true,           // Enable request statistics (default: true)
+  ignoreResponseError: false,   // Throw on HTTP errors (default: false)
+  responseType: "auto",         // Auto-detect response type
+  query: {                      // Default query parameters
+    "api_version": "v1"
   }
 });
+```
+
+### Rate Limiting
+
+Luminara includes advanced rate limiting with token bucket algorithm and flexible scoping:
+
+```js
+const api = createLuminara({
+  baseURL: "https://api.example.com",
+  rateLimit: {
+    rps: 10,                   // 10 requests per second
+    burst: 20,                 // Allow burst of 20 requests
+    scope: 'domain'            // Rate limit per domain
+  }
+});
+
+// Different scoping options
+const globalLimiter = createLuminara({
+  rateLimit: {
+    rps: 100,
+    scope: 'global'            // Single rate limit across all requests
+  }
+});
+
+const endpointLimiter = createLuminara({
+  rateLimit: {
+    rps: 5,
+    scope: 'endpoint',         // Rate limit per unique endpoint
+    include: ['/api/users/*'], // Only apply to specific patterns
+    exclude: ['/api/health']   // Exclude certain endpoints
+  }
+});
+
+// Get rate limiting stats
+const rateLimitStats = api.getRateLimitStats();
+console.log(rateLimitStats);
+
+// Reset rate limiting stats
+api.resetRateLimitStats();
 ```
 
 ---
@@ -159,7 +232,11 @@ import {
   parseRetryAfter,
   isIdempotentMethod,
   IDEMPOTENT_METHODS,
-  DEFAULT_RETRY_STATUS_CODES
+  DEFAULT_RETRY_STATUS_CODES,
+  StatsHub,
+  METRIC_TYPES,
+  GROUP_BY_DIMENSIONS,
+  TIME_WINDOWS
 } from "luminara";
 
 // Use backoff strategies directly
@@ -176,6 +253,9 @@ const customPolicy = createRetryPolicy({
 if (isIdempotentMethod('GET')) {
   console.log('Safe to retry GET requests');
 }
+
+// Create standalone stats instance
+const stats = new StatsHub();
 ```
 
 ### Build System Support
@@ -191,10 +271,13 @@ const { createLuminara } = require("luminara");
 
 **Build Requirements for Development:**
 ```bash
-# Required before testing sandbox/examples
+# Required before testing sandbox/examples - generates dist files
 npm run build        # Production build
 npm run dev          # Development with watch mode
+npm run build:watch  # Alternative watch mode command
 ```
+
+**Note:** The dist files (`dist/index.mjs` and `dist/index.cjs`) are generated during build and required for the package to work properly. Always run `npm run build` after making changes to `src/` files.
 
 ---
 
@@ -299,7 +382,134 @@ const api = createLuminara({
 
 ---
 
-## 🔌 Enhanced Interceptor System
+## � Rate Limiting
+
+Luminara's rate limiting system uses a **token bucket algorithm** with flexible scoping to control request flow and prevent API abuse.
+
+### Token Bucket Algorithm
+
+The rate limiter maintains token buckets that refill at a steady rate:
+
+```js
+const api = createLuminara({
+  rateLimit: {
+    rps: 10,  // Refill rate: 10 tokens per second
+    burst: 20           // Bucket capacity: 20 tokens max
+  }
+});
+
+// Allows bursts of 20 requests, then sustained 10 req/sec
+await api.getJson('/api/data');  // Uses 1 token
+```
+
+### Scoping Strategies
+
+Control rate limiting granularity with different scoping options:
+
+#### Global Scoping
+Single rate limit across all requests:
+```js
+const api = createLuminara({
+  rateLimit: {
+    rps: 100,
+    scope: 'global'  // One bucket for everything
+  }
+});
+```
+
+#### Domain Scoping
+Separate rate limits per domain:
+```js
+const api = createLuminara({
+  rateLimit: {
+    rps: 50,
+    scope: 'domain'  // api.example.com vs api2.example.com
+  }
+});
+```
+
+#### Endpoint Scoping
+Individual rate limits per unique endpoint:
+```js
+const api = createLuminara({
+  rateLimit: {
+    rps: 5,
+    scope: 'endpoint'  // /api/users vs /api/posts
+  }
+});
+```
+
+### Pattern Matching
+
+Fine-tune rate limiting with include/exclude patterns:
+
+```js
+const api = createLuminara({
+  rateLimit: {
+    rps: 10,
+    scope: 'endpoint',
+    include: [
+      '/api/users/*',     // Rate limit user endpoints
+      '/api/posts/*'      // Rate limit post endpoints
+    ],
+    exclude: [
+      '/api/health',      // Exclude health checks
+      '/api/status'       // Exclude status checks
+    ]
+  }
+});
+```
+
+### Real-time Statistics
+
+Monitor rate limiting performance:
+
+```js
+const api = createLuminara({
+  rateLimit: { rps: 10, burst: 20 }
+});
+
+// Get current statistics
+const stats = api.stats.query()
+  .select(['totalRequests', 'rateLimitedRequests', 'averageWaitTime'])
+  .get();
+
+console.log('Rate limit stats:', stats);
+```
+
+### Dynamic Configuration
+
+Update rate limits at runtime:
+
+```js
+// Start with conservative limits
+const api = createLuminara({
+  rateLimit: { rps: 5, burst: 10 }
+});
+
+// Increase limits based on server capacity
+api.updateConfig({
+  rateLimit: { rps: 20, burst: 40 }
+});
+```
+
+### Error Handling
+
+Rate limiting integrates seamlessly with Luminara's error system:
+
+```js
+try {
+  await api.getJson('/api/data');
+} catch (error) {
+  if (error.type === 'RATE_LIMITED') {
+    console.log(`Rate limited. Retry after: ${error.retryAfter}ms`);
+  }
+}
+```
+
+---
+
+## �🔌 Enhanced Interceptor System
 
 Luminara's interceptor architecture provides **deterministic execution order** and **guaranteed flow control** with a mutable context object that travels through the entire request lifecycle.
 
@@ -727,7 +937,7 @@ Luminara includes a **beautiful interactive sandbox** where you can explore all 
 🌐 **[Try the Sandbox](./sandbox/)** • [Sandbox Documentation](./sandbox/README.md) • [Architecture Guide](./sandbox/ARCHITECTURE.md)
 
 The sandbox features:
-- **30+ Interactive Examples** across 11 feature categories
+- **65+ Interactive Examples** across 12 feature categories
 - **Live Retry Logging** - Watch backoff strategies in action
 - **Individual Test Controls** - Run and stop tests independently
 - **Real-time Feedback** - Color-coded outputs with detailed logs
@@ -738,6 +948,15 @@ The sandbox features:
 1. 📦 **Basic Usage** - GET/POST JSON, Text, Form data
 2. 🔗 **Base URL & Query Parameters** - URL configuration  
 3. ⏱️ **Timeout** - Success and failure scenarios
+4. 🔄 **Retry** - Basic retry with status codes
+5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
+6. 🔌 **Interceptors** - Request/response/error interceptors
+7. 🛡️ **Error Handling** - Comprehensive error scenarios
+8. 🎯 **Response Types** - JSON, text, form, binary data handling
+9. 📊 **Stats System** - Real-time metrics and analytics
+10. 📝 **Verbose Logging** - Detailed debugging and tracing
+11. 🚗 **Custom Drivers** - Replace the HTTP backend
+12. 🚦 **Rate Limiting** - Token bucket algorithm examples
 4. 🔄 **Retry** - Basic retry with status codes
 5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
 6. 🔌 **Interceptors** - Request/response/error interceptors

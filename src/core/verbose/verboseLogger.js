@@ -4,12 +4,12 @@
  */
 
 // Export the base architecture for feature loggers
-export { BaseVerboseLogger, verboseLog, formatDuration } from './verbose/BaseVerboseLogger.js';
+export { BaseVerboseLogger, verboseLog, formatDuration } from './BaseVerboseLogger.js';
 
 /**
  * Core request logger instance
  */
-import { BaseVerboseLogger } from './verbose/BaseVerboseLogger.js';
+import { BaseVerboseLogger } from './BaseVerboseLogger.js';
 
 class RequestVerboseLogger extends BaseVerboseLogger {
 	constructor() {
@@ -154,15 +154,9 @@ class PluginVerboseLogger extends BaseVerboseLogger {
 					plugins: details.names
 				});
 				break;
-			case 'onSuccess':
-				this.log(context, 'ONSUCCESS', `Executing onSuccess plugins (${details.count})`, {
+			case 'onResponse':
+				this.log(context, 'ONRESPONSE', `Executing onResponse plugins (${details.count})`, {
 					plugins: details.names
-				});
-				break;
-			case 'onError':
-				this.log(context, 'ONERROR', `Executing onError plugins (${details.count})`, {
-					plugins: details.names,
-					error: details.error
 				});
 				break;
 			case 'onResponseError':

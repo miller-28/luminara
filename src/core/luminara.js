@@ -1,11 +1,8 @@
 import { NativeFetchDriver } from "../drivers/native/index.js";
-import { logRequest, logPlugin, logError, verboseLog } from "./verboseLogger.js";
-import { 
-	logStatsSystem, 
-	logRequestEvent, 
-	createStatsContext 
-} from "./stats/verboseLogger.js";
+import { logRequest, logPlugin, logError, verboseLog } from "./verbose/verboseLogger.js";
+import { statsLogger } from "./stats/verboseLogger.js";
 import { StatsHub } from "./stats/StatsHub.js";
+import { createRateLimitFeature } from "../drivers/native/features/rateLimit/index.js";
 
 export class LuminaraClient {
 
@@ -26,6 +23,12 @@ export class LuminaraClient {
 			this.statsInstance.setVerbose(true);
 		}
 		
+		// Initialize rate limiting if configured
+		this.rateLimitFeature = null;
+		if (config.rateLimit) {
+			this.rateLimitFeature = createRateLimitFeature(config.rateLimit);
+		}
+		
 		// Generate unique request ID counter
 		this.requestIdCounter = 0;
 		
@@ -36,14 +39,17 @@ export class LuminaraClient {
 				plugins: plugins.length,
 				hasGlobalConfig: Object.keys(config).length > 1, // More than just verbose
 				verboseEnabled: true,
-				statsEnabled: this.statsEnabled
+				statsEnabled: this.statsEnabled,
+				rateLimitEnabled: !!config.rateLimit
 			});
 			
 			// Log stats system initialization
-			logStatsSystem(createStatsContext(true), 'instance-created', {
-				type: 'instance',
-				initialization: true
-			});
+			if (config.verbose) {
+				statsLogger.log({ req: { verbose: true } }, 'SYSTEM', 'Stats instance created', {
+					type: 'instance',
+					initialization: true
+				});
+			}
 		}
 	}	/**
 	 * Get the stats interface
@@ -58,7 +64,7 @@ export class LuminaraClient {
 	enableStats() {
 		this.statsEnabled = true;
 		if (this.config.verbose) {
-			logStatsSystem(createStatsContext(true), 'enabled', {
+			statsLogger.log({ req: { verbose: true } }, 'SYSTEM', 'Stats enabled', {
 				runtime: true
 			});
 		}
@@ -71,7 +77,7 @@ export class LuminaraClient {
 	disableStats() {
 		this.statsEnabled = false;
 		if (this.config.verbose) {
-			logStatsSystem(createStatsContext(true), 'disabled', {
+			statsLogger.log({ req: { verbose: true } }, 'SYSTEM', 'Stats disabled', {
 				runtime: true
 			});
 		}
@@ -95,8 +101,6 @@ export class LuminaraClient {
 				totalPlugins: this.plugins.length,
 				hasOnRequest: !!plugin.onRequest,
 				hasOnResponse: !!plugin.onResponse,
-				hasOnSuccess: !!plugin.onSuccess,
-				hasOnError: !!plugin.onError,
 				hasOnResponseError: !!plugin.onResponseError
 			});
 		}
@@ -105,6 +109,18 @@ export class LuminaraClient {
 	}
 
 	async request(req) {
+		// Merge global config with per-request options so downstream code has full context
+		const mergedReq = { ...this.config, ...req };
+
+		// Apply rate limiting if configured
+		if (this.rateLimitFeature) {
+			await this.rateLimitFeature.schedule(mergedReq);
+		}
+
+		return this.#actualRequest(mergedReq);
+	}
+
+	async #actualRequest(req) {
 		// Merge global config with per-request options (per-request takes priority)
 		const mergedReq = { ...this.config, ...req };
 		
@@ -121,7 +137,7 @@ export class LuminaraClient {
 			});
 		}
 		
-		// Always use enhanced interceptor system - no legacy mode
+		// Use enhanced interceptor system
 		let context = {
 			req: { ...mergedReq },
 			res: null,
@@ -211,22 +227,10 @@ export class LuminaraClient {
 				}
 				for (const plugin of this.plugins) {
 					if (plugin.onRequest) {
-						// Check if this is a legacy plugin by inspecting function signature
-						const fnString = plugin.onRequest.toString();
-						const isLegacyPlugin = fnString.includes('request') && !fnString.includes('context');
-						
-						if (isLegacyPlugin) {
-							// Legacy plugin expects just the request object
-							const result = await plugin.onRequest(context.req);
-							if (result && typeof result === 'object') {
-								context.req = result;
-							}
-						} else {
-							// Enhanced plugin expects context object  
-							const result = await plugin.onRequest(context);
-							if (result && result !== context) {
-								context.req = result;
-							}
+						// Enhanced plugin expects context object
+						const result = await plugin.onRequest(context);
+						if (result && result !== context) {
+							context.req = result;
 						}
 					}
 				}
@@ -234,25 +238,10 @@ export class LuminaraClient {
 				// 2) Execute driver request
 				context.res = await this.driver.request(context.req);
 
-				// 3) Legacy onSuccess plugins first (L→R order)
-				const successPlugins = this.plugins.filter(p => p.onSuccess && !p.onResponse && !p.onResponseError);
-				if (successPlugins.length > 0) {
-					logPlugin(context, 'onSuccess', {
-						count: successPlugins.length,
-						names: successPlugins.map(p => p.name || 'anonymous')
-					});
-				}
-				for (const plugin of this.plugins) {
-					if (plugin.onSuccess && !plugin.onResponse && !plugin.onResponseError) {
-						// Pure legacy plugin: onSuccess(response, request)
-						context.res = await plugin.onSuccess(context.res, context.req) || context.res;
-					}
-				}
-
-				// 4) Enhanced onResponse interceptors (R→L order - reverse execution)
+				// 3) Enhanced onResponse interceptors (R→L order - reverse execution)
 				const responsePlugins = this.plugins.filter(p => p.onResponse);
 				if (responsePlugins.length > 0) {
-					logPlugin(context, 'onSuccess', {
+					logPlugin(context, 'onResponse', {
 						count: responsePlugins.length,
 						names: responsePlugins.map(p => p.name || 'anonymous')
 					});
@@ -312,8 +301,7 @@ export class LuminaraClient {
 				});
 
 				// 4) onResponseError interceptors (R→L order - reverse execution)
-				// Also support legacy onError for backward compatibility
-				const errorPlugins = this.plugins.filter(p => p.onResponseError || p.onError);
+				const errorPlugins = this.plugins.filter(p => p.onResponseError);
 				if (errorPlugins.length > 0) {
 					logPlugin(context, 'onResponseError', {
 						count: errorPlugins.length,
@@ -325,9 +313,6 @@ export class LuminaraClient {
 					const plugin = this.plugins[i];
 					if (plugin.onResponseError) {
 						await plugin.onResponseError(context);
-					} else if (plugin.onError) {
-						// Legacy support: onError(error, request)
-						await plugin.onError(context.error, context.req);
 					}
 				}
 
@@ -375,7 +360,7 @@ export class LuminaraClient {
 		
 		// Fallback to simple retry logic
 		// Check custom retry status codes first
-		if (context.req.retryStatusCodes && error.status) {
+		if (context.req.retryStatusCodes && Array.isArray(context.req.retryStatusCodes) && error.status) {
 			return context.req.retryStatusCodes.includes(error.status);
 		}
 		
@@ -524,7 +509,7 @@ export class LuminaraClient {
 		
 		// Log the stats event if verbose is enabled
 		if (this.config.verbose) {
-			logRequestEvent(createStatsContext(true), eventType, data);
+			statsLogger.logRequestLifecycle({ req: { verbose: true } }, eventType, data);
 		}
 		
 		try {
@@ -551,7 +536,7 @@ export class LuminaraClient {
 			
 			// Log stats system error if verbose is enabled
 			if (this.config.verbose) {
-				logStatsSystem(createStatsContext(true), 'listener-error', {
+				statsLogger.log({ req: { verbose: true } }, 'SYSTEM', 'Stats listener error', {
 					error,
 					listener: eventType
 				});
@@ -634,5 +619,56 @@ export class LuminaraClient {
 		const headers = { ...(options.headers || {}) };
 		if (!headers['Content-Type']) headers['Content-Type'] = contentType;
 		return { ...options, headers, responseType: options.responseType ?? defaultResponseType };
+	}
+
+	/**
+	 * Update client configuration at runtime
+	 * @param {Object} newConfig - New configuration to merge
+	 */
+	updateConfig(newConfig) {
+		// Merge new config with existing
+		this.config = { ...this.config, ...newConfig };
+		
+		// Handle rate limiting configuration updates
+		if (newConfig.rateLimit !== undefined) {
+			if (newConfig.rateLimit && this.rateLimitFeature) {
+				// Update existing rate limiter
+				this.rateLimitFeature.update(newConfig.rateLimit);
+			} else if (newConfig.rateLimit && !this.rateLimitFeature) {
+				// Enable rate limiting
+				this.rateLimitFeature = createRateLimitFeature(newConfig.rateLimit);
+				this.request = this.rateLimitFeature.wrapRequest(this.request.bind(this));
+			} else if (!newConfig.rateLimit && this.rateLimitFeature) {
+				// Disable rate limiting
+				this.rateLimitFeature.shutdown();
+				this.rateLimitFeature = null;
+				// Note: Can't unwrap request method easily, would need redesign
+			}
+		}
+		
+		// Log configuration update if verbose
+		if (this.config.verbose) {
+			verboseLog(this.config, 'CONFIG', 'Client configuration updated', {
+				rateLimitEnabled: !!this.rateLimitFeature,
+				newConfigKeys: Object.keys(newConfig)
+			});
+		}
+	}
+
+	/**
+	 * Get rate limiting statistics (if enabled)
+	 * @returns {Object|null} Rate limiting statistics or null if disabled
+	 */
+	getRateLimitStats() {
+		return this.rateLimitFeature ? this.rateLimitFeature.stats.get() : null;
+	}
+
+	/**
+	 * Reset rate limiting statistics (if enabled)
+	 */
+	resetRateLimitStats() {
+		if (this.rateLimitFeature) {
+			this.rateLimitFeature.stats.reset();
+		}
 	}
 }

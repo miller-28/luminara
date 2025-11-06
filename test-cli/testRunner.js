@@ -14,6 +14,7 @@ import { suite as responseTypesSuite, mockServer as responseTypesServer } from '
 import { suite as errorsSuite, mockServer as errorsServer } from './tests/errors.test.js';
 import { suite as parseResponseSuite, mockServer as parseResponseServer } from './tests/parseResponse.test.js';
 import { suite as statsSuite, mockServer as statsServer } from './tests/stats.test.js';
+import { suite as rateLimitSuite, mockServer as rateLimitServer } from './tests/rateLimit.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -21,6 +22,7 @@ const TEST_SUITES = [
 	{ name: 'Backoff Strategies', suite: backoffSuite, server: backoffServer },
 	{ name: 'Interceptors', suite: interceptorsSuite, server: interceptorsServer },
 	{ name: 'Retry', suite: retrySuite, server: retryServer },
+	{ name: 'Rate Limiting', suite: rateLimitSuite, server: rateLimitServer },
 	{ name: 'Timeout Handling', suite: timeoutSuite, server: timeoutServer },
 	{ name: 'Custom Drivers', suite: driversSuite, server: driversServer },
 	{ name: 'React Application Simulation', suite: reactSuite, server: reactServer },

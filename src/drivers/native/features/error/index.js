@@ -4,8 +4,7 @@
  */
 
 export { 
-	createLuminaraError,
-	enhanceError, 
+	createLuminaraError, 
 	createHttpError, 
 	createTimeoutError, 
 	createParseError, 

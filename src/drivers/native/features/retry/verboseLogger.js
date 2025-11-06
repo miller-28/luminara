@@ -1,39 +1,32 @@
 /**
  * Retry feature verbose logger
- * Handles detailed logging for retry strategies, backoff calculations, and retry decisions
+ * Handles detailed logging for retry configuration, attempts, backoff calculations, and policy decisions
  */
 
-import { verboseLog } from '../../../../core/verboseLogger.js';
+import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
-export class RetryVerboseLogger {
-	/**
-	 * Log retry configuration setup
-	 */
-	static logRetrySetup(context, retryCount, retryDelay, backoffType) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RETRY', `Retry configuration`, {
-			maxRetries: retryCount,
-			retryDelay: `${retryDelay}ms`,
-			backoffType: backoffType || 'static',
-			strategy: backoffType ? 'dynamic' : 'static'
-		});
+export class RetryVerboseLogger extends BaseVerboseLogger {
+	constructor() {
+		super('RETRY');
 	}
 
-	/**
-	 * Log retry attempt start
-	 */
-	static logRetryAttempt(context, attemptNumber, isInitial = false) {
-		if (!context?.req?.verbose) return;
-		
+	logRetrySetup(context, retryCount, retryDelay, backoffType) {
+		this.config(context, {
+			maxRetries: retryCount,
+			initialDelay: retryDelay,
+			backoffStrategy: backoffType || 'linear'
+		}, 'Retry system configured');
+	}
+
+	logRetryAttempt(context, attemptNumber, isInitial = false) {
 		if (isInitial) {
-			verboseLog(context, 'RETRY', `Attempt ${attemptNumber}: Initial request`, {
+			this.log(context, 'ATTEMPT', `Attempt ${attemptNumber}: Initial request`, {
 				attempt: attemptNumber,
 				type: 'initial',
 				totalAllowed: (context.req.retry || 0) + 1
 			});
 		} else {
-			verboseLog(context, 'RETRY', `Attempt ${attemptNumber}: Retry attempt`, {
+			this.log(context, 'ATTEMPT', `Attempt ${attemptNumber}: Retry attempt`, {
 				attempt: attemptNumber,
 				type: 'retry',
 				remaining: (context.req.retry || 0) - (attemptNumber - 1)
@@ -41,173 +34,110 @@ export class RetryVerboseLogger {
 		}
 	}
 
-	/**
-	 * Log backoff strategy calculation
-	 */
-	static logBackoffCalculation(context, attemptNumber, backoffType, calculatedDelay, expectedDelay, details = {}) {
-		if (!context?.req?.verbose) return;
-		
-		const strategyInfo = getBackoffStrategyInfo(backoffType, attemptNumber, details.baseDelay, details.maxDelay, details.backoffDelays, details.initialDelay);
-		
-		verboseLog(context, 'RETRY', `Backoff calculation: ${calculatedDelay}ms${strategyInfo}`, {
+	logRetryDelay(context, attemptNumber, delayMs, backoffType) {
+		this.timing(context, `DELAY[${backoffType}]`, delayMs, {
 			attempt: attemptNumber,
 			strategy: backoffType,
-			calculated: calculatedDelay,
-			expected: expectedDelay,
-			formula: strategyInfo.trim()
+			delay: `${delayMs}ms`
 		});
 	}
 
-	/**
-	 * Log retry delay execution
-	 */
-	static logRetryDelay(context, attemptNumber, delayMs, backoffType) {
-		if (!context?.req?.verbose) return;
-		
-		const strategyInfo = getBackoffStrategyInfo(backoffType, attemptNumber, context.req.retryDelay, context.req.backoffMaxDelay, context.req.backoffDelays, context.req.initialDelay);
-		
-		verboseLog(context, 'RETRY', `Retry after ${delayMs}ms delay${strategyInfo}`, {
-			attempt: attemptNumber,
-			delay: delayMs,
-			strategy: backoffType || 'static'
+	logRetryExhaustion(context, totalAttempts, totalTime) {
+		this.error(context, 'EXHAUSTED', `All retry attempts exhausted`, {
+			totalAttempts: totalAttempts,
+			totalTime: `${totalTime}ms`,
+			finalOutcome: 'failed'
 		});
-	}
-
-	/**
-	 * Log retry policy evaluation
-	 */
-	static logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy = 'default') {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RETRY', `Retry policy evaluation: ${willRetry ? 'retry' : 'stop'}`, {
-			policy: retryPolicy,
-			decision: willRetry ? 'retry' : 'stop',
-			reason: reason,
-			errorType: error?.name,
-			status: error?.status,
-			attempt: context.attempt
-		});
-	}
-
-	/**
-	 * Log custom retry delay function usage
-	 */
-	static logCustomRetryFunction(context, customDelay, functionResult) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RETRY', `Custom retry function executed`, {
-			attempt: context.attempt,
-			function: 'custom',
-			result: functionResult,
-			type: typeof functionResult
-		});
-	}
-
-	/**
-	 * Log retry headers analysis (Retry-After)
-	 */
-	static logRetryHeaders(context, retryAfterHeader, respectedHeader, finalDelay) {
-		if (!context?.req?.verbose) return;
-		
-		if (retryAfterHeader) {
-			verboseLog(context, 'RETRY', `Retry-After header: ${retryAfterHeader}`, {
-				header: retryAfterHeader,
-				respected: respectedHeader,
-				finalDelay: finalDelay,
-				source: respectedHeader ? 'header' : 'strategy'
-			});
-		}
-	}
-
-	/**
-	 * Log retry exhaustion
-	 */
-	static logRetryExhaustion(context, totalAttempts, totalTime) {
-		if (!context?.req?.verbose) return;
-		
-		verboseLog(context, 'RETRY', `All retries exhausted after ${totalAttempts} attempts`, {
-			attempts: totalAttempts,
-			totalTime: totalTime ? `${totalTime}ms` : 'unknown',
-			result: 'failed',
-			exhausted: true
-		});
-	}
-
-	/**
-	 * Log retry success
-	 */
-	static logRetrySuccess(context, totalAttempts, totalTime) {
-		if (!context?.req?.verbose) return;
-		
-		if (totalAttempts > 1) {
-			verboseLog(context, 'RETRY', `Request succeeded after ${totalAttempts} attempts`, {
-				attempts: totalAttempts,
-				totalTime: totalTime ? `${totalTime}ms` : 'unknown',
-				result: 'success',
-				recovered: true
-			});
-		}
 	}
 }
 
-export function getBackoffStrategyInfo(backoffType, attempt, baseDelay, maxDelay, backoffDelays = null, initialDelay = null) {
-	// For verbose logging, we need to show what the calculation SHOULD be
-	// This should match EXACTLY what the backoff strategy calculates
-	// attempt = current attempt number (1, 2, 3, 4...)
-	// retryCount = attempt - 1 for backoff calculations (1, 2, 3... for actual retries)
-	const retryCount = attempt - 1;
-	
-	if (retryCount <= 0) {
-		return ''; // No strategy info for initial attempt
+// Create singleton instance
+const retryLogger = new RetryVerboseLogger();
+
+export function logRetryAttempt(context, attemptNumber, isInitial) {
+	retryLogger.logRetryAttempt(context, attemptNumber, isInitial);
+}
+
+export function logRetryDelay(context, attemptNumber, delayMs, backoffType) {
+	retryLogger.logRetryDelay(context, attemptNumber, delayMs, backoffType);
+}
+
+export function logRetryExhaustion(context, totalAttempts, totalTime) {
+	retryLogger.logRetryExhaustion(context, totalAttempts, totalTime);
+}
+
+export function logRetrySetup(context, retryCount, retryDelay, backoffType) {
+	retryLogger.logRetrySetup(context, retryCount, retryDelay, backoffType);
+}
+
+/**
+ * Get backoff strategy information for logging purposes
+ * This function provides human-readable strategy information for console logging
+ */
+export function getBackoffStrategyInfo(backoffType, attempt, baseDelay, maxDelay, backoffDelays, initialDelay) {
+	if (!backoffType || backoffType === 'static') {
+		return '';
 	}
-	
-	// Handle initial delay for first retry
-	if (retryCount === 1 && initialDelay !== null && initialDelay !== undefined) {
-		return ` (initial delay: ${initialDelay}ms)`;
-	}
-	
-	switch (backoffType) {
-		case 'linear':
-			return ` (linear: ${baseDelay}ms constant)`;
-		case 'exponential':
-			// Exponential backoff: Math.pow(2, retryCount - 1) * baseDelay
-			// For retryCount 1,2,3,4... we get 2^0, 2^1, 2^2, 2^3...
-			const expDelay = Math.pow(2, retryCount - 1) * baseDelay;
-			return ` (exponential: expected ${expDelay}ms = 2^${retryCount-1}×${baseDelay})`;
-		case 'exponentialCapped':
-			const uncappedDelay = Math.pow(2, retryCount - 1) * baseDelay;
-			const cappedDelay = Math.min(uncappedDelay, maxDelay);
-			return ` (exp-capped: expected ${cappedDelay}ms, uncapped: ${uncappedDelay}ms, max: ${maxDelay}ms)`;
-		case 'fibonacci':
-			// Fibonacci backoff: calculateFibonacci(retryCount) * baseDelay
-			// For retryCount 1,2,3,4,5,6... we get fib(1), fib(2), fib(3), fib(4), fib(5), fib(6)...
-			const fibNumber = calculateFibonacci(retryCount);
-			const fibDelay = fibNumber * baseDelay;
-			return ` (fibonacci: expected ${fibDelay}ms = fib(${retryCount})=${fibNumber} × ${baseDelay})`;
-		case 'custom':
-			// Custom array strategy
-			if (Array.isArray(backoffDelays) && backoffDelays.length > 0) {
-				const delayIndex = retryCount - 1;
-				let expectedDelay;
-				if (delayIndex < backoffDelays.length) {
-					expectedDelay = backoffDelays[delayIndex];
-					return ` (custom: array[${delayIndex}] = ${expectedDelay}ms)`;
-				} else {
-					expectedDelay = backoffDelays[backoffDelays.length - 1];
-					return ` (custom: array[${backoffDelays.length - 1}] = ${expectedDelay}ms, last value)`;
+
+	try {
+		let strategyInfo = ` (${backoffType} backoff`;
+		
+		switch (backoffType) {
+			case 'exponential':
+				if (baseDelay && attempt) {
+					const multiplier = 2; // Default exponential multiplier
+					const calculated = baseDelay * Math.pow(multiplier, attempt - 1);
+					strategyInfo += `: ${baseDelay}ms * ${multiplier}^${attempt - 1} = ${calculated}ms`;
+					if (maxDelay) {
+						strategyInfo += `, capped at ${maxDelay}ms`;
+					}
 				}
-			}
-			return ` (custom: fallback to linear ${baseDelay}ms)`;
-		case 'jitter':
-			return ` (jitter: expected ${baseDelay}-${baseDelay * 2}ms range)`;
-		case 'exponentialJitter':
-			const expJitterBase = Math.min(Math.pow(2, retryCount - 1) * baseDelay, maxDelay || Infinity);
-			return ` (exp-jitter: expected ${expJitterBase}-${expJitterBase + baseDelay}ms range)`;
-		default:
-			return ` (${backoffType})`;
+				break;
+				
+			case 'linear':
+				if (baseDelay && attempt) {
+					const calculated = baseDelay * attempt;
+					strategyInfo += `: ${baseDelay}ms * ${attempt} = ${calculated}ms`;
+					if (maxDelay) {
+						strategyInfo += `, capped at ${maxDelay}ms`;
+					}
+				}
+				break;
+				
+			case 'fibonacci':
+				if (baseDelay && attempt) {
+					const fibNumber = calculateFibonacci(attempt);
+					const calculated = baseDelay * fibNumber;
+					strategyInfo += `: ${baseDelay}ms * fib(${attempt}) = ${calculated}ms`;
+					if (maxDelay) {
+						strategyInfo += `, capped at ${maxDelay}ms`;
+					}
+				}
+				break;
+				
+			case 'custom':
+				if (Array.isArray(backoffDelays) && backoffDelays.length > 0) {
+					const index = Math.min(attempt - 1, backoffDelays.length - 1);
+					strategyInfo += `: custom delays[${index}] = ${backoffDelays[index]}ms`;
+				} else {
+					strategyInfo += ': custom function';
+				}
+				break;
+				
+			default:
+				strategyInfo += `: ${backoffType}`;
+				break;
+		}
+		
+		return strategyInfo + ')';
+	} catch (error) {
+		return ` (${backoffType} backoff)`;
 	}
 }
 
+/**
+ * Calculate fibonacci number (helper function for backoff info)
+ */
 function calculateFibonacci(num) {
 	if (num <= 0) return 0;
 	if (num === 1) return 1;
@@ -215,23 +145,4 @@ function calculateFibonacci(num) {
 	return calculateFibonacci(num - 1) + calculateFibonacci(num - 2);
 }
 
-// Convenience functions for direct usage
-export function logRetryAttempt(context, attemptNumber, isInitial) {
-	RetryVerboseLogger.logRetryAttempt(context, attemptNumber, isInitial);
-}
-
-export function logRetryDelay(context, attemptNumber, delayMs, backoffType) {
-	RetryVerboseLogger.logRetryDelay(context, attemptNumber, delayMs, backoffType);
-}
-
-export function logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy) {
-	RetryVerboseLogger.logRetryPolicyEvaluation(context, error, willRetry, reason, retryPolicy);
-}
-
-export function logRetryExhaustion(context, totalAttempts, totalTime) {
-	RetryVerboseLogger.logRetryExhaustion(context, totalAttempts, totalTime);
-}
-
-export function logRetrySuccess(context, totalAttempts, totalTime) {
-	RetryVerboseLogger.logRetrySuccess(context, totalAttempts, totalTime);
-}
+export { retryLogger };

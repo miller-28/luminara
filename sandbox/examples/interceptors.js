@@ -30,11 +30,10 @@ export const interceptors = {
 				let transformLog = [];
 
 				client.use({
-					onSuccess(response) {
+					onResponse(context) {
 						transformLog.push('🟢 Response received, transforming...');
-						response.data.transformed = true;
-						response.data.timestamp = new Date().toISOString();
-						return response;
+						context.res.data.transformed = true;
+						context.res.data.timestamp = new Date().toISOString();
 					}
 				});
 
@@ -50,10 +49,10 @@ export const interceptors = {
 				let errorLog = [];
 
 				client.use({
-					onError(error, request) {
+					onResponseError(context) {
 						errorLog.push(`🔴 Error caught in interceptor`);
-						errorLog.push(`Request: ${request.method} ${request.url}`);
-						errorLog.push(`Error: ${error.message}`);
+						errorLog.push(`Request: ${context.req.method} ${context.req.url}`);
+						errorLog.push(`Error: ${context.error.message}`);
 					}
 				});
 
