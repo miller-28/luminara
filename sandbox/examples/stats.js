@@ -15,6 +15,20 @@ export const stats = {
 	{
 		id: 'stats-enabled-default',
 		title: 'Stats Enabled by Default',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com'
+});
+
+console.log('Stats enabled:', api.isStatsEnabled());  // true (default)
+
+await api.get('/posts/1');
+
+const stats = api.stats().counters.get();
+console.log('Total requests:', stats.total);
+console.log('Successful:', stats.success);
+console.log('Failed:', stats.fail);`,
 		run: async (updateOutput, signal) => {
 			const api = createLuminara({
 				baseURL: 'https://jsonplaceholder.typicode.com'
@@ -40,6 +54,20 @@ export const stats = {
 	{
 		id: 'stats-disabled-init',
 		title: 'Stats Disabled at Initialization',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com',
+  statsEnabled: false  // Disable stats
+});
+
+console.log('Stats enabled:', api.isStatsEnabled());  // false
+
+await api.get('/data');
+
+// Stats methods return empty/default values when disabled
+const stats = api.stats().counters.get();
+console.log('Total:', stats.total);  // 0 (stats not tracking)`,
 		run: async (updateOutput, signal) => {
 			const api = createLuminara({
 				baseURL: 'https://jsonplaceholder.typicode.com',
@@ -66,6 +94,31 @@ export const stats = {
 	{
 		id: 'stats-runtime-toggle',
 		title: 'Runtime Enable/Disable Control',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com'
+});
+
+console.log('Initially enabled:', api.isStatsEnabled());  // true
+
+await api.get('/posts/1');  // Tracked
+let stats = api.stats().counters.get();
+console.log('Total:', stats.total);  // 1
+
+// Disable stats at runtime
+api.disableStats();
+console.log('Stats enabled:', api.isStatsEnabled());  // false
+
+await api.get('/posts/2');  // Not tracked
+stats = api.stats().counters.get();
+console.log('Total:', stats.total);  // Still 1 (not tracking)
+
+// Re-enable stats
+api.enableStats();
+await api.get('/posts/3');  // Tracked again
+stats = api.stats().counters.get();
+console.log('Total:', stats.total);  // 2`,
 		run: async (updateOutput, signal) => {
 			const api = createLuminara({
 				baseURL: 'https://jsonplaceholder.typicode.com'
@@ -118,6 +171,25 @@ export const stats = {
 	{
 		id: 'stats-method-chaining',
 		title: 'Method Chaining Support',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com'
+});
+
+// Chain enable/disable methods
+const result = api
+  .enableStats()
+  .disableStats()
+  .enableStats();
+
+console.log('Chaining works:', result === api);  // true
+console.log('Final state:', api.isStatsEnabled());  // true
+
+// Make request after chaining
+await api.get('/data');
+const stats = api.stats().counters.get();
+console.log('Total requests:', stats.total);`,
 		run: async (updateOutput, signal) => {
 			const api = createLuminara({
 				baseURL: 'https://jsonplaceholder.typicode.com'
@@ -157,6 +229,29 @@ export const stats = {
 	{
 		id: 'stats-separate-instances',
 		title: 'Separate Stats Per Instance',
+		code: `import { createLuminara } from 'luminara';
+
+// Each instance has independent stats
+const api1 = createLuminara({
+  baseURL: 'https://api1.example.com'
+});
+
+const api2 = createLuminara({
+  baseURL: 'https://api2.example.com'
+});
+
+await api1.get('/data');
+await api1.get('/users');
+
+await api2.get('/products');
+
+const stats1 = api1.stats().counters.get();
+const stats2 = api2.stats().counters.get();
+
+console.log('API 1 requests:', stats1.total);  // 2
+console.log('API 2 requests:', stats2.total);  // 1
+
+// Stats are completely independent per instance`,
 		run: async (updateOutput, signal) => {
 			// Each createLuminara gets its own stats instance
 			const api1 = createLuminara({
@@ -208,6 +303,31 @@ export const stats = {
 	{
 		id: 'stats-interface-when-disabled',
 		title: 'Stats Interface Accessibility When Disabled',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com',
+  statsEnabled: false  // Disabled
+});
+
+console.log('Stats disabled:', !api.isStatsEnabled());
+
+// Interface is still accessible even when disabled
+const stats = api.stats();
+console.log('Interface available:', !!stats);
+
+const snapshot = stats.snapshot();
+console.log('Can call snapshot():', !!snapshot.timestamp);
+
+const counters = stats.counters.get();
+console.log('Can call counters.get():', counters.total);  // 0 (not tracking)
+
+// Make a request
+await api.get('/data');
+const afterStats = stats.counters.get();
+console.log('Request tracked:', afterStats.total > 0);  // false
+
+// Stats interface works but doesn't track when disabled`,
 		run: async (updateOutput, signal) => {
 			const api = createLuminara({
 				baseURL: 'https://jsonplaceholder.typicode.com',
@@ -255,6 +375,30 @@ export const stats = {
 	{
 		id: 'stats-verbose-logging',
 		title: 'Stats Verbose Logging',
+		code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com',
+  verbose: true  // Enable verbose stats logging
+});
+
+// Make some requests - verbose logs show stats operations
+await api.get('/users');
+// Logs: Stats enabled, request tracked
+
+api.disableStats();
+// Logs: Stats disabled
+
+await api.get('/products');
+// Logs: Stats disabled, request not tracked
+
+api.enableStats();
+// Logs: Stats re-enabled
+
+await api.get('/orders');
+// Logs: Stats enabled, request tracked
+
+// Check browser console for detailed stats logs!`,
 		run: async (updateOutput, signal) => {
 			// Capture console output for demonstration
 			const logMessages = [];

@@ -12,6 +12,26 @@ export const rateLimitingExamples = {
 			id: 'rate-limit-test-simple',
 			title: 'Simple Rate Limit Test',
 			description: 'Basic test: 1 request per second with 2 sequential requests',
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({ 
+  baseURL: 'https://api.example.com',
+  rateLimit: { 
+    rps: 1  // 1 request per second
+  }
+});
+
+const startTime = Date.now();
+
+await api.getJson('/todos/1');  // Immediate
+const firstTime = Date.now() - startTime;
+console.log('First request:', firstTime, 'ms');
+
+await api.getJson('/todos/2');  // Delayed ~1000ms
+const totalTime = Date.now() - startTime;
+console.log('Total time:', totalTime, 'ms');  // ~1000ms
+
+// Second request automatically delayed to respect rate limit`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('🔧 Testing basic rate limiting: 1 RPS...\n');
 				
@@ -71,6 +91,32 @@ export const rateLimitingExamples = {
 			id: 'rate-limit-basic',
 			title: '2 Requests Per Second',
 			description: 'Basic rate limiting with 2 RPS - watch timing between requests',
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({ 
+  baseURL: 'https://api.example.com',
+  rateLimit: { 
+    rps: 2  // 2 requests per second
+  }
+});
+
+const startTime = Date.now();
+
+// Send 4 requests quickly
+const requests = [];
+for (let i = 1; i <= 4; i++) {
+  const promise = api.getJson(\`/posts/\${i}\`).then(() => {
+    const elapsed = Date.now() - startTime;
+    console.log(\`Request \${i} completed after \${elapsed}ms\`);
+  });
+  requests.push(promise);
+}
+
+await Promise.all(requests);
+const totalTime = Date.now() - startTime;
+console.log('Total time:', totalTime, 'ms');  // ~1500ms
+
+// First 2 requests immediate, next 2 delayed ~500ms each`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('🔧 Setting up rate limiting: 2 requests per second...\n');
 				
@@ -127,6 +173,31 @@ export const rateLimitingExamples = {
 			id: 'rate-limit-burst',
 			title: 'Token Bucket with Burst',
 			description: 'Demonstrates burst capacity - immediate requests when tokens available',
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({ 
+  baseURL: 'https://api.example.com',
+  rateLimit: { 
+    rps: 2,
+    burst: 5  // Allow 5 immediate requests
+  }
+});
+
+const startTime = Date.now();
+
+// Send 7 requests - first 5 burst, last 2 delayed
+const requests = [];
+for (let i = 1; i <= 7; i++) {
+  const promise = api.getJson(\`/data/\${i}\`).then(() => {
+    const elapsed = Date.now() - startTime;
+    console.log(\`Request \${i} at \${elapsed}ms\`);
+  });
+  requests.push(promise);
+}
+
+await Promise.all(requests);
+// First 5 requests: immediate (burst)
+// Requests 6-7: delayed based on 2 RPS refill rate`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('🔧 Setting up token bucket: 1 RPS with burst capacity of 3...\n');
 				
@@ -202,6 +273,31 @@ export const rateLimitingExamples = {
 			id: 'rate-limit-scoping',
 			title: 'Global vs Domain Scoping',
 			description: 'Shows how rate limiting applies to different scopes',
+			code: `import { createLuminara } from 'luminara';
+
+// Global scope: rate limit applies across all requests
+const globalApi = createLuminara({ 
+  rateLimit: { 
+    rps: 2,
+    scope: 'global'  // All requests share same rate limit
+  }
+});
+
+await globalApi.get('https://api1.example.com/data');
+await globalApi.get('https://api2.example.com/data');
+// Both requests share the same 2 RPS limit
+
+// Domain scope: rate limit per domain
+const domainApi = createLuminara({ 
+  rateLimit: { 
+    rps: 2,
+    scope: 'domain'  // Each domain gets its own rate limit
+  }
+});
+
+await domainApi.get('https://api1.example.com/data');  // 2 RPS for api1
+await domainApi.get('https://api2.example.com/data');  // 2 RPS for api2
+// Requests to different domains have independent rate limits`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('🔧 Setting up global scope rate limiting...\n');
 				
@@ -254,6 +350,34 @@ export const rateLimitingExamples = {
 			id: 'rate-limit-debug',
 			title: 'Rate Limiting Debug Test',
 			description: 'Comprehensive test to verify rate limiting works correctly',
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({ 
+  baseURL: 'https://api.example.com',
+  verbose: true,  // Enable verbose logging for debugging
+  rateLimit: { 
+    rps: 1,
+    verbose: true  // Enable rate limit verbose logging
+  }
+});
+
+// Send test requests - check console for detailed logs
+const startTime = Date.now();
+
+await api.getJson('/test/1');
+console.log('Request 1:', Date.now() - startTime, 'ms');
+
+await api.getJson('/test/2');
+console.log('Request 2:', Date.now() - startTime, 'ms');
+
+await api.getJson('/test/3');
+console.log('Request 3:', Date.now() - startTime, 'ms');
+
+// Verbose logs show:
+// - Token bucket state
+// - Wait times and delays
+// - Rate limit decisions
+// Check browser console for details!`,
 			run: async (updateOutput, signal, options = {}) => {
 				try {
 					updateOutput('🔧 Running comprehensive debug test for rate limiting...\n');

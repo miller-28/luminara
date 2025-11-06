@@ -2,10 +2,22 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const retry = {
 	title: "🔄 Retry",
-    examples: [
+	examples: [
 		{
 			id: "retry-basic",
 			title: "Basic Retry (3 attempts)",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/unreliable', {
+    retry: 3,           // Retry up to 3 times
+    retryDelay: 500     // Wait 500ms between retries
+  });
+} catch (error) {
+  console.log('Failed after 3 retries');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				const retryLog = [];
@@ -53,6 +65,19 @@ export const retry = {
 		{
 			id: "retry-status-codes",
 			title: "Retry with Status Codes",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/flaky', {
+    retry: 2,
+    retryDelay: 300,
+    retryStatusCodes: [408, 429, 500, 502, 503]
+  });
+} catch (error) {
+  console.log('Failed after retries:', error.status);
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput(`🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n⏳ Creating client and making request...`);
 				
@@ -85,6 +110,21 @@ export const retry = {
 		{
 			id: "custom-retry-function",
 			title: "Custom retryDelay Function",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// Custom function for retry delay calculation
+const customRetryDelay = (context) => {
+  const attempt = context.attempt || 1;
+  console.log('Retry attempt:', attempt);
+  return 150; // Return delay in milliseconds
+};
+
+await client.get('https://api.example.com/unstable', {
+  retry: 4,
+  retryDelay: customRetryDelay
+});`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				const retryLog = [];
@@ -117,6 +157,21 @@ export const retry = {
 		{
 			id: "default-retry-policy",
 			title: "Default Retry Policy (Idempotent Methods)",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// GET is idempotent - will retry automatically
+await client.get('https://api.example.com/data', {
+  retry: 2
+});
+
+// POST may not retry on some errors
+// unless explicitly configured
+await client.post('https://api.example.com/submit', data, {
+  retry: 2,
+  retryStatusCodes: [500, 502, 503]
+});`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing default retry policy with idempotent methods...\n');
 				
@@ -167,6 +222,26 @@ export const retry = {
 		{
 			id: "custom-retry-policy",
 			title: "Custom Retry Policy Override",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// Custom policy for retry decision
+const customRetryPolicy = (error, context) => {
+  console.log('Retry attempt:', context.attempt);
+  
+  // Custom logic: retry POST on 400 errors
+  if (context.request.method === 'POST' && error.status === 400) {
+    return context.attempt < context.maxAttempts;
+  }
+  
+  return false; // Don't retry other cases
+};
+
+await client.post('https://api.example.com/submit', data, {
+  retry: 2,
+  shouldRetry: customRetryPolicy
+});`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing custom retry policy that overrides defaults...\n');
 				
@@ -204,6 +279,29 @@ export const retry = {
 		{
 			id: "retry-status-policies",
 			title: "Retry Status Code Policies",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// Test which status codes trigger retries
+const testCases = [
+  { status: 429, description: 'Too Many Requests', shouldRetry: true },
+  { status: 500, description: 'Internal Server Error', shouldRetry: true },
+  { status: 502, description: 'Bad Gateway', shouldRetry: true },
+  { status: 503, description: 'Service Unavailable', shouldRetry: true },
+  { status: 400, description: 'Bad Request', shouldRetry: false }
+];
+
+for (const test of testCases) {
+  try {
+    await client.get(\`https://api.example.com/status/\${test.status}\`, {
+      retry: 2,
+      retryDelay: 500
+    });
+  } catch (error) {
+    console.log(\`\${test.description} (\${test.status}): \${test.shouldRetry ? 'Retried' : 'Not retried'}\`);
+  }
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput('Testing retry behavior for different status codes...\n');
 				

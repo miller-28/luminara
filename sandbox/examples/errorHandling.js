@@ -6,6 +6,21 @@ export const errorHandling = {
 		{
 			id: "http-error-json",
 			title: "HTTP Error with JSON Data",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.post('https://api.example.com/invalid', {
+    message: "Bad data"
+  });
+} catch (error) {
+  console.log('Error name:', error.name);        // "LuminaraError"
+  console.log('Status code:', error.status);     // 400
+  console.log('Error data:', error.data);        // Server's JSON response
+  console.log('Request URL:', error.request.url);
+  console.log('Attempt:', error.attempt);
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing HTTP error with JSON response...");
 				
@@ -36,6 +51,19 @@ export const errorHandling = {
 		{
 			id: "network-error",
 			title: "Network Error",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://nonexistent-domain-12345.com/api/test');
+} catch (error) {
+  console.log('Error name:', error.name);        // "LuminaraError"
+  console.log('Message:', error.message);        // Network error details
+  console.log('Status:', error.status);          // undefined (no response)
+  console.log('Request URL:', error.request.url);
+  console.log('Type: Network Error');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing network error...");
 				
@@ -64,6 +92,20 @@ export const errorHandling = {
 		{
 			id: "timeout-error",
 			title: "Timeout Error",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/slow-endpoint', { 
+    timeout: 100  // 100ms timeout
+  });
+} catch (error) {
+  console.log('Error name:', error.name);        // "TimeoutError"
+  console.log('Message:', error.message);
+  console.log('Request URL:', error.request.url);
+  console.log('Timeout:', 100, 'ms');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing timeout error...");
 				
@@ -95,6 +137,23 @@ export const errorHandling = {
 		{
 			id: "abort-error",
 			title: "Abort Error",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+const controller = new AbortController();
+
+// Abort after 50ms
+setTimeout(() => controller.abort(), 50);
+
+try {
+  await client.get('https://api.example.com/slow-endpoint', { 
+    signal: controller.signal
+  });
+} catch (error) {
+  console.log('Error name:', error.name);        // "AbortError"
+  console.log('Message:', error.message);
+  console.log('Request aborted by user');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing abort error...");
 				
@@ -128,6 +187,21 @@ export const errorHandling = {
 		{
 			id: "retry-error-tracking",
 			title: "Error Tracking Across Retries",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/unstable', {
+    retry: 3,
+    retryDelay: 500
+  });
+} catch (error) {
+  console.log('Error name:', error.name);
+  console.log('Final attempt:', error.attempt);  // 4 (1 initial + 3 retries)
+  console.log('Status:', error.status);
+  console.log('All retry attempts exhausted');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing error tracking across retries...");
 				
@@ -173,6 +247,19 @@ export const errorHandling = {
 		{
 			id: "ignore-response-error",
 			title: "Ignore Response Errors",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// Don't throw on 4xx/5xx errors
+const errorResponse = await client.get('https://api.example.com/not-found', { 
+  ignoreResponseError: true
+});
+
+console.log('Status:', errorResponse.status);        // 404
+console.log('Status Text:', errorResponse.statusText);
+console.log('Data:', errorResponse.data);
+console.log('No error thrown - response returned normally');`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("Testing ignoreResponseError option...");
 				

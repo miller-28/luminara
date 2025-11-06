@@ -6,6 +6,22 @@ export const interceptors = {
 		{
 			id: "interceptor-request",
 			title: "Request Interceptor",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+client.use({
+  onRequest(request) {
+    request.headers = { 
+      ...(request.headers || {}), 
+      'X-Custom-Header': 'Luminara' 
+    };
+    return request;
+  }
+});
+
+const response = await client.get('https://api.example.com/data');
+console.log('Custom header added to request');`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let interceptorLog = [];
@@ -25,6 +41,20 @@ export const interceptors = {
 		{
 			id: "interceptor-response",
 			title: "Response Interceptor",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+client.use({
+  onResponse(context) {
+    context.res.data.transformed = true;
+    context.res.data.timestamp = new Date().toISOString();
+  }
+});
+
+const response = await client.getJson('https://api.example.com/todos/1');
+console.log('Transformed:', response.data.transformed);
+console.log('Timestamp:', response.data.timestamp);`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let transformLog = [];
@@ -44,6 +74,22 @@ export const interceptors = {
 		{
 			id: "interceptor-error",
 			title: "Error Interceptor",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+client.use({
+  onError(error, request) {
+    console.error(\`Error on \${request.method} \${request.url}: \${error.message}\`);
+    // Log to analytics, show user notification, etc.
+  }
+});
+
+try {
+  await client.get('https://api.example.com/not-found');
+} catch (error) {
+  console.log('Error interceptor logged the error');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let errorLog = [];
@@ -66,6 +112,27 @@ export const interceptors = {
 		{
 			id: "interceptor-execution-order",
 			title: "Deterministic Execution Order",
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara();
+const executionOrder = [];
+
+// Plugin 1
+api.use({
+  onRequest(req) { executionOrder.push('Plugin 1: onRequest'); return req; },
+  onResponse(ctx) { executionOrder.push('Plugin 1: onResponse'); },
+  onError(err, req) { executionOrder.push('Plugin 1: onError'); }
+});
+
+// Plugin 2
+api.use({
+  onRequest(req) { executionOrder.push('Plugin 2: onRequest'); return req; },
+  onResponse(ctx) { executionOrder.push('Plugin 2: onResponse'); },
+  onError(err, req) { executionOrder.push('Plugin 2: onError'); }
+});
+
+await api.get('https://api.example.com/data');
+// Order: P1:onRequest → P2:onRequest → Response → P2:onResponse → P1:onResponse`,
 			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',
@@ -170,6 +237,35 @@ export const interceptors = {
 		{
 			id: "shared-context-metadata",
 			title: "Shared Context Between Interceptors",
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara();
+
+// Interceptor 1: Initialize metadata
+api.use({
+  onRequest(context) {
+    context.meta.correlationId = 'correlation-' + Math.random().toString(36).substr(2, 9);
+    context.meta.tags = ['demo', 'context-sharing'];
+  },
+  onResponse(context) {
+    context.res.data._luminara = {
+      correlationId: context.meta.correlationId,
+      tags: context.meta.tags
+    };
+  }
+});
+
+// Interceptor 2: Use shared metadata
+api.use({
+  onRequest(context) {
+    context.req.headers = {
+      'X-Correlation-ID': context.meta.correlationId
+    };
+  }
+});
+
+const response = await api.get('https://api.example.com/data');
+console.log('Correlation ID:', response.data._luminara.correlationId);`,
 			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',
@@ -258,6 +354,29 @@ export const interceptors = {
 		{
 			id: "retry-aware-auth",
 			title: "Retry-Aware Authentication",
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  retry: 2,
+  retryDelay: 500
+});
+
+let authToken = 'initial-token';
+
+api.use({
+  onRequest(context) {
+    // Refresh token on retry
+    if (context.meta.attempt > 1) {
+      authToken = 'refreshed-token-' + context.meta.attempt;
+    }
+    context.req.headers = {
+      'Authorization': \`Bearer \${authToken}\`
+    };
+  }
+});
+
+await api.get('https://api.example.com/protected');
+// Auth token refreshes automatically on retry attempts`,
 			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',
@@ -326,6 +445,31 @@ export const interceptors = {
 		{
 			id: "conditional-interceptor-processing",
 			title: "Conditional Interceptor Processing",
+			code: `import { createLuminara } from 'luminara';
+
+const api = createLuminara();
+
+api.use({
+  onRequest(context) {
+    // Only process requests to /api/v2 endpoints
+    if (context.req.url.includes('/api/v2')) {
+      context.req.headers = {
+        ...(context.req.headers || {}),
+        'X-API-Version': 'v2',
+        'X-Feature-Flag': 'enabled'
+      };
+      context.meta.v2Processed = true;
+    }
+  },
+  onResponse(context) {
+    if (context.meta.v2Processed) {
+      console.log('V2 API response processed');
+    }
+  }
+});
+
+await api.get('https://api.example.com/api/v2/data');
+// Interceptor only processes v2 endpoints`,
 			run: async (updateOutput, signal, options = {}) => {
 				const api = createLuminara({
 					baseURL: 'https://httpbingo.org',

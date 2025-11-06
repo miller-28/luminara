@@ -6,6 +6,19 @@ export const backoffStrategies = {
 		{
 			id: "backoff-linear",
 			title: "Linear Backoff",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 6,
+    retryDelay: 300,
+    backoffType: 'linear'
+  });
+} catch (error) {
+  console.log('Linear backoff: 300ms constant delay between retries');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -26,6 +39,20 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential",
 			title: "Exponential Backoff",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/500', {
+    retry: 5,
+    retryDelay: 200,
+    backoffType: 'exponential'
+  });
+} catch (error) {
+  // Delays: 200ms, 400ms, 800ms, 1600ms, 3200ms
+  console.log('Exponential backoff: Doubles delay with each retry');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -46,6 +73,21 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential-capped",
 			title: "Exponential Capped",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/500', {
+    retry: 5,
+    retryDelay: 200,
+    backoffType: 'exponential',
+    backoffMaxDelay: 1000  // Cap delay at 1000ms
+  });
+} catch (error) {
+  // Delays: 200ms, 400ms, 800ms, 1000ms (capped), 1000ms (capped)
+  console.log('Exponential backoff capped at 1000ms maximum');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -67,6 +109,20 @@ export const backoffStrategies = {
 		{
 			id: "backoff-fibonacci",
 			title: "Fibonacci Backoff",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 8,
+    retryDelay: 200,
+    backoffType: 'fibonacci'
+  });
+} catch (error) {
+  // Delays follow Fibonacci: 200ms, 200ms, 400ms, 600ms, 1000ms, 1600ms, 2600ms...
+  console.log('Fibonacci backoff: Gradual increase following Fibonacci sequence');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -87,6 +143,20 @@ export const backoffStrategies = {
 		{
 			id: "backoff-jitter",
 			title: "Jitter Backoff",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 3,
+    retryDelay: 500,
+    backoffType: 'jitter'
+  });
+} catch (error) {
+  // Adds random jitter to prevent thundering herd: 500-1000ms per retry
+  console.log('Jitter backoff: Random delays prevent simultaneous retries');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -107,6 +177,21 @@ export const backoffStrategies = {
 		{
 			id: "backoff-exponential-jitter",
 			title: "Exponential Jitter",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 4,
+    retryDelay: 300,
+    backoffType: 'exponentialJitter',
+    backoffMaxDelay: 5000
+  });
+} catch (error) {
+  // Combines exponential growth with jitter for optimal retry pattern
+  console.log('Exponential jitter: Best of both strategies');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -128,6 +213,21 @@ export const backoffStrategies = {
 		{
 			id: "backoff-initial-delay",
 			title: "Initial Delay Example",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 3,
+    retryDelay: 500,
+    backoffType: 'linear',
+    initialDelay: 2000  // Wait 2 seconds before first retry
+  });
+} catch (error) {
+  // Delays: 2000ms (initial), 500ms, 500ms
+  console.log('Initial delay ensures pause before first retry');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -150,6 +250,20 @@ export const backoffStrategies = {
 		{
 			id: "backoff-custom-array",
 			title: "Custom Array Example", 
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 5,
+    backoffType: 'custom',
+    backoffDelays: [800, 5000, 10000, 15000, 30000]
+  });
+} catch (error) {
+  // Uses exact delays from array: 800ms, 5s, 10s, 15s, 30s
+  console.log('Custom array: Precise control over retry delays');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();
@@ -171,6 +285,22 @@ export const backoffStrategies = {
 		{
 			id: "backoff-combined-features",
 			title: "Combined Features Example",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  await client.get('https://api.example.com/status/503', {
+    retry: 4,
+    retryDelay: 400,
+    backoffType: 'exponentialJitter',
+    backoffMaxDelay: 3000,
+    initialDelay: 1000
+  });
+} catch (error) {
+  // Combines: initial delay, exponential jitter, max cap
+  console.log('All backoff features working together');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				let startTime = Date.now();

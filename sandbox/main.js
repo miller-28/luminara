@@ -1,5 +1,70 @@
 import { ExamplesController, examples } from './examplesController.js';
 
+// Code Modal Manager - Handles modal display and interactions
+class CodeModal {
+	constructor() {
+		this.modal = document.getElementById('code-modal');
+		this.modalTitle = document.getElementById('modal-title');
+		this.modalCode = document.getElementById('modal-code');
+		this.closeBtn = document.getElementById('modal-close');
+		this.copyBtn = document.getElementById('modal-copy');
+		
+		this.init();
+	}
+
+	init() {
+		// Close modal on close button click
+		this.closeBtn.onclick = () => this.close();
+		
+		// Close modal on backdrop click
+		this.modal.onclick = (e) => {
+			if (e.target === this.modal) {
+				this.close();
+			}
+		};
+		
+		// Close modal on Escape key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && this.modal.classList.contains('show')) {
+				this.close();
+			}
+		});
+		
+		// Copy code on copy button click
+		this.copyBtn.onclick = () => this.copyCode();
+	}
+
+	open(title, code) {
+		this.modalTitle.textContent = title;
+		this.modalCode.textContent = code;
+		this.modal.classList.add('show');
+		document.body.style.overflow = 'hidden'; // Prevent background scroll
+	}
+
+	close() {
+		this.modal.classList.remove('show');
+		document.body.style.overflow = ''; // Restore scroll
+	}
+
+	async copyCode() {
+		const code = this.modalCode.textContent;
+		try {
+			await navigator.clipboard.writeText(code);
+			// Visual feedback
+			const originalText = this.copyBtn.textContent;
+			this.copyBtn.textContent = '✅ Copied!';
+			this.copyBtn.style.background = '#48bb78';
+			setTimeout(() => {
+				this.copyBtn.textContent = originalText;
+				this.copyBtn.style.background = '';
+			}, 2000);
+		} catch (err) {
+			console.error('Failed to copy code:', err);
+			alert('Failed to copy code to clipboard');
+		}
+	}
+}
+
 // UI Management - Only handles DOM manipulation and rendering
 class SandboxUI {
 	constructor() {
@@ -12,6 +77,7 @@ class SandboxUI {
 		this.stopButtonElements = new Map();
 		
 		this.examplesController = new ExamplesController();
+		this.codeModal = new CodeModal();
 
 		this.init();
 	}
@@ -78,10 +144,19 @@ class SandboxUI {
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '8px';
 
+		// Code button (if example has code)
+		if (example.code) {
+			const codeBtn = document.createElement('button');
+			codeBtn.className = 'example-code-btn';
+			codeBtn.innerHTML = '📄 Code';
+			codeBtn.onclick = () => this.handleShowCode(example.title, example.code);
+			buttonContainer.appendChild(codeBtn);
+		}
+
 		const runBtn = document.createElement('button');
 		runBtn.className = 'btn btn-small';
 		runBtn.textContent = '▶ Run';
-        runBtn.onclick = () => this.handleRunTest(example.id);
+		runBtn.onclick = () => this.handleRunTest(example.id);
         this.runButtonElements.set(example.id, runBtn);
 
 		const stopBtn = document.createElement('button');
@@ -115,7 +190,11 @@ class SandboxUI {
 	}
 
 	// UI Handlers - delegate logic to examples controller
-    async handleRunTest(testId) {
+	handleShowCode(title, code) {
+		this.codeModal.open(title, code);
+	}
+
+	async handleRunTest(testId) {
 		const example = this.examplesController.findExample(testId);
         if (!example) return;
 

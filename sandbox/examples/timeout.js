@@ -2,10 +2,20 @@ import { createLuminara } from "../../dist/index.mjs";
 
 export const timeout = {
 	title: "⏱️ Timeout",
-    examples: [
+	examples: [
 		{
 			id: "timeout-success",
 			title: "Timeout Success (2s delay, 5s timeout)",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+// Request will complete within timeout
+const response = await client.get('https://api.example.com/slow', {
+  timeout: 5000  // 5 second timeout
+});
+
+console.log('Request completed:', response.status);`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				
@@ -24,6 +34,19 @@ export const timeout = {
 		{
 			id: "timeout-fail",
 			title: "Timeout Failure (3s delay, 1s timeout)",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara();
+
+try {
+  // Request will timeout
+  await client.get('https://api.example.com/very-slow', {
+    timeout: 1000  // 1 second timeout
+  });
+} catch (error) {
+  console.log('Timeout error:', error.message);
+  // Error: Request timeout after 1000ms
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				
@@ -41,5 +64,5 @@ export const timeout = {
 				}
 			}
 		}
-    ]
+	]
 };

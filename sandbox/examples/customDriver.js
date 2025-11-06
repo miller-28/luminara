@@ -6,6 +6,28 @@ export const customDriver = {
 		{
 			id: "browser-driver",
 			title: "Browser Fetch Driver",
+			code: `import { createLuminara } from 'luminara';
+
+// Define custom driver using browser fetch
+const BrowserDriver = (config = {}) => ({
+  async request(options) {
+    const { url, method = 'GET', headers, body, signal } = options;
+    
+    const response = await fetch(url, { method, headers, body, signal });
+    const data = await response.json();
+    
+    return { 
+      status: response.status, 
+      headers: response.headers, 
+      data 
+    };
+  }
+});
+
+// Use custom driver
+const client = createLuminara({ driver: BrowserDriver });
+const response = await client.get('https://api.example.com/data');
+console.log('Custom driver response:', response.data);`,
 			run: async (updateOutput, signal, options = {}) => {
 				// Define a custom driver factory function
 				const BrowserDriver = (config = {}) => {

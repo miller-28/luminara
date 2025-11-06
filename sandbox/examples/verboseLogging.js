@@ -6,6 +6,26 @@ export const verboseLogging = {
 		{
 			id: "verbose-comprehensive",
 			title: "Comprehensive Verbose Logging",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara({
+  baseURL: 'https://api.example.com',
+  verbose: true,  // Enable verbose logging
+  timeout: 5000,
+  retry: 3,
+  retryDelay: 500,
+  backoffType: 'exponential'
+});
+
+// All requests will log detailed information to console:
+// - Request URL, method, headers, body
+// - Timeout configuration
+// - Retry attempts and backoff delays
+// - Response status, headers, data
+// - Error details
+
+const response = await client.get('/data');
+// Check browser console for detailed logs!`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({
 					baseURL: 'https://httpbingo.org',
@@ -89,6 +109,31 @@ export const verboseLogging = {
 		{
 			id: "verbose-error-handling",
 			title: "Verbose Error Handling & Classification",
+			code: `import { createLuminara } from 'luminara';
+
+const client = createLuminara({
+  verbose: true,
+  retry: 2,
+  retryDelay: 200
+});
+
+// Test different error scenarios with verbose logging
+try {
+  await client.get('https://api.example.com/status/404');
+} catch (error) {
+  // Verbose logs show:
+  // - Error classification (4xx vs 5xx)
+  // - Retry eligibility decision
+  // - Error propagation chain
+  console.log('404 error logged verbosely');
+}
+
+try {
+  await client.get('https://api.example.com/delay/10', { timeout: 1000 });
+} catch (error) {
+  // Verbose logs show timeout detection and handling
+  console.log('Timeout error logged verbosely');
+}`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({
 					verbose: options.verbose || false, // Use passed verbose option or default to false
@@ -147,6 +192,31 @@ export const verboseLogging = {
 		{
 			id: "verbose-feature-showcase",
 			title: "Feature-by-Feature Verbose Showcase",
+			code: `import { createLuminara } from 'luminara';
+
+// Test URL building verbose logging
+const urlClient = createLuminara({
+  baseURL: 'https://api.example.com',
+  verbose: true
+});
+await urlClient.get('/users', { query: { page: 1, limit: 10 } });
+// Logs: URL construction, query parameter serialization
+
+// Test timeout verbose logging
+const timeoutClient = createLuminara({ verbose: true });
+await timeoutClient.get('https://api.example.com/data', { timeout: 5000 });
+// Logs: Timeout setup, signal configuration
+
+// Test retry verbose logging
+const retryClient = createLuminara({ verbose: true });
+await retryClient.get('https://api.example.com/unstable', {
+  retry: 3,
+  retryDelay: 500,
+  backoffType: 'exponential'
+});
+// Logs: Retry attempts, backoff delays, strategy decisions
+
+// Each feature has its own dedicated verbose logger!`,
 			run: async (updateOutput, signal, options = {}) => {
 				updateOutput("🔍 Testing feature-specific verbose logging...\n\n");
 				updateOutput("👁️ Each feature demonstrates its own verbose logger!\n\n");

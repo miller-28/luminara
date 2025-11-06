@@ -6,6 +6,16 @@ export const responseTypes = {
 	{
 		id: 'response-type-text',
 		title: 'responseType: "text"',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+const response = await luminara.get('https://api.example.com/data', {
+  responseType: 'text'
+});
+
+console.log('Type:', typeof response.data);  // "string"
+console.log('Content:', response.data);`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -35,6 +45,16 @@ export const responseTypes = {
 	{
 		id: 'response-type-json',
 		title: 'responseType: "json"',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+const response = await luminara.get('https://api.example.com/data', {
+  responseType: 'json'
+});
+
+console.log('Type:', typeof response.data);  // "object"
+console.log('Keys:', Object.keys(response.data));`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -64,6 +84,17 @@ export const responseTypes = {
 	{
 		id: 'response-type-blob',
 		title: 'responseType: "blob"',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+const response = await luminara.get('https://api.example.com/image.png', {
+  responseType: 'blob'
+});
+
+console.log('Type:', response.data.constructor.name);  // "Blob"
+console.log('Size:', response.data.size);
+console.log('MIME:', response.data.type);`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -99,6 +130,19 @@ export const responseTypes = {
 	{
 		id: 'response-type-stream',
 		title: 'responseType: "stream"',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+const response = await luminara.get('https://api.example.com/large-data', {
+  responseType: 'stream'
+});
+
+console.log('Type:', response.data.constructor.name);  // "ReadableStream"
+
+const reader = response.data.getReader();
+const { value, done } = await reader.read();
+console.log('First chunk:', value.length, 'bytes');`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -142,6 +186,16 @@ export const responseTypes = {
 	{
 		id: 'response-type-arraybuffer',
 		title: 'responseType: "arrayBuffer"',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+const response = await luminara.get('https://api.example.com/binary-data', {
+  responseType: 'arrayBuffer'
+});
+
+console.log('Type:', response.data.constructor.name);  // "ArrayBuffer"
+console.log('Size:', response.data.byteLength, 'bytes');`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -171,6 +225,16 @@ export const responseTypes = {
 	{
 		id: 'response-type-auto',
 		title: 'responseType: "auto" (default)',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+// Auto-detects response type based on Content-Type header
+const jsonResponse = await luminara.get('https://api.example.com/data.json');
+console.log('Auto-detected as JSON:', typeof jsonResponse.data);  // "object"
+
+const textResponse = await luminara.get('https://api.example.com/data.txt');
+console.log('Auto-detected as text:', typeof textResponse.data);  // "string"`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
@@ -200,6 +264,15 @@ export const responseTypes = {
 	{
 		id: 'response-type-default',
 		title: 'Default behavior (no responseType)',
+		code: `import { createLuminara } from 'luminara';
+
+const luminara = createLuminara();
+
+// No responseType specified - defaults to auto-detection
+const response = await luminara.get('https://api.example.com/data');
+
+console.log('Default behavior: auto-detected type');
+console.log('Type:', typeof response.data);`,
 		run: async (updateOutput, signal, options = {}) => {
 			const luminara = createLuminara({ verbose: options.verbose || false });
 			
