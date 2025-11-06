@@ -15,8 +15,8 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
 - 🔄 **Dual export support** - ESM/CJS compatibility with auto-detection
 - 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
-- � **Advanced rate limiting** - Token bucket algorithm with global, domain, and endpoint scoping
-- �🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
+- 🚦 **Advanced rate limiting** - Token bucket algorithm with global, domain, and endpoint scoping
+- 🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
 - 📝 **Verbose logging system** - Detailed debugging and request tracing
 - 🎯 **Response type handling** - JSON, text, form data, binary support
 - ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
@@ -183,7 +183,7 @@ api.resetRateLimitStats();
 
 ---
 
-## � Exports & Advanced Usage
+## 📤 Exports & Advanced Usage
 
 Luminara provides multiple export options for different use cases:
 
@@ -281,7 +281,7 @@ npm run build:watch  # Alternative watch mode command
 
 ---
 
-## �🔄 Retry & Backoff Strategies
+## 🔄 Retry & Backoff Strategies
 
 Luminara includes 6 built-in backoff strategies for intelligent retry handling:
 
@@ -382,7 +382,7 @@ const api = createLuminara({
 
 ---
 
-## � Rate Limiting
+## 🚦 Rate Limiting
 
 Luminara's rate limiting system uses a **token bucket algorithm** with flexible scoping to control request flow and prevent API abuse.
 
@@ -509,7 +509,7 @@ try {
 
 ---
 
-## �🔌 Enhanced Interceptor System
+## 🔌 Enhanced Interceptor System
 
 Luminara's interceptor architecture provides **deterministic execution order** and **guaranteed flow control** with a mutable context object that travels through the entire request lifecycle.
 
@@ -960,7 +960,7 @@ The sandbox features:
 4. 🔄 **Retry** - Basic retry with status codes
 5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
 6. 🔌 **Interceptors** - Request/response/error interceptors
-7. �️ **Error Handling** - Comprehensive error scenarios
+7. 🛡️ **Error Handling** - Comprehensive error scenarios
 8. 🎯 **Response Types** - JSON, text, form, binary data handling
 9. 📊 **Stats System** - Real-time metrics and analytics
 10. 📝 **Verbose Logging** - Detailed debugging and tracing
