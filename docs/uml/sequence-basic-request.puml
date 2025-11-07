@@ -1,0 +1,75 @@
+@startuml Basic HTTP Request Flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+
+title Luminara - Basic HTTP Request Flow
+
+actor "User Code" as User
+participant "LuminaraClient" as Client
+participant "Plugin Pipeline" as Pipeline
+participant "Driver\n(ofetch/native)" as Driver
+participant "HTTP Library\n(ofetch/fetch)" as HTTP
+participant "Response Parser" as Parser
+
+User -> Client: api.get('/users')
+activate Client
+
+Client -> Client: Build request config\n{url, method, headers}
+
+Client -> Pipeline: Execute onRequest hooks
+activate Pipeline
+loop For each plugin
+	Pipeline -> Pipeline: plugin.onRequest(request)
+end
+Pipeline --> Client: Modified request
+deactivate Pipeline
+
+Client -> Driver: driver.request(config)
+activate Driver
+
+Driver -> Driver: Apply driver options\n(timeout, retry, etc)
+
+Driver -> HTTP: Execute HTTP request
+activate HTTP
+
+HTTP --> Driver: Response / Error
+deactivate HTTP
+
+alt Success
+	Driver -> Parser: parseResponse(response)
+	activate Parser
+	Parser -> Parser: Detect content type
+	Parser -> Parser: Parse (json/text/blob)
+	Parser --> Driver: Parsed data
+	deactivate Parser
+	
+	Driver --> Client: Success response
+	
+	Client -> Pipeline: Execute onSuccess hooks
+	activate Pipeline
+	loop For each plugin
+		Pipeline -> Pipeline: plugin.onSuccess(response)
+	end
+	Pipeline --> Client: Modified response
+	deactivate Pipeline
+	
+	Client --> User: Return response data
+else Error
+	Driver --> Client: Error object
+	
+	Client -> Pipeline: Execute onError hooks
+	activate Pipeline
+	loop For each plugin
+		Pipeline -> Pipeline: plugin.onError(error, request)
+	end
+	Pipeline --> Client: Handled error
+	deactivate Pipeline
+	
+	Client --> User: Throw or return error
+end
+
+deactivate Driver
+deactivate Client
+
+@enduml

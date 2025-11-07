@@ -1,0 +1,166 @@
+@startuml Complete Request Lifecycle
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+
+title Luminara - Complete Request Lifecycle with All Features
+
+actor "User" as User
+participant "Client" as Client
+participant "Plugins" as Plugins
+participant "Driver" as Driver
+participant "URL Builder" as URL
+participant "Timeout" as Timeout
+participant "Retry" as Retry
+participant "Response\nParser" as Parser
+participant "Error\nHandler" as Error
+participant "Stats" as Stats
+participant "HTTP" as HTTP
+
+User -> Client: api.get('/users', {\n  retry: 3,\n  timeout: 5000,\n  backoffType: 'exponential'\n})
+activate Client
+
+Client -> Stats: onRequestStart()
+activate Stats
+Stats -> Stats: Track request metrics
+deactivate Stats
+
+Client -> Plugins: Execute onRequest hooks
+activate Plugins
+Plugins -> Plugins: Transform request\n(auth, logging, etc)
+Plugins --> Client: Modified request
+deactivate Plugins
+
+Client -> Driver: request(config)
+activate Driver
+
+Driver -> URL: buildUrl(config)
+activate URL
+URL -> URL: Resolve base URL
+URL -> URL: Append query params
+URL --> Driver: Complete URL
+deactivate URL
+
+Driver -> Timeout: Setup timeout controller
+activate Timeout
+Timeout -> Timeout: Create AbortController\nSet timeout to 5000ms
+Timeout --> Driver: Timeout context
+deactivate Timeout
+
+Driver -> Retry: Initialize retry context
+activate Retry
+
+loop Retry Loop (max 3 attempts)
+	
+	Retry -> HTTP: Execute fetch
+	activate HTTP
+	
+	alt Network Timeout
+		HTTP --> Retry: ❌ Timeout Error
+		
+		Retry -> Retry: Check retry conditions
+		
+		alt Should Retry
+			Retry -> Stats: onRequestRetry()
+			activate Stats
+			Stats -> Stats: Track retry attempt
+			deactivate Stats
+			
+			Retry -> Retry: Calculate backoff\n(exponential: 2^attempt)
+			Retry -> Retry: Wait backoff delay
+			note right: Attempt 2 with 2s delay
+		else Max Retries Reached
+			Retry -> Error: Handle timeout error
+			activate Error
+			Error -> Error: Categorize as timeout
+			Error --> Retry: Timeout error
+			deactivate Error
+			Retry --> Driver: ❌ Final error
+		end
+		
+	else Network Error (500)
+		HTTP --> Retry: ❌ Server Error
+		deactivate HTTP
+		
+		Retry -> Retry: Check retry conditions
+		Retry -> Stats: onRequestRetry()
+		activate Stats
+		Stats -> Stats: Increment retry count
+		deactivate Stats
+		
+		Retry -> Retry: Calculate backoff
+		Retry -> Retry: Wait delay
+		note right: Attempt 3 with 4s delay
+		
+	else Success (200)
+		HTTP --> Retry: ✅ Response
+		deactivate HTTP
+		
+		Retry -> Parser: parseResponse(response)
+		activate Parser
+		
+		Parser -> Parser: Detect content-type\n(application/json)
+		Parser -> Parser: Parse JSON
+		Parser --> Retry: Parsed data
+		deactivate Parser
+		
+		Retry -> Error: Check response status
+		activate Error
+		
+		alt ignoreResponseError = false
+			Error -> Error: Check 4xx/5xx status
+			alt Status >= 400
+				Error -> Error: Throw HTTP error
+				Error --> Retry: ❌ HTTP Error
+			else Status OK
+				Error --> Retry: ✅ Valid response
+			end
+		else ignoreResponseError = true
+			Error --> Retry: ✅ Return response
+		end
+		deactivate Error
+		
+		Retry --> Driver: ✅ Success response
+	end
+	
+end
+deactivate Retry
+
+alt Success Path
+	Driver --> Client: ✅ Response data
+	deactivate Driver
+	
+	Client -> Stats: onRequestSuccess()
+	activate Stats
+	Stats -> Stats: Update counters\nRecord duration\nCalculate rates
+	deactivate Stats
+	
+	Client -> Plugins: Execute onSuccess hooks
+	activate Plugins
+	Plugins -> Plugins: Transform response
+	Plugins --> Client: Modified response
+	deactivate Plugins
+	
+	Client --> User: ✅ Return data
+
+else Error Path
+	Driver --> Client: ❌ Error object
+	deactivate Driver
+	
+	Client -> Stats: onRequestFail()
+	activate Stats
+	Stats -> Stats: Update error stats\nCategorize error
+	deactivate Stats
+	
+	Client -> Plugins: Execute onError hooks
+	activate Plugins
+	Plugins -> Plugins: Handle error\n(retry, transform, log)
+	Plugins --> Client: Handled/Modified error
+	deactivate Plugins
+	
+	Client --> User: ❌ Throw error
+end
+
+deactivate Client
+
+@enduml

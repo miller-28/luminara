@@ -1,0 +1,105 @@
+@startuml Driver Comparison
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+
+title Luminara - Driver Architecture Comparison
+
+package "Ofetch Driver" {
+	component OfetchDriver [
+		OfetchDriver
+		====
+		Uses external ofetch library
+		----
+		Features delegated to ofetch:
+		- Retry (built-in)
+		- Timeout (built-in)
+		- Response parsing
+		- Interceptors
+		----
+		Luminara additions:
+		- Backoff strategies
+		- Stats tracking
+		- Enhanced error handling
+	]
+	
+	component ofetch [
+		ofetch
+		Library
+	]
+	
+	OfetchDriver --> ofetch : delegates to
+}
+
+package "Native Driver" {
+	component NativeDriver [
+		NativeDriver
+		====
+		Pure fetch API implementation
+		----
+		All features custom-built:
+		- Modular feature system
+		- Full control over lifecycle
+		- Custom implementations
+		----
+		Benefits:
+		- No external dependencies
+		- Smaller bundle size
+		- Maximum flexibility
+	]
+	
+	package "Feature Modules" {
+		component retry [
+			Retry
+			Handler
+		]
+		component timeout [
+			Timeout
+			Controller
+		]
+		component parser [
+			Response
+			Parser
+		]
+		component error [
+			Error
+			Handler
+		]
+		component url [
+			URL
+			Builder
+		]
+		component ratelimit [
+			Rate
+			Limiter
+		]
+	}
+	
+	NativeDriver --> retry
+	NativeDriver --> timeout
+	NativeDriver --> parser
+	NativeDriver --> error
+	NativeDriver --> url
+	NativeDriver --> ratelimit
+}
+
+component client [
+	LuminaraClient
+]
+
+client --> OfetchDriver : can use
+client --> NativeDriver : can use
+
+note right of OfetchDriver
+	Default driver
+	Relies on ofetch for core features
+	Lighter implementation
+end note
+
+note right of NativeDriver
+	Alternative driver
+	Complete custom implementation
+	More control, zero dependencies
+end note
+
+@enduml
