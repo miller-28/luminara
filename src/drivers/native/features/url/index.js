@@ -3,4 +3,4 @@
  * Exports URL building functionality
  */
 
-export { buildFullUrl } from "./urlBuilder.js";
+export { buildFullUrl } from './urlBuilder.js';

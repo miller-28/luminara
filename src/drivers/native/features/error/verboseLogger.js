@@ -69,10 +69,19 @@ export class ErrorVerboseLogger extends BaseVerboseLogger {
 	 * Check if error is retryable (private method)
 	 */
 	#isRetryableError(error) {
-		if (error.status >= 500) return true;
-		if (error.status === 429) return true;
-		if (error.name === 'TimeoutError') return true;
-		if (error.name === 'NetworkError') return true;
+		if (error.status >= 500) {
+			return true;
+		}
+		if (error.status === 429) {
+			return true;
+		}
+		if (error.name === 'TimeoutError') {
+			return true;
+		}
+		if (error.name === 'NetworkError') {
+			return true;
+		}
+
 		return false;
 	}
 }

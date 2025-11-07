@@ -1,11 +1,11 @@
-import { createLuminara, LuminaraClient } from "../../dist/index.mjs";
+import { createLuminara, LuminaraClient } from '../../dist/index.mjs';
 
 export const customDriver = {
-	title: "🚗 Custom Driver",
-    examples: [
+	title: '🚗 Custom Driver',
+	examples: [
 		{
-			id: "browser-driver",
-			title: "Browser Fetch Driver",
+			id: 'browser-driver',
+			title: 'Browser Fetch Driver',
 			code: `import { createLuminara } from 'luminara';
 
 // Define custom driver using browser fetch
@@ -29,6 +29,7 @@ const client = createLuminara({ driver: BrowserDriver });
 const response = await client.get('https://api.example.com/data');
 console.log('Custom driver response:', response.data);`,
 			run: async (updateOutput, signal, options = {}) => {
+
 				// Define a custom driver factory function
 				const BrowserDriver = (config = {}) => {
 					return {
@@ -60,8 +61,9 @@ console.log('Custom driver response:', response.data);`,
 				);
 				
 				const response = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
+
 				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver instead of default OfetchDriver`;
 			}
 		}
-    ]
+	]
 };

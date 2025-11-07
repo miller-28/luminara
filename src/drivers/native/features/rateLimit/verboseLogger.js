@@ -51,7 +51,7 @@ export class RateLimitVerboseLogger extends BaseVerboseLogger {
 	 * Log rate limit window reset
 	 */
 	logRateLimitWindowReset(context, windowMs, newWindowStart) {
-		this.log(context, 'WINDOW_RESET', `Rate limit window reset`, {
+		this.log(context, 'WINDOW_RESET', 'Rate limit window reset', {
 			windowMs: windowMs,
 			newWindowStart: newWindowStart,
 			resetReason: 'time-expired'

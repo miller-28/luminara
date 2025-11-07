@@ -20,6 +20,7 @@ suite.test('Basic stats tracking - counters', async () => {
 	try {
 		await api.getJson('/error-500');  // Use actual error endpoint
 	} catch (error) {
+
 		// Expected 500 error
 	}
 	
@@ -119,12 +120,14 @@ suite.test('Error metrics by type', async () => {
 	try {
 		await api.getJson('/json?fail=true&status=404');
 	} catch (error) {
+
 		// Expected 404
 	}
 	
 	try {
 		await api.getJson('/error-500');
 	} catch (error) {
+
 		// Expected 500
 	}
 	
@@ -148,6 +151,7 @@ suite.test('Retry metrics tracking', async () => {
 	try {
 		await api.getJson('/error-500');
 	} catch (error) {
+
 		// Expected after retries
 	}
 	
@@ -447,6 +451,7 @@ suite.test('Individual module reset', async () => {
 	
 	// Other modules should still have data (if they were populated)
 	const timeStats = api.stats().time.get();
+
 	// Time stats might be reset too depending on implementation, but interface should work
 	assert(typeof timeStats === 'object', 'Time stats interface should still work');
 });
@@ -579,6 +584,7 @@ suite.test('Complex query combinations', async () => {
 	// Each group should have at least the counters metric (time might not be available if requests failed)
 	complexResult.groups.forEach(group => {
 		assert(group.counters, 'Each group should have counters');
+
 		// Only check for time if it exists (requests might have failed)
 		if (group.time) {
 			assert(typeof group.time === 'object', 'Time metric should be object if present');

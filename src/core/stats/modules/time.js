@@ -2,18 +2,18 @@
  * Time module for tracking response time metrics
  */
 
-import { createTimeSchema, mergeTime } from "../query/schemas.js";
-import { Rolling60sWindow } from "../windows/rolling60s.js";
-import { SinceResetWindow } from "../windows/sinceReset.js";
-import { SinceStartWindow } from "../windows/sinceStart.js";
+import { createTimeSchema, mergeTime } from '../query/schemas.js';
+import { Rolling60sWindow } from '../windows/rolling60s.js';
+import { SinceResetWindow } from '../windows/sinceReset.js';
+import { SinceStartWindow } from '../windows/sinceStart.js';
 
 export class TimeModule {
 	
 	constructor() {
 		this.windows = {
-			"rolling-60s": new Rolling60sWindow(),
-			"since-reset": new SinceResetWindow(),
-			"since-start": new SinceStartWindow()
+			'rolling-60s': new Rolling60sWindow(),
+			'since-reset': new SinceResetWindow(),
+			'since-start': new SinceStartWindow()
 		};
 	}
 
@@ -24,7 +24,7 @@ export class TimeModule {
 		const { id, status, durationMs } = event;
 		
 		const dataPoint = {
-			type: "timing",
+			type: 'timing',
 			id,
 			status,
 			durationMs,
@@ -38,7 +38,7 @@ export class TimeModule {
 		const { id, status, errorKind, durationMs } = event;
 		
 		const dataPoint = {
-			type: "timing",
+			type: 'timing',
 			id,
 			status,
 			errorKind,
@@ -54,7 +54,7 @@ export class TimeModule {
 	 */
 	recordTiming(requestId, durationMs, context = {}) {
 		const dataPoint = {
-			type: "timing",
+			type: 'timing',
 			id: requestId,
 			durationMs,
 			...context
@@ -74,7 +74,7 @@ export class TimeModule {
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
 		const timings = data
-			.filter(point => point.type === "timing" && typeof point.durationMs === "number")
+			.filter(point => point.type === 'timing' && typeof point.durationMs === 'number')
 			.map(point => point.durationMs);
 		
 		return this._calculateTimeMetrics(timings);
@@ -84,7 +84,7 @@ export class TimeModule {
 	 * Reset time data for since-reset window
 	 */
 	reset() {
-		this.windows["since-reset"].reset();
+		this.windows['since-reset'].reset();
 	}
 
 	/**
@@ -101,28 +101,28 @@ export class TimeModule {
 		
 		// Group timing data points by the specified field
 		for (const point of data) {
-			if (point.type !== "timing" || typeof point.durationMs !== "number") {
+			if (point.type !== 'timing' || typeof point.durationMs !== 'number') {
 				continue;
 			}
 			
 			let groupKey;
 			
 			switch (groupByField) {
-				case "domain":
-					groupKey = point.domain || "unknown";
+				case 'domain':
+					groupKey = point.domain || 'unknown';
 					break;
-				case "method":
-					groupKey = point.method || "unknown";
+				case 'method':
+					groupKey = point.method || 'unknown';
 					break;
-				case "endpoint":
-					groupKey = point.endpoint || "unknown";
+				case 'endpoint':
+					groupKey = point.endpoint || 'unknown';
 					break;
-				case "tag":
+				case 'tag':
 					const tags = point.tags || [];
-					groupKey = tags.length > 0 ? tags[0] : "no-tags";
+					groupKey = tags.length > 0 ? tags[0] : 'no-tags';
 					break;
 				default:
-					groupKey = "all";
+					groupKey = 'all';
 			}
 			
 			if (!groups.has(groupKey)) {
@@ -167,7 +167,9 @@ export class TimeModule {
 	 * Calculate percentile from sorted array
 	 */
 	_percentile(sortedArray, percentile) {
-		if (sortedArray.length === 0) return 0;
+		if (sortedArray.length === 0) {
+			return 0;
+		}
 		
 		const index = (sortedArray.length - 1) * percentile;
 		const lower = Math.floor(index);
@@ -178,6 +180,7 @@ export class TimeModule {
 		}
 		
 		const weight = index - lower;
+
 		return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
 	}
 
@@ -191,8 +194,9 @@ export class TimeModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
+
 		return data
-			.filter(point => point.type === "timing" && typeof point.durationMs === "number")
+			.filter(point => point.type === 'timing' && typeof point.durationMs === 'number')
 			.map(point => ({
 				id: point.id,
 				durationMs: point.durationMs,

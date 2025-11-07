@@ -5,7 +5,9 @@ let consoleSuppression = null;
 
 // Global function to suppress redundant console messages during testing
 export function enableConsoleSuppressionForTesting() {
-	if (consoleSuppression) return; // Already enabled
+	if (consoleSuppression) {
+		return;
+	} // Already enabled
 	
 	const originalConsoleWarn = console.warn;
 	const originalConsoleError = console.error;
@@ -19,6 +21,7 @@ export function enableConsoleSuppressionForTesting() {
 		'Body is unusable',
 		'Body has already been consumed',
 		'Failed to parse response as JSON',
+
 		// Test debug output patterns
 		'🔑 onRequest called with attempt:',
 		'🔑 Set authorization header:',
@@ -63,10 +66,12 @@ export function enableConsoleSuppressionForTesting() {
 		if (!shouldSuppress(message)) {
 			return originalProcessStderrWrite.call(this, chunk, encoding, callback);
 		}
+
 		// Suppress the message by not writing it
 		if (typeof callback === 'function') {
 			callback();
 		}
+
 		return true;
 	};
 	
@@ -75,10 +80,12 @@ export function enableConsoleSuppressionForTesting() {
 		if (!shouldSuppress(message)) {
 			return originalProcessStdoutWrite.call(this, chunk, encoding, callback);
 		}
+
 		// Suppress the message by not writing it
 		if (typeof callback === 'function') {
 			callback();
 		}
+
 		return true;
 	};
 	
@@ -93,7 +100,9 @@ export function enableConsoleSuppressionForTesting() {
 
 // Function to restore original console methods
 export function disableConsoleSuppressionForTesting() {
-	if (!consoleSuppression) return; // Not enabled
+	if (!consoleSuppression) {
+		return;
+	} // Not enabled
 	
 	console.warn = consoleSuppression.originalConsoleWarn;
 	console.error = consoleSuppression.originalConsoleError;
@@ -175,6 +184,7 @@ export class MockServer {
 		const { createServer } = await import('http');
 		
 		this.server = createServer((req, res) => {
+
 			// CORS headers
 			res.setHeader('Access-Control-Allow-Origin', '*');
 			res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
@@ -183,6 +193,7 @@ export class MockServer {
 			if (req.method === 'OPTIONS') {
 				res.writeHead(200);
 				res.end();
+
 				return;
 			}
 			
@@ -205,6 +216,7 @@ export class MockServer {
 	}
 
 	handleRequest(req, res, path, params) {
+
 		// Delay simulation
 		const delay = parseInt(params.get('delay') || '0');
 		const shouldFail = params.get('fail') === 'true';
@@ -219,6 +231,7 @@ export class MockServer {
 					path,
 					method: req.method 
 				}));
+
 				return;
 			}
 			
@@ -246,6 +259,7 @@ export class MockServer {
 								method: req.method
 							}));
 						});
+
 						return;
 					} else {
 						res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -264,6 +278,7 @@ export class MockServer {
 							method: req.method
 						}));
 					});
+
 					return; // Important: return here to avoid the rest of the switch
 				
 				// Error testing endpoints
@@ -351,6 +366,7 @@ export class MockServer {
 							method: req.method
 						}));
 					});
+
 					return;
 					
 				case '/soap':
@@ -365,6 +381,7 @@ export class MockServer {
 							bodyLength: soapBody.length
 						}));
 					});
+
 					return;
 					
 				// New endpoints for comprehensive interceptor testing
@@ -470,6 +487,7 @@ export function assert(condition, message) {
 }
 
 export function assertEqual(actual, expected, message) {
+
 	// Handle array comparison
 	if (Array.isArray(actual) && Array.isArray(expected)) {
 		if (actual.length !== expected.length) {
@@ -480,6 +498,7 @@ export function assertEqual(actual, expected, message) {
 				throw new Error(message || `Expected array[${i}] to be ${expected[i]}, got ${actual[i]}`);
 			}
 		}
+
 		return;
 	}
 	
@@ -499,6 +518,7 @@ export async function measureTime(fn) {
 	const start = Date.now();
 	const result = await fn();
 	const duration = Date.now() - start;
+
 	return { result, duration };
 }
 
@@ -519,6 +539,7 @@ export class Timer {
 	getDuration(from = 0, to = -1) {
 		const startTime = this.times[from];
 		const endTime = to === -1 ? this.times[this.times.length - 1] : this.times[to];
+
 		return endTime - startTime;
 	}
 
@@ -527,6 +548,7 @@ export class Timer {
 		for (let i = 1; i < this.times.length; i++) {
 			durations.push(this.times[i] - this.times[i - 1]);
 		}
+
 		return durations;
 	}
 

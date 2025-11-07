@@ -54,15 +54,19 @@ async function safeParseJson(response) {
 		// Check if body is already consumed
 		if (response.bodyUsed) {
 			console.debug('Response body already consumed, cannot parse JSON');
+
 			return undefined;
 		}
 		
 		// Clone the response to avoid consuming the original body
 		const clonedResponse = response.clone();
+
 		return await clonedResponse.json();
 	} catch (error) {
+
 		// Failed to parse JSON, return undefined
 		console.debug('Failed to parse error response as JSON:', error.message);
+
 		return undefined;
 	}
 }
@@ -73,7 +77,9 @@ async function safeParseJson(response) {
  * @returns {Object} Response snapshot
  */
 function createResponseSnapshot(response) {
-	if (!response) return null;
+	if (!response) {
+		return null;
+	}
 	
 	return {
 		status: response.status,
@@ -111,6 +117,7 @@ function createRequestSnapshot(requestContext) {
  * @returns {Promise<LuminaraError>} Normalized HTTP error
  */
 export async function createHttpError(response, requestContext, attempt = 1) {
+
 	// Try to parse JSON error data from server
 	const errorData = await safeParseJson(response);
 	

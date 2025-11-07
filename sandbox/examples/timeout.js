@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const timeout = {
-	title: "⏱️ Timeout",
+	title: '⏱️ Timeout',
 	examples: [
 		{
-			id: "timeout-success",
-			title: "Timeout Success (2s delay, 5s timeout)",
+			id: 'timeout-success',
+			title: 'Timeout Success (2s delay, 5s timeout)',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -20,7 +20,7 @@ console.log('Request completed:', response.status);`,
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				if (updateOutput) {
-					updateOutput(`Status: Pending\nTimeout: 5000ms\nDelay: 2s\n\n⏳ Waiting for response...\n\nThe server will delay 2 seconds.\nRequest will timeout after 5 seconds.`);
+					updateOutput('Status: Pending\nTimeout: 5000ms\nDelay: 2s\n\n⏳ Waiting for response...\n\nThe server will delay 2 seconds.\nRequest will timeout after 5 seconds.');
 				}
 				
 				const timeoutResponse = await client.get('https://httpbingo.org/delay/2', {
@@ -32,8 +32,8 @@ console.log('Request completed:', response.status);`,
 			}
 		},
 		{
-			id: "timeout-fail",
-			title: "Timeout Failure (3s delay, 1s timeout)",
+			id: 'timeout-fail',
+			title: 'Timeout Failure (3s delay, 1s timeout)',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -51,7 +51,7 @@ try {
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				if (updateOutput) {
-					updateOutput(`Status: Pending\nTimeout: 1000ms\nDelay: 3s\n\n⏳ Waiting for response...\n\nThe server will delay 3 seconds.\nRequest will timeout after 1 second.`);
+					updateOutput('Status: Pending\nTimeout: 1000ms\nDelay: 3s\n\n⏳ Waiting for response...\n\nThe server will delay 3 seconds.\nRequest will timeout after 1 second.');
 				}
 				
 				try {

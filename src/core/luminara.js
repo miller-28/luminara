@@ -1,8 +1,8 @@
-import { NativeFetchDriver } from "../drivers/native/index.js";
-import { logRequest, logPlugin, logError, verboseLog } from "./verbose/verboseLogger.js";
-import { statsLogger } from "./stats/verboseLogger.js";
-import { StatsHub } from "./stats/StatsHub.js";
-import { createRateLimitFeature } from "../drivers/native/features/rateLimit/index.js";
+import { NativeFetchDriver } from '../drivers/native/index.js';
+import { logRequest, logPlugin, logError, verboseLog } from './verbose/verboseLogger.js';
+import { statsLogger } from './stats/verboseLogger.js';
+import { StatsHub } from './stats/StatsHub.js';
+import { createRateLimitFeature } from '../drivers/native/features/rateLimit/index.js';
 
 export class LuminaraClient {
 
@@ -54,6 +54,7 @@ export class LuminaraClient {
 	}	/**
 	 * Get the stats interface
 	 */
+
 	stats() {
 		return this.statsInstance;
 	}
@@ -68,6 +69,7 @@ export class LuminaraClient {
 				runtime: true
 			});
 		}
+
 		return this;
 	}
 
@@ -81,6 +83,7 @@ export class LuminaraClient {
 				runtime: true
 			});
 		}
+
 		return this;
 	}
 
@@ -109,6 +112,7 @@ export class LuminaraClient {
 	}
 
 	async request(req) {
+
 		// Merge global config with per-request options so downstream code has full context
 		const mergedReq = { ...this.config, ...req };
 
@@ -121,6 +125,7 @@ export class LuminaraClient {
 	}
 
 	async #actualRequest(req) {
+
 		// Merge global config with per-request options (per-request takes priority)
 		const mergedReq = { ...this.config, ...req };
 		
@@ -138,7 +143,7 @@ export class LuminaraClient {
 		}
 		
 		// Use enhanced interceptor system
-		let context = {
+		const context = {
 			req: { ...mergedReq },
 			res: null,
 			error: null,
@@ -165,6 +170,7 @@ export class LuminaraClient {
 			const userSignal = mergedReq.signal;
 			const cleanup = () => {
 				context.controller.abort();
+
 				// Emit abort event
 				this.#emitStatsEvent('request:abort', {
 					id: requestId
@@ -190,10 +196,19 @@ export class LuminaraClient {
 
 	#getDriverFeatures() {
 		const features = [];
-		if (this.driver.calculateRetryDelay) features.push('retry-calculation');
-		if (this.driver.request) features.push('request');
-		if (this.driver.constructor.name === 'OfetchDriver') features.push('ofetch-based');
-		if (this.driver.constructor.name === 'NativeFetchDriver') features.push('native-fetch');
+		if (this.driver.calculateRetryDelay) {
+			features.push('retry-calculation');
+		}
+		if (this.driver.request) {
+			features.push('request');
+		}
+		if (this.driver.constructor.name === 'OfetchDriver') {
+			features.push('ofetch-based');
+		}
+		if (this.driver.constructor.name === 'NativeFetchDriver') {
+			features.push('native-fetch');
+		}
+
 		return features;
 	}
 
@@ -212,6 +227,7 @@ export class LuminaraClient {
 			logRequest(context, 'attempt');
 
 			try {
+
 				// On retry, re-run request interceptors for fresh tokens/headers
 				if (attempt > 1) {
 					context.req = { ...context.req }; // Fresh copy for retry
@@ -227,6 +243,7 @@ export class LuminaraClient {
 				}
 				for (const plugin of this.plugins) {
 					if (plugin.onRequest) {
+
 						// Enhanced plugin expects context object
 						const result = await plugin.onRequest(context);
 						if (result && result !== context) {
@@ -276,7 +293,7 @@ export class LuminaraClient {
 				
 				// Log additional response details if verbose
 				if (context.req.verbose) {
-					verboseLog(context, 'RESPONSE', `Request completed successfully`, {
+					verboseLog(context, 'RESPONSE', 'Request completed successfully', {
 						finalAttempt: context.attempt,
 						totalRetries: context.attempt - 1,
 						responseStatus: context.res?.status,
@@ -318,6 +335,7 @@ export class LuminaraClient {
 
 				// Check if we should retry
 				if (attempt < maxAttempts && this.#shouldRetry(error, context)) {
+
 					// Apply retry delay
 					const delay = await this.#getRetryDelay(context);
 					
@@ -353,6 +371,7 @@ export class LuminaraClient {
 	}
 
 	#shouldRetry(error, context) {
+
 		// Use driver's retry logic for sophisticated policy decisions
 		if (this.driver.shouldRetry) {
 			return this.driver.shouldRetry(error, context);
@@ -366,18 +385,22 @@ export class LuminaraClient {
 		
 		// Default retry logic for server errors (5xx) and specific client errors
 		if (error.status) {
+
 			// Server errors (5xx) - generally retryable
 			if (error.status >= 500) {
 				return true;
 			}
+
 			// Auth errors (401) - retryable for auth refresh scenarios
 			if (error.status === 401) {
 				return true;
 			}
+
 			// Request timeout (408) - retryable
 			if (error.status === 408) {
 				return true;
 			}
+
 			// Too many requests (429) - retryable with backoff
 			if (error.status === 429) {
 				return true;
@@ -393,6 +416,7 @@ export class LuminaraClient {
 	}
 
 	async #getRetryDelay(context) {
+
 		// Use driver's retry delay calculation if available
 		if (this.driver.calculateRetryDelay) {
 			return await this.driver.calculateRetryDelay(context);
@@ -403,57 +427,64 @@ export class LuminaraClient {
 		if (typeof req.retryDelay === 'function') {
 			return req.retryDelay(context);
 		}
+
 		return req.retryDelay || 1000;
 	}
 
 	// -------- Core verbs --------
 	get(url, options = {}) {
-		return this.request({ ...options, url, method: "GET" });
+		return this.request({ ...options, url, method: 'GET' });
 	}
 	
 	post(url, body, options = {}) {
-		return this.request({ ...options, url, method: "POST", body });
+		return this.request({ ...options, url, method: 'POST', body });
 	}
 	
 	put(url, body, options = {}) {
-		return this.request({ ...options, url, method: "PUT", body });
+		return this.request({ ...options, url, method: 'PUT', body });
 	}
 	
 	patch(url, body, options = {}) {
-		return this.request({ ...options, url, method: "PATCH", body });
+		return this.request({ ...options, url, method: 'PATCH', body });
 	}
 	
 	del(url, options = {}) {
-		return this.request({ ...options, url, method: "DELETE" });
+		return this.request({ ...options, url, method: 'DELETE' });
 	}
 	
 	head(url, options = {}) {
-		return this.request({ ...options, url, method: "HEAD" });
+		return this.request({ ...options, url, method: 'HEAD' });
 	}
 	
 	options(url, options = {}) {
-		return this.request({ ...options, url, method: "OPTIONS" });
+		return this.request({ ...options, url, method: 'OPTIONS' });
 	}
 
 	// -------- Typed GET helpers (response content) --------
 	getText(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'text/plain', 'text'));
 	}
+
 	getJson(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'application/json', 'json'));
 	}
+
 	getXml(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'application/xml, text/xml, application/soap+xml', 'xml'));
 	}
+
 	getHtml(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'text/html', 'html'));
 	}
+
 	getBlob(url, options = {}) {
 		return this.get(url, this.#withAccept(options, '*/*', 'blob'));
 	}
+
 	getArrayBuffer(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'application/octet-stream', 'arrayBuffer'));
 	}
+
 	// NDJSON: expect driver to stream/iterate, or return text and split lines upstream
 	getNDJSON(url, options = {}) {
 		return this.get(url, this.#withAccept(options, 'application/x-ndjson', 'ndjson'));
@@ -463,9 +494,11 @@ export class LuminaraClient {
 	postJson(url, data, options = {}) {
 		return this.post(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
 	}
+
 	putJson(url, data, options = {}) {
 		return this.put(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
 	}
+
 	patchJson(url, data, options = {}) {
 		return this.patch(url, JSON.stringify(data), this.#withType(options, 'application/json', 'json'));
 	}
@@ -476,23 +509,28 @@ export class LuminaraClient {
 
 	postForm(url, data, options = {}) {
 		const body = data instanceof URLSearchParams ? data : new URLSearchParams(data);
+
 		// note: URLSearchParams auto-encodes; body will be used directly
 		return this.post(url, body, this.#withType(options, 'application/x-www-form-urlencoded', 'auto'));
 	}
 
 	postMultipart(url, formData, options = {}) {
+
 		// Important: do NOT set Content-Type; browser sets boundary for FormData.
 		const { headers = {}, responseType } = options;
 		const safeOptions = { ...options, headers: { ...headers }, responseType: responseType ?? 'json' };
+
 		return this.post(url, formData, safeOptions);
 	}
 
 	// SOAP 1.1/1.2 helper (XML envelope)
 	postSoap(url, xmlString, options = {}) {
 		const { headers = {} } = options;
+
 		// If user provided SOAPAction, keep it; else omit.
 		const hasSoap12 = String(headers['Content-Type'] || '').includes('application/soap+xml');
 		const type = hasSoap12 ? 'application/soap+xml' : 'text/xml';
+
 		return this.post(url, xmlString, this.#withType(options, type, 'xml'));
 	}
 
@@ -502,6 +540,7 @@ export class LuminaraClient {
 	 * Emit stats events to the stats hub
 	 */
 	#emitStatsEvent(eventType, data) {
+
 		// Early return if stats are disabled
 		if (!this.statsEnabled) {
 			return;
@@ -531,6 +570,7 @@ export class LuminaraClient {
 					break;
 			}
 		} catch (error) {
+
 			// Don't let stats errors break the main request flow
 			console.warn('Stats event error:', error);
 			
@@ -548,16 +588,20 @@ export class LuminaraClient {
 	 * Extract domain from URL
 	 */
 	#extractDomain(url) {
-		if (!url) return 'unknown';
+		if (!url) {
+			return 'unknown';
+		}
 		
 		try {
 			if (url.startsWith('http://') || url.startsWith('https://')) {
 				return new URL(url).hostname;
 			} else {
+
 				// Relative URL - use window.location if available (browser)
 				if (typeof window !== 'undefined' && window.location) {
 					return window.location.hostname;
 				}
+
 				return 'localhost';
 			}
 		} catch {
@@ -569,7 +613,9 @@ export class LuminaraClient {
 	 * Normalize endpoint for stats tracking
 	 */
 	#normalizeEndpoint(method, url) {
-		if (!url) return 'unknown';
+		if (!url) {
+			return 'unknown';
+		}
 		
 		try {
 			const urlObj = url.startsWith('http') ? new URL(url) : { pathname: url };
@@ -606,18 +652,25 @@ export class LuminaraClient {
 		if (!error.status) {
 			return 'network';
 		}
+
 		return 'http';
 	}
 
 	#withAccept(options, accept, responseType) {
 		const headers = { ...(options.headers || {}) };
-		if (!headers['Accept']) headers['Accept'] = accept;
+		if (!headers['Accept']) {
+			headers['Accept'] = accept;
+		}
+
 		return { ...options, headers, responseType: options.responseType ?? responseType };
 	}
 
 	#withType(options, contentType, defaultResponseType) {
 		const headers = { ...(options.headers || {}) };
-		if (!headers['Content-Type']) headers['Content-Type'] = contentType;
+		if (!headers['Content-Type']) {
+			headers['Content-Type'] = contentType;
+		}
+
 		return { ...options, headers, responseType: options.responseType ?? defaultResponseType };
 	}
 
@@ -626,22 +679,27 @@ export class LuminaraClient {
 	 * @param {Object} newConfig - New configuration to merge
 	 */
 	updateConfig(newConfig) {
+
 		// Merge new config with existing
 		this.config = { ...this.config, ...newConfig };
 		
 		// Handle rate limiting configuration updates
 		if (newConfig.rateLimit !== undefined) {
 			if (newConfig.rateLimit && this.rateLimitFeature) {
+
 				// Update existing rate limiter
 				this.rateLimitFeature.update(newConfig.rateLimit);
 			} else if (newConfig.rateLimit && !this.rateLimitFeature) {
+
 				// Enable rate limiting
 				this.rateLimitFeature = createRateLimitFeature(newConfig.rateLimit);
 				this.request = this.rateLimitFeature.wrapRequest(this.request.bind(this));
 			} else if (!newConfig.rateLimit && this.rateLimitFeature) {
+
 				// Disable rate limiting
 				this.rateLimitFeature.shutdown();
 				this.rateLimitFeature = null;
+
 				// Note: Can't unwrap request method easily, would need redesign
 			}
 		}

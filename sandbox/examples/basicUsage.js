@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const basicUsage = {
-	title: "📦 Basic Usage",
+	title: '📦 Basic Usage',
 	examples: [
 		{
-			id: "get-json",
-			title: "GET JSON",
+			id: 'get-json',
+			title: 'GET JSON',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -16,12 +16,13 @@ console.log(response.data);    // { id: 1, title: '...', ... }`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				const jsonResponse = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
+
 				return `Status: ${jsonResponse.status}\nTodo ID: ${jsonResponse.data.id}\nTitle: ${jsonResponse.data.title}`;
 			}
 		},
 		{
-			id: "get-text",
-			title: "GET Text",
+			id: 'get-text',
+			title: 'GET Text',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -32,12 +33,13 @@ console.log(response.data);    // Plain text content`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
 				const textResponse = await client.getText('https://httpbingo.org/get', { signal });
+
 				return `Status: ${textResponse.status}\nContent Length: ${String(textResponse.data).length} characters`;
 			}
 		},
 		{
-			id: "post-json",
-			title: "POST JSON",
+			id: 'post-json',
+			title: 'POST JSON',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -54,12 +56,13 @@ console.log(response.data);    // { id: 101, title: 'My Post', ... }`,
 					title: 'Luminara Test',
 					body: 'Testing POST request'
 				}, { signal });
+
 				return `Status: ${postResponse.status}\nCreated ID: ${postResponse.data.id}\nTitle: ${postResponse.data.title}`;
 			}
 		},
 		{
-			id: "post-form",
-			title: "POST Form Data",
+			id: 'post-form',
+			title: 'POST Form Data',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -76,6 +79,7 @@ console.log(response.data);    // Form submission result`,
 					hello: 'world',
 					framework: 'luminara'
 				}, { signal });
+
 				return `Status: ${formResponse.status}\nForm Fields: ${Object.keys(formResponse.data.form || {}).join(', ')}`;
 			}
 		}

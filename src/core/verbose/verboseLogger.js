@@ -21,7 +21,9 @@ class RequestVerboseLogger extends BaseVerboseLogger {
 	 * Log request lifecycle events
 	 */
 	logRequest(context, phase, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		switch (phase) {
 			case 'start':
@@ -62,7 +64,9 @@ class TimeoutVerboseLogger extends BaseVerboseLogger {
 	 * Log timeout events
 	 */
 	logTimeout(context, phase, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		switch (phase) {
 			case 'setup':
@@ -72,7 +76,7 @@ class TimeoutVerboseLogger extends BaseVerboseLogger {
 				this.error(context, 'TRIGGERED', `Request timed out after ${details.timeout}ms`);
 				break;
 			case 'cleared':
-				this.log(context, 'CLEARED', `Timeout cleared successfully`);
+				this.log(context, 'CLEARED', 'Timeout cleared successfully');
 				break;
 		}
 	}
@@ -88,11 +92,13 @@ class ResponseVerboseLogger extends BaseVerboseLogger {
 	 * Log response parsing events
 	 */
 	logResponse(context, phase, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		switch (phase) {
 			case 'received':
-				this.log(context, 'RECEIVED', `Received response`, {
+				this.log(context, 'RECEIVED', 'Received response', {
 					status: details?.status,
 					type: details?.type,
 					size: details?.size
@@ -122,7 +128,9 @@ class ErrorVerboseLogger extends BaseVerboseLogger {
 	 * Log error handling events
 	 */
 	logError(context, phase, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		switch (phase) {
 			case 'caught':
@@ -151,7 +159,9 @@ class PluginVerboseLogger extends BaseVerboseLogger {
 	 * Log plugin execution events
 	 */
 	logPlugin(context, phase, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		switch (phase) {
 			case 'onRequest':

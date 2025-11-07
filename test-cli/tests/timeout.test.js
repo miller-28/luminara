@@ -17,6 +17,7 @@ suite.test('Request times out after specified duration', async () => {
 	timer.mark();
 	
 	try {
+
 		// Request 500ms delay, should timeout at 200ms
 		await api.getJson('/json?delay=500');
 		assert(false, 'Request should have timed out');
@@ -56,6 +57,7 @@ suite.test('Request completes within timeout', async () => {
 suite.test('Different timeouts for different requests', async () => {
 	const api = createLuminara({
 		baseURL: BASE_URL
+
 		// No default timeout
 	});
 	
@@ -97,6 +99,7 @@ suite.test('Timeout with retry combination', async () => {
 	timer.mark();
 	
 	try {
+
 		// ofetch doesn't retry timeout errors by default, so this will just timeout once
 		await api.getJson('/json?delay=300');
 		assert(false, 'Request should timeout');
@@ -104,6 +107,7 @@ suite.test('Timeout with retry combination', async () => {
 		timer.mark();
 		
 		const totalDuration = timer.getDuration();
+
 		// Single timeout attempt: ~150ms + overhead (can be significant in test environment)
 		assertRange(totalDuration, 120, 300, `Timeout should occur around 150ms, got ${totalDuration}ms`);
 		
@@ -165,6 +169,7 @@ suite.test('Timeout error provides meaningful message', async () => {
 		await api.getJson('/json?delay=300');
 		assert(false, 'Should timeout');
 	} catch (error) {
+
 		// Check for meaningful timeout error message
 		const message = error.message.toLowerCase();
 		assert(message.includes('timeout') || 
@@ -198,6 +203,7 @@ suite.test('Timeout with POST request', async () => {
 });
 
 suite.test('Timeout with large response simulation', async () => {
+
 	// Configure mock server to simulate slow response with large data
 	const api = createLuminara({
 		baseURL: BASE_URL,
@@ -208,6 +214,7 @@ suite.test('Timeout with large response simulation', async () => {
 	timer.mark();
 	
 	try {
+
 		// Simulate large response that times out during transfer
 		await api.getJson('/json?delay=300&size=large');
 		assert(false, 'Large response should timeout');

@@ -3,18 +3,19 @@
  * Provides unified query interface and namespaced helpers
  */
 
-import { CountersModule } from "./modules/counters.js";
-import { TimeModule } from "./modules/time.js";
-import { RateModule } from "./modules/rate.js";
-import { RetryModule } from "./modules/retry.js";
-import { ErrorModule } from "./modules/error.js";
-import { QueryEngine } from "./query/queryEngine.js";
-import { extractRequestMetadata } from "./query/selectors.js";
-import { statsLogger } from "./verboseLogger.js";
+import { CountersModule } from './modules/counters.js';
+import { TimeModule } from './modules/time.js';
+import { RateModule } from './modules/rate.js';
+import { RetryModule } from './modules/retry.js';
+import { ErrorModule } from './modules/error.js';
+import { QueryEngine } from './query/queryEngine.js';
+import { extractRequestMetadata } from './query/selectors.js';
+import { statsLogger } from './verboseLogger.js';
 
 export class StatsHub {
 	
 	constructor() {
+
 		// Initialize metric modules
 		this.modules = {
 			counters: new CountersModule(),
@@ -92,7 +93,7 @@ export class StatsHub {
 	reset() {
 		this.queryEngine.reset();
 		this.activeRequests.clear();
-		this._notifyUpdateListeners("reset");
+		this._notifyUpdateListeners('reset');
 		
 		// Log reset operation if verbose is enabled
 		if (this.verboseEnabled) {
@@ -109,18 +110,19 @@ export class StatsHub {
 	get counters() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-reset", where, limit } = options;
+				const { groupBy = 'none', window = 'since-reset', where, limit } = options;
 				
-				if (groupBy === "none") {
+				if (groupBy === 'none') {
 					return this.modules.counters.getMetrics(window, where ? this._createFilterFn(where) : null);
 				} else {
 					const results = this.modules.counters.getGroupedMetrics(window, groupBy, where ? this._createFilterFn(where) : null);
+
 					return this._applyLimit(results, limit);
 				}
 			},
 			reset: () => {
 				this.modules.counters.reset();
-				this._notifyUpdateListeners("counters.reset");
+				this._notifyUpdateListeners('counters.reset');
 				
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
@@ -138,18 +140,19 @@ export class StatsHub {
 	get time() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-reset", where, limit } = options;
+				const { groupBy = 'none', window = 'since-reset', where, limit } = options;
 				
-				if (groupBy === "none") {
+				if (groupBy === 'none') {
 					return this.modules.time.getMetrics(window, where ? this._createFilterFn(where) : null);
 				} else {
 					const results = this.modules.time.getGroupedMetrics(window, groupBy, where ? this._createFilterFn(where) : null);
+
 					return this._applyLimit(results, limit);
 				}
 			},
 			reset: () => {
 				this.modules.time.reset();
-				this._notifyUpdateListeners("time.reset");
+				this._notifyUpdateListeners('time.reset');
 				
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
@@ -167,18 +170,19 @@ export class StatsHub {
 	get rate() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-reset", where, limit, mode = "ema-30s" } = options;
+				const { groupBy = 'none', window = 'since-reset', where, limit, mode = 'ema-30s' } = options;
 				
-				if (groupBy === "none") {
+				if (groupBy === 'none') {
 					return this.modules.rate.getMetrics(window, mode, where ? this._createFilterFn(where) : null);
 				} else {
 					const results = this.modules.rate.getGroupedMetrics(window, groupBy, mode, where ? this._createFilterFn(where) : null);
+
 					return this._applyLimit(results, limit);
 				}
 			},
 			reset: () => {
 				this.modules.rate.reset();
-				this._notifyUpdateListeners("rate.reset");
+				this._notifyUpdateListeners('rate.reset');
 				
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
@@ -196,18 +200,19 @@ export class StatsHub {
 	get retry() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-reset", where, limit } = options;
+				const { groupBy = 'none', window = 'since-reset', where, limit } = options;
 				
-				if (groupBy === "none") {
+				if (groupBy === 'none') {
 					return this.modules.retry.getMetrics(window, where ? this._createFilterFn(where) : null);
 				} else {
 					const results = this.modules.retry.getGroupedMetrics(window, groupBy, where ? this._createFilterFn(where) : null);
+
 					return this._applyLimit(results, limit);
 				}
 			},
 			reset: () => {
 				this.modules.retry.reset();
-				this._notifyUpdateListeners("retry.reset");
+				this._notifyUpdateListeners('retry.reset');
 				
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
@@ -225,18 +230,19 @@ export class StatsHub {
 	get error() {
 		return {
 			get: (options = {}) => {
-				const { groupBy = "none", window = "since-reset", where, limit } = options;
+				const { groupBy = 'none', window = 'since-reset', where, limit } = options;
 				
-				if (groupBy === "none") {
+				if (groupBy === 'none') {
 					return this.modules.error.getMetrics(window, where ? this._createFilterFn(where) : null);
 				} else {
 					const results = this.modules.error.getGroupedMetrics(window, groupBy, where ? this._createFilterFn(where) : null);
+
 					return this._applyLimit(results, limit);
 				}
 			},
 			reset: () => {
 				this.modules.error.reset();
-				this._notifyUpdateListeners("error.reset");
+				this._notifyUpdateListeners('error.reset');
 				
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
@@ -252,8 +258,9 @@ export class StatsHub {
 	 * Event listener for stats updates
 	 */
 	on(event, listener) {
-		if (event === "update") {
+		if (event === 'update') {
 			this.updateListeners.add(listener);
+
 			return () => this.updateListeners.delete(listener);
 		}
 		
@@ -277,7 +284,7 @@ export class StatsHub {
 		this.modules.counters.onRequestStart(enrichedEvent);
 		this.modules.rate.onRequestStart(enrichedEvent);
 		
-		this._notifyUpdateListeners("request.start", enrichedEvent);
+		this._notifyUpdateListeners('request.start', enrichedEvent);
 	}
 
 	onRequestSuccess(event) {
@@ -311,7 +318,7 @@ export class StatsHub {
 			}
 			
 			this.activeRequests.delete(id);
-			this._notifyUpdateListeners("request.success", enrichedEvent);
+			this._notifyUpdateListeners('request.success', enrichedEvent);
 		}
 	}
 
@@ -352,7 +359,7 @@ export class StatsHub {
 			}
 			
 			this.activeRequests.delete(id);
-			this._notifyUpdateListeners("request.fail", enrichedEvent);
+			this._notifyUpdateListeners('request.fail', enrichedEvent);
 		}
 	}
 
@@ -370,7 +377,7 @@ export class StatsHub {
 			this.modules.counters.onRequestRetry(enrichedEvent);
 			this.modules.retry.onRequestRetry(enrichedEvent);
 			
-			this._notifyUpdateListeners("request.retry", enrichedEvent);
+			this._notifyUpdateListeners('request.retry', enrichedEvent);
 		}
 	}
 
@@ -389,7 +396,7 @@ export class StatsHub {
 			this.modules.error.onRequestAbort(enrichedEvent);
 			
 			this.activeRequests.delete(id);
-			this._notifyUpdateListeners("request.abort", enrichedEvent);
+			this._notifyUpdateListeners('request.abort', enrichedEvent);
 		}
 	}
 
@@ -398,6 +405,7 @@ export class StatsHub {
 	 */
 	_enrichEvent(event) {
 		const metadata = extractRequestMetadata(event);
+
 		return { ...event, ...metadata };
 	}
 
@@ -406,10 +414,19 @@ export class StatsHub {
 	 */
 	_createFilterFn(where) {
 		return (dataPoint) => {
-			if (where.domain && dataPoint.domain !== where.domain) return false;
-			if (where.method && dataPoint.method !== where.method) return false;
-			if (where.endpointPrefix && !dataPoint.endpoint?.startsWith(where.endpointPrefix)) return false;
-			if (where.tag && !dataPoint.tags?.includes(where.tag)) return false;
+			if (where.domain && dataPoint.domain !== where.domain) {
+				return false;
+			}
+			if (where.method && dataPoint.method !== where.method) {
+				return false;
+			}
+			if (where.endpointPrefix && !dataPoint.endpoint?.startsWith(where.endpointPrefix)) {
+				return false;
+			}
+			if (where.tag && !dataPoint.tags?.includes(where.tag)) {
+				return false;
+			}
+
 			return true;
 		};
 	}
@@ -418,7 +435,10 @@ export class StatsHub {
 	 * Apply limit to results array
 	 */
 	_applyLimit(results, limit) {
-		if (!limit || limit <= 0) return results;
+		if (!limit || limit <= 0) {
+			return results;
+		}
+
 		return results.slice(0, limit);
 	}
 
@@ -430,7 +450,7 @@ export class StatsHub {
 			try {
 				listener({ type, data, timestamp: Date.now() });
 			} catch (error) {
-				console.warn("Error in stats update listener:", error);
+				console.warn('Error in stats update listener:', error);
 			}
 		}
 	}

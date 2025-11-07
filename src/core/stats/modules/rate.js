@@ -2,18 +2,18 @@
  * Rate module for tracking request rate metrics (RPS/RPM)
  */
 
-import { createRateSchema } from "../query/schemas.js";
-import { Rolling60sWindow } from "../windows/rolling60s.js";
-import { SinceResetWindow } from "../windows/sinceReset.js";
-import { SinceStartWindow } from "../windows/sinceStart.js";
+import { createRateSchema } from '../query/schemas.js';
+import { Rolling60sWindow } from '../windows/rolling60s.js';
+import { SinceResetWindow } from '../windows/sinceReset.js';
+import { SinceStartWindow } from '../windows/sinceStart.js';
 
 export class RateModule {
 	
 	constructor() {
 		this.windows = {
-			"rolling-60s": new Rolling60sWindow(),
-			"since-reset": new SinceResetWindow(),
-			"since-start": new SinceStartWindow()
+			'rolling-60s': new Rolling60sWindow(),
+			'since-reset': new SinceResetWindow(),
+			'since-start': new SinceStartWindow()
 		};
 		
 		// EMA (Exponential Moving Average) state for smooth rate calculation
@@ -31,7 +31,7 @@ export class RateModule {
 		const { id, domain, method, endpoint, tags } = event;
 		
 		const dataPoint = {
-			type: "request-start",
+			type: 'request-start',
 			id,
 			domain,
 			method,
@@ -46,15 +46,15 @@ export class RateModule {
 	/**
 	 * Get rate metrics for a specific window
 	 */
-	getMetrics(windowName, mode = "ema-30s", filterFn = null) {
+	getMetrics(windowName, mode = 'ema-30s', filterFn = null) {
 		const window = this.windows[windowName];
 		if (!window) {
 			throw new Error(`Unknown window: ${windowName}`);
 		}
 		
-		if (mode === "ema-30s") {
+		if (mode === 'ema-30s') {
 			return this._getEmaRate();
-		} else if (mode === "tumbling-60s") {
+		} else if (mode === 'tumbling-60s') {
 			return this._getTumblingRate(windowName, filterFn);
 		}
 		
@@ -65,23 +65,24 @@ export class RateModule {
 	 * Reset rate data for since-reset window
 	 */
 	reset() {
-		this.windows["since-reset"].reset();
+		this.windows['since-reset'].reset();
 		this._resetEma();
 	}
 
 	/**
 	 * Get grouped rate metrics
 	 */
-	getGroupedMetrics(windowName, groupByField, mode = "ema-30s", filterFn = null) {
+	getGroupedMetrics(windowName, groupByField, mode = 'ema-30s', filterFn = null) {
 		const window = this.windows[windowName];
 		if (!window) {
 			throw new Error(`Unknown window: ${windowName}`);
 		}
 		
-		if (mode === "ema-30s") {
+		if (mode === 'ema-30s') {
+
 			// For EMA, we calculate global rate then distribute by group
 			return this._getGroupedEmaRate(windowName, groupByField, filterFn);
-		} else if (mode === "tumbling-60s") {
+		} else if (mode === 'tumbling-60s') {
 			return this._getGroupedTumblingRate(windowName, groupByField, filterFn);
 		}
 		
@@ -93,7 +94,8 @@ export class RateModule {
 	 */
 	_getEmaRate() {
 		this._updateEma();
-		return createRateSchema("ema-30s");
+
+		return createRateSchema('ema-30s');
 	}
 
 	/**
@@ -103,7 +105,7 @@ export class RateModule {
 		const window = this.windows[windowName];
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
 		
-		const requestStarts = data.filter(point => point.type === "request-start");
+		const requestStarts = data.filter(point => point.type === 'request-start');
 		const timespan = this._getWindowTimespan(windowName);
 		
 		const rps = timespan > 0 ? (requestStarts.length / (timespan / 1000)) : 0;
@@ -112,7 +114,7 @@ export class RateModule {
 		return {
 			rps: Math.round(rps * 100) / 100, // Round to 2 decimal places
 			rpm: Math.round(rpm * 100) / 100,
-			mode: "tumbling-60s"
+			mode: 'tumbling-60s'
 		};
 	}
 
@@ -120,6 +122,7 @@ export class RateModule {
 	 * Get grouped EMA rate
 	 */
 	_getGroupedEmaRate(windowName, groupByField, filterFn = null) {
+
 		// For EMA, we provide the current global rate for each group
 		// This is simplified - a more sophisticated implementation would
 		// maintain separate EMA state per group
@@ -148,7 +151,7 @@ export class RateModule {
 		
 		const results = [];
 		for (const [key, groupData] of groups) {
-			const requestStarts = groupData.filter(point => point.type === "request-start");
+			const requestStarts = groupData.filter(point => point.type === 'request-start');
 			const rps = timespan > 0 ? (requestStarts.length / (timespan / 1000)) : 0;
 			const rpm = rps * 60;
 			
@@ -157,7 +160,7 @@ export class RateModule {
 				rate: {
 					rps: Math.round(rps * 100) / 100,
 					rpm: Math.round(rpm * 100) / 100,
-					mode: "tumbling-60s"
+					mode: 'tumbling-60s'
 				}
 			});
 		}
@@ -175,21 +178,21 @@ export class RateModule {
 			let groupKey;
 			
 			switch (groupByField) {
-				case "domain":
-					groupKey = point.domain || "unknown";
+				case 'domain':
+					groupKey = point.domain || 'unknown';
 					break;
-				case "method":
-					groupKey = point.method || "unknown";
+				case 'method':
+					groupKey = point.method || 'unknown';
 					break;
-				case "endpoint":
-					groupKey = point.endpoint || "unknown";
+				case 'endpoint':
+					groupKey = point.endpoint || 'unknown';
 					break;
-				case "tag":
+				case 'tag':
 					const tags = point.tags || [];
-					groupKey = tags.length > 0 ? tags[0] : "no-tags";
+					groupKey = tags.length > 0 ? tags[0] : 'no-tags';
 					break;
 				default:
-					groupKey = "all";
+					groupKey = 'all';
 			}
 			
 			if (!groups.has(groupKey)) {
@@ -209,6 +212,7 @@ export class RateModule {
 		const timeDelta = (now - this.emaState.lastUpdate) / 1000; // seconds
 		
 		if (timeDelta > 0) {
+
 			// Decay the EMA based on time elapsed
 			const decay = Math.exp(-timeDelta / 30); // 30-second half-life
 			this.emaState.currentRps *= decay;
@@ -233,6 +237,7 @@ export class RateModule {
 	_getWindowTimespan(windowName) {
 		const window = this.windows[windowName];
 		const stats = window.getStats();
+
 		return stats.timespan;
 	}
 
@@ -241,6 +246,7 @@ export class RateModule {
 	 */
 	getCurrentEmaRate() {
 		this._updateEma();
+
 		return {
 			rps: this.emaState.currentRps,
 			rpm: this.emaState.currentRps * 60,

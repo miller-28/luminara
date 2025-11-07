@@ -11,12 +11,14 @@
  * @returns {Object} URL-like object with hostname, pathname, origin properties
  */
 function parseUrlString(urlString) {
+
 	// Parse URL manually using regex to avoid browser issues
 	const urlPattern = /^(https?):\/\/([^\/]+)(\/.*)?$/;
 	const match = urlString.match(urlPattern);
 	
 	if (match) {
 		const [, protocol, hostname, pathname = '/'] = match;
+
 		return {
 			protocol: protocol + ':',
 			hostname,
@@ -24,6 +26,7 @@ function parseUrlString(urlString) {
 			origin: `${protocol}://${hostname}`
 		};
 	} else {
+
 		// Fallback for malformed URLs
 		return {
 			protocol: 'http:',
@@ -42,6 +45,7 @@ function parseUrlString(urlString) {
  * @returns {string} Rate limiting key for bucketing requests
  */
 export function deriveKey(req, scope = 'global', { include, exclude } = {}) {
+
 	// Parse request URL using string parsing to avoid browser "Illegal invocation" errors
 	let url;
 	
@@ -50,26 +54,32 @@ export function deriveKey(req, scope = 'global', { include, exclude } = {}) {
 		
 		// Build URL info using string parsing (browser-safe approach)
 		if (typeof requestUrl === 'string' && (requestUrl.startsWith('http://') || requestUrl.startsWith('https://'))) {
+
 			// Full URL - parse manually
 			url = parseUrlString(requestUrl);
 		} else {
+
 			// Relative URL - combine with base
 			const base = req.baseURL || req.baseUrl;
 			
 			if (base) {
+
 				// Combine base and relative URL manually
 				const fullUrl = base.endsWith('/') ? base + requestUrl.replace(/^\//, '') : base + '/' + requestUrl.replace(/^\//, '');
 				url = parseUrlString(fullUrl);
 			} else if (typeof window !== 'undefined' && window.location) {
+
 				// Browser environment - use window.location
 				const fullUrl = window.location.origin + (requestUrl.startsWith('/') ? requestUrl : '/' + requestUrl);
 				url = parseUrlString(fullUrl);
 			} else {
+
 				// Node.js environment fallback
 				url = parseUrlString('http://localhost' + (requestUrl.startsWith('/') ? requestUrl : '/' + requestUrl));
 			}
 		}
 	} catch (error) {
+
 		// Fallback for any parsing errors
 		console.warn('Rate limiting: Failed to parse URL', req.url, error);
 		const urlString = req.url || '/';
@@ -90,8 +100,12 @@ export function deriveKey(req, scope = 'global', { include, exclude } = {}) {
 		// Debug logging for pattern matching
 		if (req.debugRateLimit) {
 			console.log(`[DEBUG] Path: ${path}, shouldInclude: ${shouldInclude}, shouldExclude: ${shouldExclude}`);
-			if (include) console.log(`[DEBUG] Include patterns: ${JSON.stringify(include)}`);
-			if (exclude) console.log(`[DEBUG] Exclude patterns: ${JSON.stringify(exclude)}`);
+			if (include) {
+				console.log(`[DEBUG] Include patterns: ${JSON.stringify(include)}`);
+			}
+			if (exclude) {
+				console.log(`[DEBUG] Exclude patterns: ${JSON.stringify(exclude)}`);
+			}
 		}
 		
 		// If doesn't match include pattern or matches exclude pattern, bypass rate limiting
@@ -99,6 +113,7 @@ export function deriveKey(req, scope = 'global', { include, exclude } = {}) {
 			if (req.debugRateLimit) {
 				console.log(`[DEBUG] Returning __no_limit__ for path: ${path}`);
 			}
+
 			return '__no_limit__';
 		}
 	}
@@ -109,6 +124,7 @@ export function deriveKey(req, scope = 'global', { include, exclude } = {}) {
 		if (req.debugRateLimit) {
 			console.log(`[DEBUG] Returning global key: ${key} for path: ${path}`);
 		}
+
 		return key;
 	}
 	
@@ -143,12 +159,15 @@ function matchesPatterns(str, patterns) {
 		}
 		
 		if (typeof pattern === 'string') {
+
 			// Support simple wildcard patterns
 			if (pattern.includes('*')) {
+
 				// Convert wildcard pattern to regex
 				const regexPattern = pattern
 					.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape special chars
 					.replace(/\\\*/g, '.*'); // Convert * to .*
+
 				return new RegExp(`^${regexPattern}$`).test(str);
 			}
 			
@@ -177,6 +196,7 @@ export function isValidScope(scope) {
 export function extractDomain(url) {
 	try {
 		const parsed = parseUrlString(url);
+
 		return parsed.hostname;
 	} catch (error) {
 		return null;
@@ -191,6 +211,7 @@ export function extractDomain(url) {
 export function extractEndpoint(url) {
 	try {
 		const parsed = parseUrlString(url);
+
 		return `${parsed.origin}${parsed.pathname}`;
 	} catch (error) {
 		return null;

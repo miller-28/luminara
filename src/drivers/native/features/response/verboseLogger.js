@@ -33,7 +33,7 @@ export class ResponseVerboseLogger extends BaseVerboseLogger {
 			headerInfo[headerName] = headers.get(headerName);
 		});
 		
-		this.debug(context, 'HEADERS', `Response headers analyzed`, {
+		this.debug(context, 'HEADERS', 'Response headers analyzed', {
 			...headerInfo,
 			totalHeaders: headers.size || Object.keys(headers).length
 		});

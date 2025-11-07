@@ -14,6 +14,7 @@ export default defineConfig({
 	platform: 'browser',
 	target: 'es2020',
 	treeshake: true,
+
 	// Additional optimization options
 	minifyWhitespace: true,
 	minifyIdentifiers: true,

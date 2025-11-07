@@ -47,9 +47,11 @@ export function parseRetryAfter(retryAfterValue) {
 		const date = new Date(retryAfterValue);
 		if (!isNaN(date.getTime())) {
 			const delay = date.getTime() - Date.now();
+
 			return Math.max(0, Math.min(delay, 300000)); // Cap at 5 minutes, minimum 0
 		}
 	} catch (error) {
+
 		// Invalid date format
 	}
 
@@ -97,9 +99,11 @@ export function defaultRetryPolicy(error, context) {
 
 	// Check status code based retries
 	if (error.status) {
+
 		// For non-idempotent methods, only retry on specific "safe" status codes
 		if (!isIdempotentMethod(method)) {
 			const safeStatusCodes = new Set([408, 429, 500, 502, 503, 504]);
+
 			return safeStatusCodes.has(error.status);
 		}
 
@@ -160,9 +164,11 @@ export function createRetryPolicy(options = {}) {
 
 		// Check status code based retries
 		if (error.status) {
+
 			// For non-idempotent methods, be more conservative
 			if (!isIdempotent) {
 				const safeStatusCodes = new Set([408, 429, 500, 502, 503, 504]);
+
 				return safeStatusCodes.has(error.status);
 			}
 

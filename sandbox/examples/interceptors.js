@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const interceptors = {
-	title: "🔌 Interceptors",
-    examples: [
+	title: '🔌 Interceptors',
+	examples: [
 		{
-			id: "interceptor-request",
-			title: "Request Interceptor",
+			id: 'interceptor-request',
+			title: 'Request Interceptor',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -24,23 +24,25 @@ const response = await client.get('https://api.example.com/data');
 console.log('Custom header added to request');`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
-				let interceptorLog = [];
+				const interceptorLog = [];
 				
 				client.use({
 					onRequest(request) {
 						interceptorLog.push(`🔵 Intercepted: ${request.method} ${request.url}`);
 						request.headers = { ...(request.headers || {}), 'X-Custom-Header': 'Luminara' };
+
 						return request;
 					}
 				});
 
 				const response = await client.get('https://httpbingo.org/get', { signal });
+
 				return `${interceptorLog.join('\n')}\n\n✅ Custom header added\nStatus: ${response.status}`;
 			}
 		},
 		{
-			id: "interceptor-response",
-			title: "Response Interceptor",
+			id: 'interceptor-response',
+			title: 'Response Interceptor',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -57,7 +59,7 @@ console.log('Transformed:', response.data.transformed);
 console.log('Timestamp:', response.data.timestamp);`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
-				let transformLog = [];
+				const transformLog = [];
 
 				client.use({
 					onResponse(context) {
@@ -68,12 +70,13 @@ console.log('Timestamp:', response.data.timestamp);`,
 				});
 
 				const response = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
+
 				return `${transformLog.join('\n')}\n\nOriginal todo ID: ${response.data.id}\nTransformed: ${response.data.transformed}\nTimestamp: ${response.data.timestamp}`;
 			}
 		},
 		{
-			id: "interceptor-error",
-			title: "Error Interceptor",
+			id: 'interceptor-error',
+			title: 'Error Interceptor',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -92,11 +95,11 @@ try {
 }`,
 			run: async (updateOutput, signal, options = {}) => {
 				const client = createLuminara({ verbose: options.verbose || false });
-				let errorLog = [];
+				const errorLog = [];
 
 				client.use({
 					onResponseError(context) {
-						errorLog.push(`🔴 Error caught in interceptor`);
+						errorLog.push('🔴 Error caught in interceptor');
 						errorLog.push(`Request: ${context.req.method} ${context.req.url}`);
 						errorLog.push(`Error: ${context.error.message}`);
 					}
@@ -110,8 +113,8 @@ try {
 			}
 		},
 		{
-			id: "interceptor-execution-order",
-			title: "Deterministic Execution Order",
+			id: 'interceptor-execution-order',
+			title: 'Deterministic Execution Order',
 			code: `import { createLuminara } from 'luminara';
 
 const api = createLuminara();
@@ -159,12 +162,12 @@ await api.get('https://api.example.com/data');
 						context.meta.authAdded = true;
 					},
 					onResponse(context) {
-						const msg = `1️⃣ [Auth] onResponse - Validating auth (LAST in chain)`;
+						const msg = '1️⃣ [Auth] onResponse - Validating auth (LAST in chain)';
 						output += msg + '\n';
 						updateOutput(output);
 					},
 					onResponseError(context) {
-						const msg = `1️⃣ [Auth] onResponseError - Auth error handling (LAST in chain)`;
+						const msg = '1️⃣ [Auth] onResponseError - Auth error handling (LAST in chain)';
 						output += msg + '\n';
 						updateOutput(output);
 					}
@@ -173,7 +176,7 @@ await api.get('https://api.example.com/data');
 				// Interceptor 2: Logging (Second registered)
 				api.use({
 					onRequest(context) {
-						const msg = `2️⃣ [Log] onRequest - Starting timer`;
+						const msg = '2️⃣ [Log] onRequest - Starting timer';
 						output += msg + '\n';
 						updateOutput(output);
 						
@@ -196,19 +199,19 @@ await api.get('https://api.example.com/data');
 				// Interceptor 3: Analytics (Third registered)
 				api.use({
 					onRequest(context) {
-						const msg = `3️⃣ [Analytics] onRequest - Tracking request (LAST in chain)`;
+						const msg = '3️⃣ [Analytics] onRequest - Tracking request (LAST in chain)';
 						output += msg + '\n';
 						updateOutput(output);
 						
 						context.meta.tracked = true;
 					},
 					onResponse(context) {
-						const msg = `3️⃣ [Analytics] onResponse - Tracking success (FIRST in chain)`;
+						const msg = '3️⃣ [Analytics] onResponse - Tracking success (FIRST in chain)';
 						output += msg + '\n';
 						updateOutput(output);
 					},
 					onResponseError(context) {
-						const msg = `3️⃣ [Analytics] onResponseError - Tracking error (FIRST in chain)`;
+						const msg = '3️⃣ [Analytics] onResponseError - Tracking error (FIRST in chain)';
 						output += msg + '\n';
 						updateOutput(output);
 					}
@@ -224,19 +227,23 @@ await api.get('https://api.example.com/data');
 					output += `Response keys: ${Object.keys(response.data).join(', ')}\n`;
 					
 					updateOutput(output);
+
 					return output;
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					output += `\n❌ Error occurred: ${error.message}\n`;
 					updateOutput(output);
+
 					return output;
 				}
 			}
 		},
 		{
-			id: "shared-context-metadata",
-			title: "Shared Context Between Interceptors",
+			id: 'shared-context-metadata',
+			title: 'Shared Context Between Interceptors',
 			code: `import { createLuminara } from 'luminara';
 
 const api = createLuminara();
@@ -277,6 +284,7 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 				// Interceptor 1: Initialize metadata
 				api.use({
 					onRequest(context) {
+
 						// Initialize shared metadata
 						context.meta.correlationId = 'correlation-' + Math.random().toString(36).substr(2, 9);
 						context.meta.userAgent = 'Luminara-Demo/1.0';
@@ -287,6 +295,7 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 						updateOutput(output);
 					},
 					onResponse(context) {
+
 						// Enrich response with metadata
 						context.res.data._luminara = {
 							correlationId: context.meta.correlationId,
@@ -294,7 +303,7 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 							timestamp: new Date().toISOString()
 						};
 						
-						const msg = `🏗️ [Init] Added metadata to response`;
+						const msg = '🏗️ [Init] Added metadata to response';
 						output += msg + '\n';
 						updateOutput(output);
 					}
@@ -303,6 +312,7 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 				// Interceptor 2: Use shared metadata for security
 				api.use({
 					onRequest(context) {
+
 						// Use metadata from first interceptor
 						context.req.headers = {
 							...(context.req.headers || {}),
@@ -310,7 +320,7 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 							'X-User-Agent': context.meta.userAgent
 						};
 						
-						const msg = `🔐 [Security] Added headers using shared metadata`;
+						const msg = '🔐 [Security] Added headers using shared metadata';
 						output += msg + '\n';
 						updateOutput(output);
 					}
@@ -342,18 +352,22 @@ console.log('Correlation ID:', response.data._luminara.correlationId);`,
 					output += `Final response includes _luminara metadata: ${JSON.stringify(response.data._luminara, null, 2)}\n`;
 					
 					updateOutput(output);
+
 					return output;
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					output += `\n❌ Error: ${error.message}\n`;
 					updateOutput(output);
+
 					return output;
 				}
 			}
 		},
 		{
-			id: "retry-aware-auth",
-			title: "Retry-Aware Authentication",
+			id: 'retry-aware-auth',
+			title: 'Retry-Aware Authentication',
 			code: `import { createLuminara } from 'luminara';
 
 const api = createLuminara({
@@ -432,19 +446,22 @@ await api.get('https://api.example.com/protected');
 				try {
 					await api.get('/status/401', { signal });
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					output += `\n⚠️ Final error after ${authAttempts} auth attempts: ${error.message}\n`;
 					output += `✅ Auth interceptor ran ${authAttempts} times, refreshing tokens for retries\n`;
 					
 					updateOutput(output);
+
 					return output;
 				}
 			}
 		},
 		{
-			id: "conditional-interceptor-processing",
-			title: "Conditional Interceptor Processing",
+			id: 'conditional-interceptor-processing',
+			title: 'Conditional Interceptor Processing',
 			code: `import { createLuminara } from 'luminara';
 
 const api = createLuminara();
@@ -481,6 +498,7 @@ await api.get('https://api.example.com/api/v2/data');
 				// Conditional auth interceptor
 				api.use({
 					onRequest(context) {
+
 						// Only add auth for specific endpoints
 						if (context.req.url.includes('/bearer')) {
 							context.req.headers = {
@@ -488,11 +506,11 @@ await api.get('https://api.example.com/api/v2/data');
 								'Authorization': 'Bearer demo-token'
 							};
 							
-							const msg = `🔐 [ConditionalAuth] Added auth for protected endpoint`;
+							const msg = '🔐 [ConditionalAuth] Added auth for protected endpoint';
 							output += msg + '\n';
 							updateOutput(output);
 						} else {
-							const msg = `🔐 [ConditionalAuth] Skipped auth for public endpoint`;
+							const msg = '🔐 [ConditionalAuth] Skipped auth for public endpoint';
 							output += msg + '\n';
 							updateOutput(output);
 						}
@@ -502,17 +520,18 @@ await api.get('https://api.example.com/api/v2/data');
 				// Conditional logging interceptor
 				api.use({
 					onRequest(context) {
+
 						// Only log requests with auth
 						if (context.req.headers?.Authorization) {
 							context.meta.shouldLog = true;
-							const msg = `📝 [ConditionalLog] Will log authenticated request`;
+							const msg = '📝 [ConditionalLog] Will log authenticated request';
 							output += msg + '\n';
 							updateOutput(output);
 						}
 					},
 					onResponse(context) {
 						if (context.meta.shouldLog) {
-							const msg = `📝 [ConditionalLog] Authenticated request completed successfully`;
+							const msg = '📝 [ConditionalLog] Authenticated request completed successfully';
 							output += msg + '\n';
 							updateOutput(output);
 						}
@@ -537,15 +556,19 @@ await api.get('https://api.example.com/api/v2/data');
 					output += '🎯 Notice how interceptors behaved differently based on the endpoint!\n';
 					
 					updateOutput(output);
+
 					return output;
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					output += `\n❌ Error: ${error.message}\n`;
 					updateOutput(output);
+
 					return output;
 				}
 			}
 		}
-    ]
+	]
 };

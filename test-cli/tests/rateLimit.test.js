@@ -298,6 +298,7 @@ suite.test('Burst capacity and token refill validation', async () => {
 	
 	// If no increase, tokens might already be at max capacity or timing variance
 	if (tokenIncrease === 0) {
+
 		// Check if we're at burst capacity
 		assert(bucketAfterRefill.tokens <= 3, `Tokens should not exceed burst capacity, got ${bucketAfterRefill.tokens}`);
 	}

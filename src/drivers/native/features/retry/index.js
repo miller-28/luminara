@@ -3,7 +3,7 @@
  * Exports all retry-related functionality
  */
 
-export { shouldRetryRequest, calculateRetryDelay, createRetryContext } from "./retryHandler.js";
+export { shouldRetryRequest, calculateRetryDelay, createRetryContext } from './retryHandler.js';
 export { 
 	defaultRetryPolicy, 
 	createRetryPolicy, 
@@ -12,8 +12,8 @@ export {
 	DEFAULT_RETRY_STATUS_CODES,
 	parseRetryAfter,
 	isIdempotentMethod
-} from "./retryPolicy.js";
+} from './retryPolicy.js';
 export { 
 	createBackoffHandler,
 	backoffStrategies
-} from "./backoff.js";
+} from './backoff.js';

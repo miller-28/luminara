@@ -2,8 +2,8 @@
  * Query engine for executing stats queries with filtering, grouping, and limiting
  */
 
-import { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from "./schemas.js";
-import { createFilterFunction, applyLimit } from "./selectors.js";
+import { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from './schemas.js';
+import { createFilterFunction, applyLimit } from './selectors.js';
 
 export class QueryEngine {
 	
@@ -16,9 +16,9 @@ export class QueryEngine {
 	 */
 	query(options = {}) {
 		const {
-			metrics = ["counters"],
-			groupBy = "none",
-			window = "since-start",
+			metrics = ['counters'],
+			groupBy = 'none',
+			window = 'since-start',
 			where = {},
 			limit = null
 		} = options;
@@ -30,7 +30,7 @@ export class QueryEngine {
 		const filterFn = createFilterFunction(where);
 
 		// Execute query based on groupBy
-		if (groupBy === "none") {
+		if (groupBy === 'none') {
 			return this._executeGlobalQuery(metrics, window, filterFn);
 		} else {
 			return this._executeGroupedQuery(metrics, groupBy, window, filterFn, limit);
@@ -46,7 +46,7 @@ export class QueryEngine {
 			window,
 			groups: [
 				{
-					key: "all",
+					key: 'all',
 					...this._collectMetricsForGroup(metrics, window, filterFn)
 				}
 			]
@@ -71,12 +71,14 @@ export class QueryEngine {
 
 		for (const metricType of metrics) {
 			const module = this.modules[metricType];
-			if (!module) continue;
+			if (!module) {
+				continue;
+			}
 
 			// Handle rate module's different signature
 			let groupedMetrics;
 			if (metricType === 'rate') {
-				groupedMetrics = module.getGroupedMetrics(window, groupBy, "ema-30s", filterFn);
+				groupedMetrics = module.getGroupedMetrics(window, groupBy, 'ema-30s', filterFn);
 			} else {
 				groupedMetrics = module.getGroupedMetrics(window, groupBy, filterFn);
 			}
@@ -106,9 +108,10 @@ export class QueryEngine {
 		for (const metricType of metrics) {
 			const module = this.modules[metricType];
 			if (module) {
+
 				// Handle rate module's different signature
 				if (metricType === 'rate') {
-					groupMetrics[metricType] = module.getMetrics(window, "ema-30s", filterFn);
+					groupMetrics[metricType] = module.getMetrics(window, 'ema-30s', filterFn);
 				} else {
 					groupMetrics[metricType] = module.getMetrics(window, filterFn);
 				}
@@ -122,25 +125,26 @@ export class QueryEngine {
 	 * Validate query parameters
 	 */
 	_validateQuery(metrics, groupBy, window) {
+
 		// Validate metrics
 		if (!Array.isArray(metrics) || metrics.length === 0) {
-			throw new Error("Metrics must be a non-empty array");
+			throw new Error('Metrics must be a non-empty array');
 		}
 
 		for (const metric of metrics) {
 			if (!METRIC_TYPES.includes(metric)) {
-				throw new Error(`Unknown metric type: ${metric}. Supported: ${METRIC_TYPES.join(", ")}`);
+				throw new Error(`Unknown metric type: ${metric}. Supported: ${METRIC_TYPES.join(', ')}`);
 			}
 		}
 
 		// Validate groupBy
 		if (!GROUP_BY_DIMENSIONS.includes(groupBy)) {
-			throw new Error(`Unknown groupBy dimension: ${groupBy}. Supported: ${GROUP_BY_DIMENSIONS.join(", ")}`);
+			throw new Error(`Unknown groupBy dimension: ${groupBy}. Supported: ${GROUP_BY_DIMENSIONS.join(', ')}`);
 		}
 
 		// Validate window
 		if (!TIME_WINDOWS.includes(window)) {
-			throw new Error(`Unknown time window: ${window}. Supported: ${TIME_WINDOWS.join(", ")}`);
+			throw new Error(`Unknown time window: ${window}. Supported: ${TIME_WINDOWS.join(', ')}`);
 		}
 	}
 
@@ -150,8 +154,8 @@ export class QueryEngine {
 	snapshot() {
 		return this.query({
 			metrics: METRIC_TYPES,
-			groupBy: "none",
-			window: "since-start"
+			groupBy: 'none',
+			window: 'since-start'
 		});
 	}
 
@@ -191,16 +195,16 @@ export class QueryEngine {
 	 * Validate where criteria structure
 	 */
 	validateWhereClause(where) {
-		if (!where || typeof where !== "object") {
+		if (!where || typeof where !== 'object') {
 			return true;
 		}
 
-		const validFields = ["domain", "endpointPrefix", "method", "tag"];
+		const validFields = ['domain', 'endpointPrefix', 'method', 'tag'];
 		const providedFields = Object.keys(where);
 
 		for (const field of providedFields) {
 			if (!validFields.includes(field)) {
-				throw new Error(`Unknown where field: ${field}. Supported: ${validFields.join(", ")}`);
+				throw new Error(`Unknown where field: ${field}. Supported: ${validFields.join(', ')}`);
 			}
 		}
 

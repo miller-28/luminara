@@ -1,10 +1,11 @@
-import { ofetch } from "ofetch";
-import { createBackoffHandler } from "../native/features/retry/backoff.js";
-import { getBackoffStrategyInfo } from "../native/features/retry/verboseLogger.js";
-import { verboseLog } from "../../core/verbose/verboseLogger.js";
-import { ErrorVerboseLogger } from "../native/features/error/verboseLogger.js";
+import { ofetch } from 'ofetch';
+import { createBackoffHandler } from '../native/features/retry/backoff.js';
+import { getBackoffStrategyInfo } from '../native/features/retry/verboseLogger.js';
+import { verboseLog } from '../../core/verbose/verboseLogger.js';
+import { ErrorVerboseLogger } from '../native/features/error/verboseLogger.js';
 
 export function OfetchDriver(config = {}) {
+
 	// Store global configuration
 	const globalConfig = { ...config };
 
@@ -20,11 +21,12 @@ export function OfetchDriver(config = {}) {
 
 	return {
 		async request(opts) {
+
 			// Merge global config with per-request options (per-request takes priority)
 			const mergedOpts = { ...globalConfig, ...opts };
 			
 			const { 
-				url, method = "GET", headers, query, body, signal, 
+				url, method = 'GET', headers, query, body, signal, 
 				timeout, retry, retryDelay, retryStatusCodes,
 				backoffType, backoffMaxDelay, responseType, parseResponse,
 				ignoreResponseError
@@ -68,6 +70,7 @@ export function OfetchDriver(config = {}) {
 			let combinedSignal = signal;
 			
 			if (timeout !== undefined && timeout > 0) {
+
 				// Log timeout setup if verbose
 				if (mergedOpts.verbose) {
 					verboseLog(context, 'TIMEOUT', `Setting up manual timeout: ${timeout}ms`, {
@@ -122,9 +125,11 @@ export function OfetchDriver(config = {}) {
 			
 			// Handle retry delay logic: use backoff strategy if specified, otherwise use static delay
 			if (backoffType) {
+
 				// Use Luminara's backoff strategy - this returns a function
 				const backoffDelayFunction = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay, mergedOpts.backoffDelays, mergedOpts.initialDelay);
 				if (backoffDelayFunction) {
+
 					// Wrap the backoff function to include verbose logging if enabled
 					if (mergedOpts.verbose) {
 						ofetchOptions.retryDelay = (context) => {
@@ -134,7 +139,7 @@ export function OfetchDriver(config = {}) {
 							if (context.attempt === 1) {
 								console.info(`🚀 [Luminara] Attempt ${context.attempt}: Initial request`);
 							} else {
-								let strategyInfo = getBackoffStrategyInfo(backoffType, context.attempt, retryDelay, backoffMaxDelay, mergedOpts.backoffDelays, mergedOpts.initialDelay);
+								const strategyInfo = getBackoffStrategyInfo(backoffType, context.attempt, retryDelay, backoffMaxDelay, mergedOpts.backoffDelays, mergedOpts.initialDelay);
 								console.info(`🔄 [Luminara] Attempt ${context.attempt}: Retry after ${delay}ms delay${strategyInfo}`);
 							}
 							
@@ -145,6 +150,7 @@ export function OfetchDriver(config = {}) {
 					}
 				}
 			} else if (retryDelay !== undefined) {
+
 				// Use static retry delay
 				ofetchOptions.retryDelay = retryDelay;
 			}
@@ -152,14 +158,17 @@ export function OfetchDriver(config = {}) {
 			// Note: ofetch throws on non-2xx; we'll normalize in Luminara layer if needed.
 			try {
 				const responseData = await ofetchInstance(url, ofetchOptions);
+
 				// Clear timeout if request succeeded
 				if (timeoutId) {
 					clearTimeout(timeoutId);
 				}
+
 				// ofetch returns parsed body; raw headers/status require raw mode.
 				// For now we return a minimal normalized shape.
 				return { status: 200, headers: new Headers(), data: responseData };
 			} catch (error) {
+
 				// Clear timeout on error
 				if (timeoutId) {
 					clearTimeout(timeoutId);
@@ -173,6 +182,7 @@ export function OfetchDriver(config = {}) {
 					timeoutError.statusText = null;
 					timeoutError.data = null;
 					timeoutError.response = null;
+
 					// Add options for debugging
 					timeoutError.options = {
 						url,
@@ -194,6 +204,7 @@ export function OfetchDriver(config = {}) {
 					httpError.statusText = error.statusText;
 					httpError.data = error.data;
 					httpError.response = error.response;
+
 					// Add options for debugging
 					httpError.options = {
 						url,

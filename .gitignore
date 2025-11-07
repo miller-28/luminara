@@ -12,3 +12,6 @@ coverage
 .vscode/chrome-debug-profile/
 .vite
 **/design-*.md
+
+# ESLint reports
+eslint-report.txt

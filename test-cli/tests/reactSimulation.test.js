@@ -8,6 +8,7 @@ const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Simulate React component patterns and usage scenarios
 suite.test('Component initialization with useEffect pattern', async () => {
+
 	// Simulate a React component that initializes an API client
 	const componentSimulation = {
 		api: null,
@@ -31,6 +32,7 @@ suite.test('Component initialization with useEffect pattern', async () => {
 			// Add logging plugin like a real React app might
 			this.api.use({
 				onRequest: (context) => {
+
 					// Debug logging suppressed during testing
 					return context.req;
 				},
@@ -69,6 +71,7 @@ suite.test('Component initialization with useEffect pattern', async () => {
 });
 
 suite.test('Form submission with validation pattern', async () => {
+
 	// Simulate a React form component
 	const formComponent = {
 		api: createLuminara({
@@ -114,6 +117,7 @@ suite.test('Form submission with validation pattern', async () => {
 			try {
 				const response = await this.api.postJson('/json', this.formData);
 				this.submitting = false;
+
 				return response;
 			} catch (error) {
 				this.submitting = false;
@@ -137,6 +141,7 @@ suite.test('Form submission with validation pattern', async () => {
 });
 
 suite.test('Data fetching with loading states', async () => {
+
 	// Simulate a React component with data fetching states
 	const dataComponent = {
 		api: createLuminara({
@@ -197,6 +202,7 @@ suite.test('Data fetching with loading states', async () => {
 });
 
 suite.test('Authentication flow simulation', async () => {
+
 	// Simulate authentication workflow in React app
 	const authService = {
 		token: null,
@@ -233,6 +239,7 @@ suite.test('Authentication flow simulation', async () => {
 			}
 			
 			const response = await this.api.getJson('/json');
+
 			return {
 				...response.data,
 				userId: this.user.id,
@@ -267,6 +274,7 @@ suite.test('Authentication flow simulation', async () => {
 });
 
 suite.test('Error boundary simulation with retry', async () => {
+
 	// Simulate React error boundary behavior
 	const errorBoundarySimulation = {
 		hasError: false,
@@ -285,6 +293,7 @@ suite.test('Error boundary simulation with retry', async () => {
 			
 			try {
 				const response = await this.api.getJson(endpoint);
+
 				// Don't reset retryCount here - let the calling code manage it
 				return response;
 			} catch (error) {
@@ -327,6 +336,7 @@ suite.test('Error boundary simulation with retry', async () => {
 });
 
 suite.test('Pagination component simulation', async () => {
+
 	// Simulate pagination in a React component
 	const paginationComponent = {
 		api: createLuminara({
@@ -373,6 +383,7 @@ suite.test('Pagination component simulation', async () => {
 			if (this.currentPage < totalPages) {
 				return await this.fetchPage(this.currentPage + 1);
 			}
+
 			return null;
 		},
 		
@@ -380,6 +391,7 @@ suite.test('Pagination component simulation', async () => {
 			if (this.currentPage > 1) {
 				return await this.fetchPage(this.currentPage - 1);
 			}
+
 			return null;
 		}
 	};
@@ -399,6 +411,7 @@ suite.test('Pagination component simulation', async () => {
 });
 
 suite.test('Real-time data updates simulation', async () => {
+
 	// Simulate polling for real-time updates
 	const realTimeComponent = {
 		api: createLuminara({
@@ -435,6 +448,7 @@ suite.test('Real-time data updates simulation', async () => {
 				return response;
 			} catch (error) {
 				console.error('Polling error:', error.message);
+
 				// Continue polling despite errors
 			}
 		},
@@ -465,6 +479,7 @@ suite.test('Real-time data updates simulation', async () => {
 });
 
 suite.test('Bulk operations simulation', async () => {
+
 	// Simulate bulk data operations like batch uploads
 	const bulkComponent = {
 		api: createLuminara({
@@ -486,6 +501,7 @@ suite.test('Bulk operations simulation', async () => {
 							batchIndex: Math.floor(i / batchSize),
 							itemIndex: index
 						});
+
 						return { success: true, item, response: response.data };
 					} catch (error) {
 						return { success: false, item, error: error.message };

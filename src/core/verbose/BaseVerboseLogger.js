@@ -68,7 +68,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Additional details
 	 */
 	log(context, operation, message, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const fullMessage = operation ? `${operation}: ${message}` : message;
 		verboseLog(context, this.category, fullMessage, details);
@@ -82,7 +84,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Error details
 	 */
 	error(context, operation, message, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const timestamp = new Date().toISOString();
 		const emoji = getCategoryEmoji(this.category);
@@ -104,7 +108,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Warning details
 	 */
 	warn(context, operation, message, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const timestamp = new Date().toISOString();
 		const emoji = getCategoryEmoji(this.category);
@@ -126,7 +132,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Debug details
 	 */
 	debug(context, operation, message, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const timestamp = new Date().toISOString();
 		const emoji = getCategoryEmoji(this.category);
@@ -148,7 +156,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Additional timing context
 	 */
 	timing(context, operation, duration, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const formattedDuration = formatDuration(duration);
 		const message = `${operation} completed in ${formattedDuration}`;
@@ -166,7 +176,9 @@ export class BaseVerboseLogger {
 	 * @param {string} description - Description of configuration
 	 */
 	config(context, config, description = 'Configuration applied') {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		this.log(context, 'CONFIG', description, {
 			feature: this.featureName,
@@ -182,7 +194,9 @@ export class BaseVerboseLogger {
 	 * @param {object} details - Phase details
 	 */
 	lifecycle(context, phase, message, details = null) {
-		if (!this.isVerboseEnabled(context)) return;
+		if (!this.isVerboseEnabled(context)) {
+			return;
+		}
 		
 		const phaseUpper = phase.toUpperCase();
 		this.log(context, `LIFECYCLE[${phaseUpper}]`, message, details);
@@ -208,6 +222,7 @@ function getCategoryEmoji(category) {
 		'CONFIG': '⚙️',
 		'LIFECYCLE': '♻️'
 	};
+
 	return emojis[category] || '📋';
 }
 
@@ -227,6 +242,7 @@ function formatDetails(details) {
 			if (Array.isArray(value)) {
 				return `${key}: [${value.join(', ')}]`;
 			}
+
 			return `${key}: ${value}`;
 		})
 		.join(', ');
@@ -268,6 +284,7 @@ export function formatRate(rate, windowMs) {
 	} else {
 		const ratePerWindow = rate * windowMs;
 		const windowSeconds = windowMs / 1000;
+
 		return `${ratePerWindow.toFixed(2)} req/${windowSeconds}s`;
 	}
 }

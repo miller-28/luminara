@@ -68,7 +68,7 @@ console.log('Total time:', totalTime, 'ms');  // ~1000ms
 					updateOutput(`⏰ Total time: ${totalTime}ms\n`);
 					
 					if (totalTime > 900) {
-						updateOutput(`✅ Rate limiting working! Requests were delayed appropriately.\n`);
+						updateOutput('✅ Rate limiting working! Requests were delayed appropriately.\n');
 					} else {
 						updateOutput(`⚠️ Rate limiting may not be working. Total time too short: ${totalTime}ms\n`);
 					}
@@ -80,8 +80,8 @@ console.log('Total time:', totalTime, 'ms');  // ~1000ms
 					updateOutput(`🔍 Stack: ${error.stack}\n`);
 					
 					if (error.message.includes('Illegal invocation')) {
-						updateOutput(`� This indicates a browser compatibility issue with URL parsing.\n`);
-						updateOutput(`🔧 The error has been reported and should be fixed.\n`);
+						updateOutput('� This indicates a browser compatibility issue with URL parsing.\n');
+						updateOutput('🔧 The error has been reported and should be fixed.\n');
 					}
 					throw error;
 				}
@@ -136,6 +136,7 @@ console.log('Total time:', totalTime, 'ms');  // ~1500ms
 					
 					const requests = [];
 					for (let i = 1; i <= 4; i++) {
+
 						// Check if aborted before starting request
 						if (signal.aborted) {
 							throw new Error('Operation was aborted');
@@ -144,6 +145,7 @@ console.log('Total time:', totalTime, 'ms');  // ~1500ms
 						const promise = api.getJson(`/posts/${i}`, { signal }).then(response => {
 							const elapsed = Date.now() - startTime;
 							updateOutput(`✅ Request ${i} completed after ${elapsed}ms\n`);
+
 							return response;
 						}).catch(error => {
 							const elapsed = Date.now() - startTime;
@@ -218,6 +220,7 @@ await Promise.all(requests);
 					
 					const burstRequests = [];
 					for (let i = 1; i <= 3; i++) {
+
 						// Check if aborted before starting request
 						if (signal.aborted) {
 							throw new Error('Operation was aborted');
@@ -226,6 +229,7 @@ await Promise.all(requests);
 						const promise = api.getJson(`/posts/${i}`, { signal }).then(response => {
 							const elapsed = Date.now() - burstStart;
 							updateOutput(`✅ Burst request ${i} completed after ${elapsed}ms\n`);
+
 							return response;
 						}).catch(error => {
 							if (error.name === 'AbortError') {
@@ -256,7 +260,7 @@ await Promise.all(requests);
 						updateOutput(`✅ Delayed request completed after ${delayTime}ms (waited for refill)\n`);
 					} catch (error) {
 						if (error.name === 'AbortError') {
-							updateOutput(`⏹ Delayed request aborted\n`);
+							updateOutput('⏹ Delayed request aborted\n');
 						} else {
 							updateOutput(`❌ Delayed request failed: ${error.message}\n`);
 						}
@@ -332,8 +336,7 @@ await domainApi.get('https://api2.example.com/data');  // 2 RPS for api2
 							} else {
 								updateOutput(`❌ Global request ${index + 1} failed: ${error.message}\n`);
 							}
-						})
-					));
+						})));
 					
 					const globalTime = Date.now() - globalStart;
 					updateOutput(`🌍 Global scope total time: ${globalTime}ms\n\n`);
@@ -385,15 +388,15 @@ console.log('Request 3:', Date.now() - startTime, 'ms');
 					const { createLuminara } = await import('../../dist/index.mjs');
 					
 					// Test if we can create a client with rate limiting
-				updateOutput('🔍 Creating Luminara client with rate limiting...\n');
-				const api = createLuminara({ 
-					baseURL: 'https://jsonplaceholder.typicode.com',
-					verbose: options.verbose || false,
-					rateLimit: { 
-						rps: 1,
-						verbose: options.verbose || false
-					}
-				});					updateOutput('✅ Client created successfully\n');
+					updateOutput('🔍 Creating Luminara client with rate limiting...\n');
+					const api = createLuminara({ 
+						baseURL: 'https://jsonplaceholder.typicode.com',
+						verbose: options.verbose || false,
+						rateLimit: { 
+							rps: 1,
+							verbose: options.verbose || false
+						}
+					});					updateOutput('✅ Client created successfully\n');
 					
 					// Check if rate limiting stats API is available
 					updateOutput('🔍 Testing rate limiting stats API...\n');
@@ -411,16 +414,16 @@ console.log('Request 3:', Date.now() - startTime, 'ms');
 					updateOutput('🔍 Testing requests with timing measurement...\n');
 					const startTime = Date.now();
 					
-				// Test two requests that should be rate limited
-				updateOutput('🚀 Sending request 1...\n');
-				const req1Start = Date.now();
-				await api.getJson('/todos/1', { signal });
-				const req1Time = Date.now() - req1Start;
-				updateOutput(`✅ Request 1 completed after ${req1Time}ms\n`);
+					// Test two requests that should be rate limited
+					updateOutput('🚀 Sending request 1...\n');
+					const req1Start = Date.now();
+					await api.getJson('/todos/1', { signal });
+					const req1Time = Date.now() - req1Start;
+					updateOutput(`✅ Request 1 completed after ${req1Time}ms\n`);
 				
-				updateOutput('🚀 Sending request 2 (should be delayed)...\n');
-				const req2Start = Date.now();
-				await api.getJson('/todos/2', { signal });
+					updateOutput('🚀 Sending request 2 (should be delayed)...\n');
+					const req2Start = Date.now();
+					await api.getJson('/todos/2', { signal });
 					const req2Time = Date.now() - req2Start;
 					updateOutput(`✅ Request 2 completed after ${req2Time}ms\n`);
 					
@@ -438,7 +441,7 @@ console.log('Request 3:', Date.now() - startTime, 'ms');
 					}
 					
 					if (totalTime > 900) {
-						updateOutput(`✅ SUCCESS: Rate limiting is working correctly!\n`);
+						updateOutput('✅ SUCCESS: Rate limiting is working correctly!\n');
 					} else {
 						updateOutput(`⚠️ WARNING: Rate limiting may not be active (total time: ${totalTime}ms, expected: >1000ms)\n`);
 					}
@@ -450,8 +453,8 @@ console.log('Request 3:', Date.now() - startTime, 'ms');
 					updateOutput(`🔍 Stack trace:\n${error.stack}\n`);
 					
 					if (error.message.includes('Illegal invocation')) {
-						updateOutput(`\n🔧 DIAGNOSIS: "Illegal invocation" suggests URL parsing issues in browser.\n`);
-						updateOutput(`🔧 This has been identified and fixed. Please refresh and try again.\n`);
+						updateOutput('\n🔧 DIAGNOSIS: "Illegal invocation" suggests URL parsing issues in browser.\n');
+						updateOutput('🔧 This has been identified and fixed. Please refresh and try again.\n');
 					}
 					
 					throw error;

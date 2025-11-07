@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const baseUrlAndQuery = {
-	title: "🔗 Base URL & Query Parameters",
+	title: '🔗 Base URL & Query Parameters',
 	examples: [
 		{
-			id: "base-url",
-			title: "Using Base URL",
+			id: 'base-url',
+			title: 'Using Base URL',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara({ 
@@ -21,12 +21,13 @@ const response = await client.get('/users/1');
 					verbose: options.verbose || false
 				});
 				const baseUrlResponse = await client.get('/todos/1', { signal });
+
 				return `Base URL: jsonplaceholder.typicode.com\nEndpoint: /todos/1\nTodo Title: ${baseUrlResponse.data.title}`;
 			}
 		},
 		{
-			id: "query-params",
-			title: "Query Parameters",
+			id: 'query-params',
+			title: 'Query Parameters',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -44,6 +45,7 @@ const response = await client.get('https://api.example.com/comments', {
 					query: { postId: 1 },
 					signal
 				});
+
 				return `Query: { postId: 1 }\nFound ${queryResponse.data.length} comments for post 1`;
 			}
 		}

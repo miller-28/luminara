@@ -12,8 +12,10 @@ suite.test('parseResponse can remove JSON prefix', async () => {
 	
 	const response = await luminara.get(`${baseURL}/prefix-json`, {
 		parseResponse: (text) => {
+
 			// Remove ")]}'," prefix (JSONP protection) and parse JSON
 			const jsonText = text.replace(/^\)\]\}',/, '');
+
 			return JSON.parse(jsonText);
 		}
 	});
@@ -28,6 +30,7 @@ suite.test('parseResponse can parse custom formats', async () => {
 	const baseURL = `http://localhost:${mockServer.port}`;
 	
 	const xmlParser = (text) => {
+
 		// Simple XML to object parser for demonstration
 		if (text.includes('<')) {
 			return { 
@@ -36,6 +39,7 @@ suite.test('parseResponse can parse custom formats', async () => {
 				length: text.length 
 			};
 		}
+
 		// Fallback to JSON if not XML
 		return JSON.parse(text);
 	};
@@ -79,6 +83,7 @@ suite.test('parseResponse receives response object', async () => {
 		receivedText = text;
 		assert(typeof text === 'string', 'parseResponse should receive text string');
 		assert(text.length > 0, 'parseResponse should receive non-empty text');
+
 		return JSON.parse(text);
 	};
 

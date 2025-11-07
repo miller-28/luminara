@@ -2,18 +2,18 @@
  * Retry module for tracking retry-related metrics
  */
 
-import { createRetrySchema } from "../query/schemas.js";
-import { Rolling60sWindow } from "../windows/rolling60s.js";
-import { SinceResetWindow } from "../windows/sinceReset.js";
-import { SinceStartWindow } from "../windows/sinceStart.js";
+import { createRetrySchema } from '../query/schemas.js';
+import { Rolling60sWindow } from '../windows/rolling60s.js';
+import { SinceResetWindow } from '../windows/sinceReset.js';
+import { SinceStartWindow } from '../windows/sinceStart.js';
 
 export class RetryModule {
 	
 	constructor() {
 		this.windows = {
-			"rolling-60s": new Rolling60sWindow(),
-			"since-reset": new SinceResetWindow(),
-			"since-start": new SinceStartWindow()
+			'rolling-60s': new Rolling60sWindow(),
+			'since-reset': new SinceResetWindow(),
+			'since-start': new SinceStartWindow()
 		};
 		
 		// Track retry sequences per request ID
@@ -27,7 +27,7 @@ export class RetryModule {
 		const { id, attempt, backoffMs } = event;
 		
 		const dataPoint = {
-			type: "retry",
+			type: 'retry',
 			id,
 			attempt,
 			backoffMs
@@ -57,12 +57,12 @@ export class RetryModule {
 		const { id } = event;
 		
 		if (this.retrySequences.has(id)) {
-			this.retrySequences.get(id).outcome = "success";
+			this.retrySequences.get(id).outcome = 'success';
 			
 			const dataPoint = {
-				type: "retry-outcome",
+				type: 'retry-outcome',
 				id,
-				outcome: "success",
+				outcome: 'success',
 				totalAttempts: this.retrySequences.get(id).attempts.length
 			};
 			
@@ -77,12 +77,12 @@ export class RetryModule {
 		const { id } = event;
 		
 		if (this.retrySequences.has(id)) {
-			this.retrySequences.get(id).outcome = "giveup";
+			this.retrySequences.get(id).outcome = 'giveup';
 			
 			const dataPoint = {
-				type: "retry-outcome",
+				type: 'retry-outcome',
 				id,
-				outcome: "giveup",
+				outcome: 'giveup',
 				totalAttempts: this.retrySequences.get(id).attempts.length
 			};
 			
@@ -107,6 +107,7 @@ export class RetryModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
+
 		return this._calculateRetryMetrics(data);
 	}
 
@@ -114,7 +115,7 @@ export class RetryModule {
 	 * Reset retry data for since-reset window
 	 */
 	reset() {
-		this.windows["since-reset"].reset();
+		this.windows['since-reset'].reset();
 		this.retrySequences.clear();
 	}
 
@@ -144,15 +145,15 @@ export class RetryModule {
 	 */
 	_calculateRetryMetrics(data) {
 		const retrySchema = createRetrySchema();
-		const retryEvents = data.filter(point => point.type === "retry");
-		const outcomeEvents = data.filter(point => point.type === "retry-outcome");
+		const retryEvents = data.filter(point => point.type === 'retry');
+		const outcomeEvents = data.filter(point => point.type === 'retry-outcome');
 		
 		// Count total retries
 		retrySchema.count = retryEvents.length;
 		
 		// Calculate backoff statistics
 		const backoffTimes = retryEvents
-			.filter(event => typeof event.backoffMs === "number")
+			.filter(event => typeof event.backoffMs === 'number')
 			.map(event => event.backoffMs);
 		
 		if (backoffTimes.length > 0) {
@@ -162,8 +163,8 @@ export class RetryModule {
 		}
 		
 		// Calculate success after retry average and giveups
-		const successfulRetries = outcomeEvents.filter(event => event.outcome === "success");
-		const giveupRetries = outcomeEvents.filter(event => event.outcome === "giveup");
+		const successfulRetries = outcomeEvents.filter(event => event.outcome === 'success');
+		const giveupRetries = outcomeEvents.filter(event => event.outcome === 'giveup');
 		
 		if (successfulRetries.length > 0) {
 			const totalAttempts = successfulRetries.reduce((sum, event) => sum + event.totalAttempts, 0);
@@ -189,21 +190,21 @@ export class RetryModule {
 			let groupKey;
 			
 			switch (groupByField) {
-				case "domain":
-					groupKey = point.domain || "unknown";
+				case 'domain':
+					groupKey = point.domain || 'unknown';
 					break;
-				case "method":
-					groupKey = point.method || "unknown";
+				case 'method':
+					groupKey = point.method || 'unknown';
 					break;
-				case "endpoint":
-					groupKey = point.endpoint || "unknown";
+				case 'endpoint':
+					groupKey = point.endpoint || 'unknown';
 					break;
-				case "tag":
+				case 'tag':
 					const tags = point.tags || [];
-					groupKey = tags.length > 0 ? tags[0] : "no-tags";
+					groupKey = tags.length > 0 ? tags[0] : 'no-tags';
 					break;
 				default:
-					groupKey = "all";
+					groupKey = 'all';
 			}
 			
 			if (!groups.has(groupKey)) {
@@ -237,7 +238,7 @@ export class RetryModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
-		const outcomeEvents = data.filter(point => point.type === "retry-outcome");
+		const outcomeEvents = data.filter(point => point.type === 'retry-outcome');
 		
 		const distribution = {};
 		for (const event of outcomeEvents) {

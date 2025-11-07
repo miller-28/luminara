@@ -3,7 +3,7 @@
  * Manages timeout setup and signal combination
  */
 
-import { logTimeout } from "../../../../core/verbose/verboseLogger.js";
+import { logTimeout } from '../../../../core/verbose/verboseLogger.js';
 
 export function createTimeoutHandler(timeout, userSignal, context = null) {
 	if (timeout === undefined || timeout <= 0) {
@@ -17,6 +17,7 @@ export function createTimeoutHandler(timeout, userSignal, context = null) {
 	
 	const timeoutController = new AbortController();
 	const timeoutId = setTimeout(() => {
+
 		// Log timeout trigger
 		if (context) {
 			logTimeout(context, 'triggered', { timeout });
@@ -40,6 +41,7 @@ export function createTimeoutHandler(timeout, userSignal, context = null) {
 	const cleanup = () => {
 		if (timeoutId) {
 			clearTimeout(timeoutId);
+
 			// Log timeout cleared
 			if (context) {
 				logTimeout(context, 'cleared');

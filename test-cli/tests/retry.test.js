@@ -86,6 +86,7 @@ suite.test('Retry with timeout combination', async () => {
 	timer.mark();
 	
 	try {
+
 		// Request with 300ms delay should timeout (ofetch doesn't retry timeout errors by default)
 		await api.getJson('/json?delay=300');
 		assert(false, 'Should timeout');
@@ -97,6 +98,7 @@ suite.test('Retry with timeout combination', async () => {
 		
 		// ofetch doesn't retry timeout errors by default, so only 1 request
 		assert(requestCount === 1, `Should make 1 request (timeout not retried), made ${requestCount}`);
+
 		// Single timeout: ~200ms (can have overhead in test environment)
 		assertRange(totalTime, 180, 500, `Timeout should occur around 200ms, got ${totalTime}ms`);
 	}
@@ -113,6 +115,7 @@ suite.test('Eventual success after retries', async () => {
 			if (requestCount <= 2) {
 				res.writeHead(503, { 'Content-Type': 'application/json' });
 				res.end(JSON.stringify({ error: 'Service temporarily unavailable' }));
+
 				return;
 			}
 			res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -120,6 +123,7 @@ suite.test('Eventual success after retries', async () => {
 				message: 'Success after retries',
 				attemptNumber: requestCount 
 			}));
+
 			return;
 		}
 		
@@ -150,10 +154,12 @@ suite.test('Custom retry delay function', async () => {
 		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
+
 			// Get the attempt number from context.attempt (1-based)
 			const attemptNumber = context.attempt || 1;
 			const delay = 100 * attemptNumber; // 100ms, 200ms, 300ms, 400ms
 			delays.push(delay);
+
 			return delay;
 		}
 	});
@@ -173,6 +179,7 @@ suite.test('Custom retry delay function', async () => {
 		assert(delays[3] === 400, `Fourth delay should be 400ms, got ${delays[3]}ms`);
 		
 		const totalTime = timer.getDuration();
+
 		// Total delays: 100 + 200 + 300 + 400 = 1000ms plus request time
 		assertRange(totalTime, 950, 1300, `Total time should include custom delays, got ${totalTime}ms`);
 	}
@@ -186,6 +193,7 @@ suite.test('Retry context provides request information', async () => {
 		baseURL: BASE_URL,
 		retry: totalRetries,
 		retryDelay: (context) => {
+
 			// Get the attempt number from context.attempt (1-based)
 			const attemptNumber = context.attempt || 1;
 			contextsCaptured.push({
@@ -194,6 +202,7 @@ suite.test('Retry context provides request information', async () => {
 				requestUrl: context.req?.url || 'No URL',
 				retryRemaining: context.req?.retry || 0
 			});
+
 			return 50;
 		}
 	});
@@ -257,6 +266,7 @@ suite.test('Retry disabled with retry: 0', async () => {
 });
 
 suite.test('Retry with network errors simulation', async () => {
+
 	// Create a separate client that points to non-existent server
 	const api = createLuminara({
 		baseURL: 'http://localhost:9999', // Non-existent server
@@ -275,6 +285,7 @@ suite.test('Retry with network errors simulation', async () => {
 		timer.mark();
 		
 		const totalTime = timer.getDuration();
+
 		// Network errors may fail immediately or after timeout, expect wide range
 		// Single attempt: immediate failure (0-10ms) or timeout (100ms+)
 		assertRange(totalTime, 0, 500, `Network error timing should be 0-500ms, got ${totalTime}ms`);
@@ -354,6 +365,7 @@ suite.test('Default policy retries POST on safe status codes', async () => {
 // Custom retry policy tests
 suite.test('Custom retry policy overrides default behavior', async () => {
 	const customPolicy = (error, context) => {
+
 		// Always retry regardless of method or status (for testing)
 		return context.attempt < context.maxAttempts;
 	};
@@ -379,6 +391,7 @@ suite.test('Network errors retry for idempotent methods (advanced)', async () =>
 	const luminara = createLuminara();
 
 	try {
+
 		// Use invalid URL to trigger network error
 		await luminara.get('http://invalid-host-that-does-not-exist.local/test', {
 			retry: 1,
@@ -387,6 +400,7 @@ suite.test('Network errors retry for idempotent methods (advanced)', async () =>
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
+
 		// With LuminaraError normalization, network errors are wrapped
 		assert(error.name === 'LuminaraError' || error.name === 'TypeError' || error.name === 'TimeoutError', `Expected network/timeout error, got ${error.name}`);
 	}

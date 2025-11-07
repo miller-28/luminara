@@ -35,7 +35,9 @@ export class TestController {
 
 	async runTest(testId, updateOutput, onStatusChange) {
 		const test = this.findTest(testId);
-		if (!test) return;
+		if (!test) {
+			return;
+		}
 
 		// Create AbortController for this test
 		const abortController = new AbortController();
@@ -54,11 +56,13 @@ export class TestController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
+
 				return { status: 'stopped', message: `${test.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('success');
 				}
+
 				return { status: 'success', message: result };
 			}
 		} catch (error) {
@@ -66,11 +70,13 @@ export class TestController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
+
 				return { status: 'stopped', message: `${test.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('error');
 				}
+
 				return { status: 'error', message: error.message, stack: error.stack };
 			}
 		} finally {
@@ -87,7 +93,9 @@ export class TestController {
 
 	async runFeature(featureKey, runTestCallback) {
 		const feature = examples[featureKey];
-		if (!feature) return;
+		if (!feature) {
+			return;
+		}
 
 		const promises = feature.examples.map(test => runTestCallback(test.id));
 		await Promise.all(promises);
@@ -113,8 +121,11 @@ export class TestController {
 	findTest(testId) {
 		for (const feature of Object.values(examples)) {
 			const test = feature.examples.find(t => t.id === testId);
-			if (test) return test;
+			if (test) {
+				return test;
+			}
 		}
+
 		return null;
 	}
 }

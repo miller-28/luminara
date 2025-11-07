@@ -46,6 +46,7 @@ export class SinceStartWindow {
 	 */
 	getStats() {
 		const now = Date.now();
+
 		return {
 			totalPoints: this.data.length,
 			timespan: now - this.startTime,
@@ -67,6 +68,7 @@ export class SinceStartWindow {
 	 * This method exists for interface compatibility but does nothing
 	 */
 	reset() {
+
 		// Since-start window doesn't support reset
 		// Data accumulates from process start
 	}

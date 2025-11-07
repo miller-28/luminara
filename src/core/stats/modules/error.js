@@ -2,18 +2,18 @@
  * Error module for tracking error-related metrics
  */
 
-import { createErrorSchema, mergeErrors } from "../query/schemas.js";
-import { Rolling60sWindow } from "../windows/rolling60s.js";
-import { SinceResetWindow } from "../windows/sinceReset.js";
-import { SinceStartWindow } from "../windows/sinceStart.js";
+import { createErrorSchema, mergeErrors } from '../query/schemas.js';
+import { Rolling60sWindow } from '../windows/rolling60s.js';
+import { SinceResetWindow } from '../windows/sinceReset.js';
+import { SinceStartWindow } from '../windows/sinceStart.js';
 
 export class ErrorModule {
 	
 	constructor() {
 		this.windows = {
-			"rolling-60s": new Rolling60sWindow(),
-			"since-reset": new SinceResetWindow(),
-			"since-start": new SinceStartWindow()
+			'rolling-60s': new Rolling60sWindow(),
+			'since-reset': new SinceResetWindow(),
+			'since-start': new SinceStartWindow()
 		};
 	}
 
@@ -24,7 +24,7 @@ export class ErrorModule {
 		const { id, status, errorKind, durationMs } = event;
 		
 		const dataPoint = {
-			type: "error",
+			type: 'error',
 			id,
 			status,
 			errorKind,
@@ -42,10 +42,10 @@ export class ErrorModule {
 		const { id } = event;
 		
 		const dataPoint = {
-			type: "error",
+			type: 'error',
 			id,
-			errorKind: "aborted",
-			errorClass: "aborted"
+			errorKind: 'aborted',
+			errorClass: 'aborted'
 		};
 		
 		Object.values(this.windows).forEach(window => window.add(dataPoint));
@@ -58,10 +58,10 @@ export class ErrorModule {
 		const { id, timeoutMs } = event;
 		
 		const dataPoint = {
-			type: "error",
+			type: 'error',
 			id,
-			errorKind: "timeout",
-			errorClass: "timeout",
+			errorKind: 'timeout',
+			errorClass: 'timeout',
 			timeoutMs
 		};
 		
@@ -78,6 +78,7 @@ export class ErrorModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
+
 		return this._calculateErrorMetrics(data);
 	}
 
@@ -85,7 +86,7 @@ export class ErrorModule {
 	 * Reset error data for since-reset window
 	 */
 	reset() {
-		this.windows["since-reset"].reset();
+		this.windows['since-reset'].reset();
 	}
 
 	/**
@@ -114,10 +115,11 @@ export class ErrorModule {
 	 */
 	_calculateErrorMetrics(data) {
 		const errorSchema = createErrorSchema();
-		const errorEvents = data.filter(point => point.type === "error");
+		const errorEvents = data.filter(point => point.type === 'error');
 		const statusCodes = new Map();
 		
 		for (const event of errorEvents) {
+
 			// Count by error class
 			const errorClass = event.errorClass;
 			if (errorSchema.byClass.hasOwnProperty(errorClass)) {
@@ -127,7 +129,7 @@ export class ErrorModule {
 			}
 			
 			// Track status codes
-			if (event.status && typeof event.status === "number") {
+			if (event.status && typeof event.status === 'number') {
 				const count = statusCodes.get(event.status) || 0;
 				statusCodes.set(event.status, count + 1);
 			}
@@ -146,19 +148,30 @@ export class ErrorModule {
 	 * Classify errors into predefined categories
 	 */
 	_classifyError(status, errorKind) {
+
 		// Handle explicit error kinds first
-		if (errorKind === "timeout") return "timeout";
-		if (errorKind === "network") return "network";
-		if (errorKind === "aborted") return "aborted";
+		if (errorKind === 'timeout') {
+			return 'timeout';
+		}
+		if (errorKind === 'network') {
+			return 'network';
+		}
+		if (errorKind === 'aborted') {
+			return 'aborted';
+		}
 		
 		// Classify by HTTP status code
-		if (typeof status === "number") {
-			if (status >= 400 && status < 500) return "4xx";
-			if (status >= 500 && status < 600) return "5xx";
+		if (typeof status === 'number') {
+			if (status >= 400 && status < 500) {
+				return '4xx';
+			}
+			if (status >= 500 && status < 600) {
+				return '5xx';
+			}
 		}
 		
 		// Default classification
-		return "other";
+		return 'other';
 	}
 
 	/**
@@ -171,21 +184,21 @@ export class ErrorModule {
 			let groupKey;
 			
 			switch (groupByField) {
-				case "domain":
-					groupKey = point.domain || "unknown";
+				case 'domain':
+					groupKey = point.domain || 'unknown';
 					break;
-				case "method":
-					groupKey = point.method || "unknown";
+				case 'method':
+					groupKey = point.method || 'unknown';
 					break;
-				case "endpoint":
-					groupKey = point.endpoint || "unknown";
+				case 'endpoint':
+					groupKey = point.endpoint || 'unknown';
 					break;
-				case "tag":
+				case 'tag':
 					const tags = point.tags || [];
-					groupKey = tags.length > 0 ? tags[0] : "no-tags";
+					groupKey = tags.length > 0 ? tags[0] : 'no-tags';
 					break;
 				default:
-					groupKey = "all";
+					groupKey = 'all';
 			}
 			
 			if (!groups.has(groupKey)) {
@@ -207,8 +220,8 @@ export class ErrorModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
-		const errorEvents = data.filter(point => point.type === "error");
-		const totalRequests = data.filter(point => point.type === "request-start").length;
+		const errorEvents = data.filter(point => point.type === 'error');
+		const totalRequests = data.filter(point => point.type === 'request-start').length;
 		
 		return {
 			errorCount: errorEvents.length,
@@ -227,7 +240,7 @@ export class ErrorModule {
 		}
 		
 		const data = filterFn ? window.getFiltered(filterFn) : window.getData();
-		const errorEvents = data.filter(point => point.type === "error");
+		const errorEvents = data.filter(point => point.type === 'error');
 		
 		const breakdown = {
 			byStatusCode: new Map(),
@@ -236,6 +249,7 @@ export class ErrorModule {
 		};
 		
 		for (const event of errorEvents) {
+
 			// By status code
 			if (event.status) {
 				const statusCount = breakdown.byStatusCode.get(event.status) || 0;

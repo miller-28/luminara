@@ -6,21 +6,21 @@
  * Extract domain from a data point
  */
 export const selectDomain = (dataPoint) => {
-	return dataPoint.domain || "unknown";
+	return dataPoint.domain || 'unknown';
 };
 
 /**
  * Extract method from a data point
  */
 export const selectMethod = (dataPoint) => {
-	return dataPoint.method || "unknown";
+	return dataPoint.method || 'unknown';
 };
 
 /**
  * Extract endpoint from a data point
  */
 export const selectEndpoint = (dataPoint) => {
-	return dataPoint.endpoint || "unknown";
+	return dataPoint.endpoint || 'unknown';
 };
 
 /**
@@ -28,7 +28,8 @@ export const selectEndpoint = (dataPoint) => {
  */
 export const selectTag = (dataPoint) => {
 	const tags = dataPoint.tags || [];
-	return tags.length > 0 ? tags[0] : "no-tags";
+
+	return tags.length > 0 ? tags[0] : 'no-tags';
 };
 
 /**
@@ -36,6 +37,7 @@ export const selectTag = (dataPoint) => {
  */
 export const createFilterFunction = (where = {}) => {
 	return (dataPoint) => {
+
 		// If no where criteria, accept all
 		if (!where || Object.keys(where).length === 0) {
 			return true;
@@ -76,17 +78,17 @@ export const createFilterFunction = (where = {}) => {
  */
 export const createGroupByFunction = (groupBy) => {
 	switch (groupBy) {
-		case "domain":
+		case 'domain':
 			return selectDomain;
-		case "method":
+		case 'method':
 			return selectMethod;
-		case "endpoint":
+		case 'endpoint':
 			return selectEndpoint;
-		case "tag":
+		case 'tag':
 			return selectTag;
-		case "none":
+		case 'none':
 		default:
-			return () => "all";
+			return () => 'all';
 	}
 };
 
@@ -120,6 +122,7 @@ export const applyLimit = (groupedResults, limit) => {
 	
 	// Sort by group key for consistent ordering
 	const sorted = groupedResults.sort((a, b) => a.key.localeCompare(b.key));
+
 	return sorted.slice(0, limit);
 };
 
@@ -130,7 +133,9 @@ export const applyLimit = (groupedResults, limit) => {
  * - "/api/v1/orders/abc-def-123/items" -> "/api/v1/orders/:id/items"
  */
 export const normalizeEndpoint = (method, path) => {
-	if (!path) return "unknown";
+	if (!path) {
+		return 'unknown';
+	}
 	
 	// Common ID patterns to replace with :id
 	const idPatterns = [
@@ -167,6 +172,7 @@ export const extractRequestMetadata = (event) => {
 			const url = new URL(event.url);
 			metadata.domain = url.hostname;
 		} catch {
+
 			// Invalid URL, keep domain as null
 		}
 	}
@@ -188,13 +194,13 @@ export const groupKeyMatchesFilter = (groupKey, groupBy, where) => {
 	}
 	
 	switch (groupBy) {
-		case "domain":
+		case 'domain':
 			return !where.domain || groupKey === where.domain;
-		case "method":
+		case 'method':
 			return !where.method || groupKey === where.method;
-		case "endpoint":
+		case 'endpoint':
 			return !where.endpointPrefix || groupKey.includes(where.endpointPrefix);
-		case "tag":
+		case 'tag':
 			return !where.tag || groupKey === where.tag;
 		default:
 			return true;

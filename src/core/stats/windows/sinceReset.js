@@ -54,6 +54,7 @@ export class SinceResetWindow {
 	 */
 	getStats() {
 		const now = Date.now();
+
 		return {
 			totalPoints: this.data.length,
 			timespan: now - this.resetTime,

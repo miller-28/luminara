@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const retry = {
-	title: "🔄 Retry",
+	title: '🔄 Retry',
 	examples: [
 		{
-			id: "retry-basic",
-			title: "Basic Retry (3 attempts)",
+			id: 'retry-basic',
+			title: 'Basic Retry (3 attempts)',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -56,15 +56,18 @@ try {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					retryLog.push(`[${new Date().toLocaleTimeString()}] Final result: Failed after all retries (expected)`);
+
 					return `Retry Count: 3\nDelay: 500ms\nEndpoint: /status/503\n\n📊 Retry Log:\n${retryLog.join('\n')}\n\n⚠️ Failed after all retries as expected`;
 				}
 			}
 		},
 		{
-			id: "retry-status-codes",
-			title: "Retry with Status Codes",
+			id: 'retry-status-codes',
+			title: 'Retry with Status Codes',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -79,13 +82,13 @@ try {
   console.log('Failed after retries:', error.status);
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput(`🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n⏳ Creating client and making request...`);
+				updateOutput('🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n⏳ Creating client and making request...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				const startTime = Date.now();
 				
 				try {
-					updateOutput(`🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n🌐 Making initial request to httpbingo.org/status/429...\n💡 Watch the Console tab → you should see multiple requests`);
+					updateOutput('🔄 STARTING: Retry with Status Codes test...\n\n📋 Configuration:\n- Retry Count: 2\n- Retry on: [408, 429, 500, 502, 503]\n- Endpoint: httpbingo.org/status/429\n- Delay: 300ms between retries\n\n🌐 Making initial request to httpbingo.org/status/429...\n💡 Watch the Console tab → you should see multiple requests');
 
 					await client.get('https://httpbingo.org/status/429', {
 						retry: 2,
@@ -96,10 +99,13 @@ try {
 					
 					// This shouldn't happen
 					const duration = Date.now() - startTime;
+
 					return `❌ UNEXPECTED: Request succeeded in ${duration}ms (should have failed with 429)`;
 					
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					const duration = Date.now() - startTime;
 					
@@ -108,8 +114,8 @@ try {
 			}
 		},
 		{
-			id: "custom-retry-function",
-			title: "Custom retryDelay Function",
+			id: 'custom-retry-function',
+			title: 'Custom retryDelay Function',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -149,14 +155,17 @@ await client.get('https://api.example.com/unstable', {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
+
 					return `Custom retryDelay function:\n\n📊 Retry Log:\n${retryLog.join('\n')}\n\n✅ All retries completed\n\n💡 retryDelay can be a function for full control over retry timing`;
 				}
 			}
 		},
 		{
-			id: "default-retry-policy",
-			title: "Default Retry Policy (Idempotent Methods)",
+			id: 'default-retry-policy',
+			title: 'Default Retry Policy (Idempotent Methods)',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -178,6 +187,7 @@ await client.post('https://api.example.com/submit', data, {
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
+
 					// GET is idempotent, so it should retry on 500 errors
 					await client.get('https://httpbingo.org/status/500', {
 						retry: 2,
@@ -186,11 +196,14 @@ await client.post('https://api.example.com/submit', data, {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					updateOutput(`✅ GET request failed as expected after retries: ${error.message}\n`);
 				}
 				
 				try {
+
 					// POST is not idempotent by default, but 500 is in safe retry list
 					await client.post('https://httpbingo.org/status/500', { test: 'data' }, {
 						retry: 2,
@@ -199,11 +212,14 @@ await client.post('https://api.example.com/submit', data, {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					updateOutput(`✅ POST request failed as expected after retries on 500: ${error.message}\n`);
 				}
 				
 				try {
+
 					// POST won't retry on 400 (not in safe list)
 					await client.post('https://httpbingo.org/status/400', { test: 'data' }, {
 						retry: 2,
@@ -212,7 +228,9 @@ await client.post('https://api.example.com/submit', data, {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					updateOutput(`✅ POST request failed without retries on 400: ${error.message}\n`);
 				}
 				
@@ -220,8 +238,8 @@ await client.post('https://api.example.com/submit', data, {
 			}
 		},
 		{
-			id: "custom-retry-policy",
-			title: "Custom Retry Policy Override",
+			id: 'custom-retry-policy',
+			title: 'Custom Retry Policy Override',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -269,7 +287,9 @@ await client.post('https://api.example.com/submit', data, {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					updateOutput(`✅ Custom retry policy executed, POST failed after custom retries: ${error.message}\n`);
 				}
 				
@@ -277,8 +297,8 @@ await client.post('https://api.example.com/submit', data, {
 			}
 		},
 		{
-			id: "retry-status-policies",
-			title: "Retry Status Code Policies",
+			id: 'retry-status-policies',
+			title: 'Retry Status Code Policies',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -341,7 +361,9 @@ for (const test of testCases) {
 						signal
 					});
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					const duration = Date.now() - startTime;
 					updateOutput(`✅ 502 error retried as expected (took ${duration}ms)\n`);
 				}
@@ -349,5 +371,5 @@ for (const test of testCases) {
 				return 'Retry status code policies test completed successfully!';
 			}
 		}
-    ]
+	]
 };

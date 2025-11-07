@@ -42,7 +42,9 @@ export class ExamplesController {
 
 	async runExample(exampleId, updateOutput, onStatusChange) {
 		const example = this.findExample(exampleId);
-		if (!example) return;
+		if (!example) {
+			return;
+		}
 
 		// Create AbortController for this example
 		const abortController = new AbortController();
@@ -61,11 +63,13 @@ export class ExamplesController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
+
 				return { status: 'stopped', message: `${example.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('success');
 				}
+
 				return { status: 'success', message: result };
 			}
 		} catch (error) {
@@ -73,11 +77,13 @@ export class ExamplesController {
 				if (onStatusChange) {
 					onStatusChange('stopped');
 				}
+
 				return { status: 'stopped', message: `${example.title} was stopped by user.` };
 			} else {
 				if (onStatusChange) {
 					onStatusChange('error');
 				}
+
 				return { status: 'error', message: error.message, stack: error.stack };
 			}
 		} finally {
@@ -94,7 +100,9 @@ export class ExamplesController {
 
 	async runFeature(featureKey, runExampleCallback) {
 		const feature = examples[featureKey];
-		if (!feature) return;
+		if (!feature) {
+			return;
+		}
 
 		const promises = feature.examples.map(example => runExampleCallback(example.id));
 		await Promise.all(promises);
@@ -120,8 +128,11 @@ export class ExamplesController {
 	findExample(exampleId) {
 		for (const feature of Object.values(examples)) {
 			const example = feature.examples.find(e => e.id === exampleId);
-			if (example) return example;
+			if (example) {
+				return example;
+			}
 		}
+
 		return null;
 	}
 }

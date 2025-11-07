@@ -15,6 +15,7 @@ class MockDriver {
 	}
 	
 	async request(requestOptions) {
+
 		// Log the request
 		this.requestLog.push({
 			method: requestOptions.method,
@@ -103,8 +104,7 @@ suite.test('Custom driver receives all request options', async () => {
 		{ 
 			headers: { 'X-Custom': 'test-header' },
 			timeout: 5000
-		}
-	);
+		});
 	
 	const log = mockDriver.getRequestLog();
 	const request = log[0];
@@ -116,6 +116,7 @@ suite.test('Custom driver receives all request options', async () => {
 });
 
 suite.test('Default OfetchDriver functionality', async () => {
+
 	// Test that the default OfetchDriver works correctly
 	const api = createLuminara({
 		baseURL: BASE_URL
@@ -135,6 +136,7 @@ suite.test('Driver option mapping validation', async () => {
 	const originalRequest = mockDriver.request.bind(mockDriver);
 	mockDriver.request = async (options) => {
 		capturedOptions = { ...options };
+
 		return await originalRequest(options);
 	};
 	
@@ -190,6 +192,7 @@ suite.test('Custom driver with backoff strategies', async () => {
 	const originalRequest = mockDriver.request.bind(mockDriver);
 	mockDriver.request = async (options) => {
 		capturedOptions = { ...options };
+
 		return await originalRequest(options);
 	};
 	
@@ -214,6 +217,7 @@ suite.test('Custom driver with backoff strategies', async () => {
 });
 
 suite.test('Driver comparison - ofetch vs custom', async () => {
+
 	// Test with OfetchDriver
 	const ofetchApi = createLuminara({
 		baseURL: BASE_URL
@@ -239,6 +243,7 @@ suite.test('Driver method requirements validation', async () => {
 	
 	// Test that driver must implement request method
 	class IncompleteDriver {
+
 		// Missing request method
 	}
 	
@@ -248,6 +253,7 @@ suite.test('Driver method requirements validation', async () => {
 		await api.getJson('/test');
 		assert(false, 'Should fail with incomplete driver');
 	} catch (error) {
+
 		// Should fail because driver doesn't implement request method
 		assert(error.message.includes('request') || 
 		       error.message.includes('function') ||

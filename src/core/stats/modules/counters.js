@@ -2,18 +2,18 @@
  * Counters module for tracking request counts and states
  */
 
-import { createCountersSchema, mergeCounters } from "../query/schemas.js";
-import { Rolling60sWindow } from "../windows/rolling60s.js";
-import { SinceResetWindow } from "../windows/sinceReset.js";
-import { SinceStartWindow } from "../windows/sinceStart.js";
+import { createCountersSchema, mergeCounters } from '../query/schemas.js';
+import { Rolling60sWindow } from '../windows/rolling60s.js';
+import { SinceResetWindow } from '../windows/sinceReset.js';
+import { SinceStartWindow } from '../windows/sinceStart.js';
 
 export class CountersModule {
 	
 	constructor() {
 		this.windows = {
-			"rolling-60s": new Rolling60sWindow(),
-			"since-reset": new SinceResetWindow(),
-			"since-start": new SinceStartWindow()
+			'rolling-60s': new Rolling60sWindow(),
+			'since-reset': new SinceResetWindow(),
+			'since-start': new SinceStartWindow()
 		};
 		
 		// Track current in-flight requests
@@ -29,7 +29,7 @@ export class CountersModule {
 		this.inflightRequests.add(id);
 		
 		const dataPoint = {
-			type: "request-start",
+			type: 'request-start',
 			id,
 			domain,
 			method,
@@ -47,7 +47,7 @@ export class CountersModule {
 		this.inflightRequests.delete(id);
 		
 		const dataPoint = {
-			type: "request-success",
+			type: 'request-success',
 			id,
 			status,
 			durationMs
@@ -62,7 +62,7 @@ export class CountersModule {
 		this.inflightRequests.delete(id);
 		
 		const dataPoint = {
-			type: "request-fail",
+			type: 'request-fail',
 			id,
 			status,
 			errorKind,
@@ -76,7 +76,7 @@ export class CountersModule {
 		const { id, attempt, backoffMs } = event;
 		
 		const dataPoint = {
-			type: "request-retry",
+			type: 'request-retry',
 			id,
 			attempt,
 			backoffMs
@@ -91,7 +91,7 @@ export class CountersModule {
 		this.inflightRequests.delete(id);
 		
 		const dataPoint = {
-			type: "request-abort",
+			type: 'request-abort',
 			id
 		};
 		
@@ -115,29 +115,29 @@ export class CountersModule {
 		
 		for (const point of data) {
 			switch (point.type) {
-				case "request-start":
+				case 'request-start':
 					if (!requestStarts.has(point.id)) {
 						counters.total++;
 						requestStarts.add(point.id);
 					}
 					break;
 				
-				case "request-success":
+				case 'request-success':
 					counters.success++;
 					break;
 				
-				case "request-fail":
+				case 'request-fail':
 					counters.fail++;
 					break;
 				
-				case "request-retry":
+				case 'request-retry':
 					if (!retryRequests.has(point.id)) {
 						counters.retried++;
 						retryRequests.add(point.id);
 					}
 					break;
 				
-				case "request-abort":
+				case 'request-abort':
 					counters.aborted++;
 					break;
 			}
@@ -153,7 +153,7 @@ export class CountersModule {
 	 * Reset counters for since-reset window
 	 */
 	reset() {
-		this.windows["since-reset"].reset();
+		this.windows['since-reset'].reset();
 	}
 
 	/**
@@ -173,27 +173,29 @@ export class CountersModule {
 			let groupKey;
 			
 			switch (groupByField) {
-				case "domain":
-					groupKey = point.domain || "unknown";
+				case 'domain':
+					groupKey = point.domain || 'unknown';
 					break;
-				case "method":
-					groupKey = point.method || "unknown";
+				case 'method':
+					groupKey = point.method || 'unknown';
 					break;
-				case "endpoint":
-					groupKey = point.endpoint || "unknown";
+				case 'endpoint':
+					groupKey = point.endpoint || 'unknown';
 					break;
-				case "tag":
+				case 'tag':
+
 					// For tags, create a group for each tag
 					const tags = point.tags || [];
 					if (tags.length === 0) {
-						groupKey = "no-tags";
+						groupKey = 'no-tags';
 					} else {
+
 						// For simplicity, use first tag as group key
 						groupKey = tags[0];
 					}
 					break;
 				default:
-					groupKey = "all";
+					groupKey = 'all';
 			}
 			
 			if (!groups.has(groupKey)) {
@@ -222,29 +224,29 @@ export class CountersModule {
 		
 		for (const point of dataPoints) {
 			switch (point.type) {
-				case "request-start":
+				case 'request-start':
 					if (!requestStarts.has(point.id)) {
 						counters.total++;
 						requestStarts.add(point.id);
 					}
 					break;
 				
-				case "request-success":
+				case 'request-success':
 					counters.success++;
 					break;
 				
-				case "request-fail":
+				case 'request-fail':
 					counters.fail++;
 					break;
 				
-				case "request-retry":
+				case 'request-retry':
 					if (!retryRequests.has(point.id)) {
 						counters.retried++;
 						retryRequests.add(point.id);
 					}
 					break;
 				
-				case "request-abort":
+				case 'request-abort':
 					counters.aborted++;
 					break;
 			}

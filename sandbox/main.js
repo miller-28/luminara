@@ -14,6 +14,7 @@ class CodeModal {
 	}
 
 	init() {
+
 		// Close modal on close button click
 		this.closeBtn.onclick = () => this.close();
 		
@@ -51,6 +52,7 @@ class CodeModal {
 		const code = this.modalCode.textContent;
 		try {
 			await navigator.clipboard.writeText(code);
+
 			// Visual feedback
 			const originalText = this.copyBtn.textContent;
 			this.copyBtn.textContent = '✅ Copied!';
@@ -108,9 +110,9 @@ class SandboxUI {
 		title.className = 'feature-title';
 		title.textContent = feature.title;
 
-        const runFeatureBtn = document.createElement('button');
+		const runFeatureBtn = document.createElement('button');
 		runFeatureBtn.className = 'btn btn-small';
-        runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
+		runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
 		runFeatureBtn.onclick = () => this.handleRunFeature(featureKey);
 
 		header.appendChild(title);
@@ -119,8 +121,8 @@ class SandboxUI {
 		const grid = document.createElement('div');
 		grid.className = 'examples-grid';
 
-        for (const example of feature.examples) {
-            const card = this.createExampleCard(example);
+		for (const example of feature.examples) {
+			const card = this.createExampleCard(example);
 			grid.appendChild(card);
 		}
 
@@ -130,17 +132,17 @@ class SandboxUI {
 		return section;
 	}
 
-    createExampleCard(example) {
+	createExampleCard(example) {
 		const card = document.createElement('div');
 		card.className = 'example-card';
-        card.id = `example-${example.id}`;
+		card.id = `example-${example.id}`;
 
 		const cardHeader = document.createElement('div');
 		cardHeader.className = 'example-header';
 
 		const titleDiv = document.createElement('div');
 		titleDiv.className = 'example-title';
-        titleDiv.textContent = example.title;
+		titleDiv.textContent = example.title;
 
 		const buttonContainer = document.createElement('div');
 		buttonContainer.style.display = 'flex';
@@ -159,14 +161,14 @@ class SandboxUI {
 		runBtn.className = 'btn btn-small';
 		runBtn.textContent = '▶ Run';
 		runBtn.onclick = () => this.handleRunTest(example.id);
-        this.runButtonElements.set(example.id, runBtn);
+		this.runButtonElements.set(example.id, runBtn);
 
 		const stopBtn = document.createElement('button');
 		stopBtn.className = 'btn btn-small btn-stop';
 		stopBtn.textContent = '⏹ Stop';
 		stopBtn.style.display = 'none';
-        stopBtn.onclick = () => this.handleStopTest(example.id);
-        this.stopButtonElements.set(example.id, stopBtn);
+		stopBtn.onclick = () => this.handleStopTest(example.id);
+		this.stopButtonElements.set(example.id, stopBtn);
 
 		buttonContainer.appendChild(runBtn);
 		buttonContainer.appendChild(stopBtn);
@@ -177,7 +179,7 @@ class SandboxUI {
 		const output = document.createElement('pre');
 		output.className = 'example-output';
 		output.textContent = 'Click ▶ Run to run this example';
-        this.outputElements.set(example.id, output);
+		this.outputElements.set(example.id, output);
 
 		card.appendChild(cardHeader);
 		card.appendChild(output);
@@ -198,26 +200,28 @@ class SandboxUI {
 
 	async handleRunTest(testId) {
 		const example = this.examplesController.findExample(testId);
-        if (!example) return;
+		if (!example) {
+			return;
+		}
 
 		const output = this.outputElements.get(testId);
 		const runButton = this.runButtonElements.get(testId);
 		const stopButton = this.stopButtonElements.get(testId);
 
 		// Update output callback for live updates
-        const updateOutput = (content) => {
+		const updateOutput = (content) => {
 			output.textContent = content;
 		};
 
 		// Status change callback for UI updates
-        const onStatusChange = (status) => {
+		const onStatusChange = (status) => {
 			switch (status) {
 				case 'running':
 					runButton.disabled = true;
 					runButton.style.display = 'none';
 					stopButton.style.display = 'inline-block';
 					output.className = 'example-output running';
-                    output.textContent = `▶ Running ${example.title}...\nPlease wait...`;
+					output.textContent = `▶ Running ${example.title}...\nPlease wait...`;
 					break;
 				case 'success':
 					output.className = 'example-output success';
@@ -266,11 +270,12 @@ class SandboxUI {
 	}
 
 	handleClearAll() {
+
 		// Stop all running examples
 		this.examplesController.stopAll();
 
 		// Clear all outputs
-        for (const [testId, output] of this.outputElements) {
+		for (const [testId, output] of this.outputElements) {
 			output.className = 'example-output';
 			output.textContent = 'Click ▶ Run to run this example';
 			
@@ -288,6 +293,7 @@ class SandboxUI {
 	}
 
 	handleVerboseToggle(isVerbose) {
+
 		// Update examples controller with verbose state
 		this.examplesController.setVerboseMode(isVerbose);
 		

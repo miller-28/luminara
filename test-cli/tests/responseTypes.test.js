@@ -34,6 +34,7 @@ suite.test('responseType: json should parse JSON', async () => {
 
 // Test responseType: 'blob'
 suite.test('responseType: blob should return Blob', async () => {
+
 	// Skip in Node.js environment (no Blob support)
 	if (typeof Blob === 'undefined') {
 		return; // Test passes by skipping
@@ -51,6 +52,7 @@ suite.test('responseType: blob should return Blob', async () => {
 
 // Test responseType: 'stream'
 suite.test('responseType: stream should return ReadableStream', async () => {
+
 	// Skip in Node.js environment (limited ReadableStream support)
 	if (typeof ReadableStream === 'undefined') {
 		return; // Test passes by skipping

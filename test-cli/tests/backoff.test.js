@@ -21,12 +21,14 @@ suite.test('Linear backoff timing', async () => {
 	try {
 		await api.getJson('/json?status=500');
 	} catch (error) {
+
 		// Expected to fail after retries
 	}
 	
 	timer.mark(); // End
 	
 	const totalTime = timer.getDuration();
+
 	// Linear: 100ms + 100ms + 100ms = ~300ms + request times
 	// Allow for request overhead: 250ms - 500ms range
 	assertRange(totalTime, 250, 500, `Linear backoff timing should be ~300ms, got ${totalTime}ms`);
@@ -46,12 +48,14 @@ suite.test('Exponential backoff timing', async () => {
 	try {
 		await api.getJson('/json?status=503');
 	} catch (error) {
+
 		// Expected to fail
 	}
 	
 	timer.mark();
 	
 	const totalTime = timer.getDuration();
+
 	// Exponential: Theoretical 100ms + 200ms + 400ms + 800ms = 1500ms
 	// But actual performance shows ~500ms, so test for reasonable backoff behavior
 	// Minimum threshold: 400ms (shows retries are happening with some delay)
@@ -73,12 +77,14 @@ suite.test('Exponential capped backoff', async () => {
 	try {
 		await api.getJson('/json?status=502');
 	} catch (error) {
+
 		// Expected to fail
 	}
 	
 	timer.mark();
 	
 	const totalTime = timer.getDuration();
+
 	// Capped: Theoretical 200ms + 300ms + 300ms + 300ms + 300ms = 1400ms
 	// But actual performance shows ~1100ms, so test for reasonable capped behavior
 	// Minimum threshold: 1000ms (shows capped backoff is working)
@@ -99,12 +105,14 @@ suite.test('Fibonacci backoff pattern', async () => {
 	try {
 		await api.getJson('/json?status=500');
 	} catch (error) {
+
 		// Expected to fail
 	}
 	
 	timer.mark();
 	
 	const totalTime = timer.getDuration();
+
 	// Fibonacci: Theoretical 50 + 50 + 100 + 150 + 250 + 400 = 1000ms
 	// But actual performance shows ~467ms, so test for reasonable fibonacci behavior
 	// Minimum threshold: 400ms (shows fibonacci sequence delays are happening)
@@ -130,6 +138,7 @@ suite.test('Jitter backoff randomization', async () => {
 		try {
 			await api.getJson('/json?status=429');
 		} catch (error) {
+
 			// Expected to fail
 		}
 		
@@ -169,12 +178,14 @@ suite.test('Exponential jitter combination', async () => {
 	try {
 		await api.getJson('/json?status=503');
 	} catch (error) {
+
 		// Expected to fail
 	}
 	
 	timer.mark();
 	
 	const totalTime = timer.getDuration();
+
 	// Exponential jitter: Theoretical 200 + 400 + 800 + 1000(capped) = 2400ms + jitter
 	// But actual performance shows ~979-1115ms due to jitter and system variations
 	// Generous tolerance: Allow 700-3500ms to account for timing variations
@@ -190,6 +201,7 @@ suite.test('Custom retry handler timing', async () => {
 		retry: 3,
 		retryDelay: (context) => {
 			retryAttempts++;
+
 			return 150; // Fixed 150ms delay
 		}
 	});
@@ -200,6 +212,7 @@ suite.test('Custom retry handler timing', async () => {
 	try {
 		await api.getJson('/json?status=500');
 	} catch (error) {
+
 		// Expected to fail
 	}
 	
@@ -208,12 +221,14 @@ suite.test('Custom retry handler timing', async () => {
 	assert(retryAttempts === 3, `Should make 3 retry attempts, made ${retryAttempts}`);
 	
 	const totalTime = timer.getDuration();
+
 	// Custom: 150ms * 3 = 450ms
 	// Allow overhead: 400ms - 650ms
 	assertRange(totalTime, 400, 650, `Custom retry timing should be ~450ms, got ${totalTime}ms`);
 });
 
 suite.test('Backoff with eventual success', async () => {
+
 	// Set up server to fail twice, then succeed
 	let requestCount = 0;
 	const originalHandler = mockServer.handleRequest;
@@ -222,14 +237,18 @@ suite.test('Backoff with eventual success', async () => {
 		if (path === '/eventual-success') {
 			requestCount++;
 			if (requestCount <= 2) {
+
 				// Fail first two requests
 				res.writeHead(503, { 'Content-Type': 'application/json' });
 				res.end(JSON.stringify({ error: 'Temporary failure' }));
+
 				return;
 			}
+
 			// Succeed on third request
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(JSON.stringify({ message: 'Success after retries', attempt: requestCount }));
+
 			return;
 		}
 		

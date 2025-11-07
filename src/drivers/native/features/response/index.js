@@ -3,4 +3,4 @@
  * Exports response parsing functionality
  */
 
-export { parseResponseData } from "./responseParser.js";
+export { parseResponseData } from './responseParser.js';

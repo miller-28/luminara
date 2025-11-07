@@ -3,9 +3,10 @@
  * Handles responseType options and custom parseResponse functions
  */
 
-import { logResponse } from "../../../../core/verbose/verboseLogger.js";
+import { logResponse } from '../../../../core/verbose/verboseLogger.js';
 
 export async function parseResponseData(response, responseType = 'auto', parseResponse, context = null) {
+
 	// Log response received
 	if (context) {
 		logResponse(context, 'received', {
@@ -31,6 +32,7 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 				resultType: typeof result
 			});
 		}
+
 		return result;
 	}
 	
@@ -43,12 +45,14 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 		if (context) {
 			logResponse(context, 'parsed', { type: 'blob', resultType: 'Blob' });
 		}
+
 		return result;
 	} else if (responseType === 'stream') {
 		if (context) {
 			logResponse(context, 'parsing', { type: 'stream' });
 			logResponse(context, 'parsed', { type: 'stream', resultType: 'ReadableStream' });
 		}
+
 		return response.body; // ReadableStream
 	} else if (responseType === 'text') {
 		if (context) {
@@ -58,6 +62,7 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 		if (context) {
 			logResponse(context, 'parsed', { type: 'text', resultType: 'string' });
 		}
+
 		return result;
 	} else if (responseType === 'json') {
 		if (context) {
@@ -67,6 +72,7 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 		if (context) {
 			logResponse(context, 'parsed', { type: 'json', resultType: typeof result });
 		}
+
 		return result;
 	} else if (responseType === 'arrayBuffer') {
 		if (context) {
@@ -76,8 +82,10 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 		if (context) {
 			logResponse(context, 'parsed', { type: 'arrayBuffer', resultType: 'ArrayBuffer' });
 		}
+
 		return result;
 	} else {
+
 		// Auto-detect based on content-type (default behavior)
 		const contentType = response.headers.get('content-type') || '';
 		
@@ -96,8 +104,10 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 						resultType: typeof result
 					});
 				}
+
 				return result;
 			} catch (jsonError) {
+
 				// Try text fallback for auto-detection
 				if (context) {
 					logResponse(context, 'parsing', {
@@ -112,6 +122,7 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 						resultType: 'string'
 					});
 				}
+
 				return result;
 			}
 		} else {
@@ -128,6 +139,7 @@ export async function parseResponseData(response, responseType = 'auto', parseRe
 					resultType: 'string'
 				});
 			}
+
 			return result;
 		}
 	}

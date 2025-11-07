@@ -10,7 +10,7 @@ const BASE_URL = `http://localhost:${mockServer.port}`;
 // onRequest Interceptor Tests (L→R execution order)
 // =============================================================================
 
-suite.test("onRequest interceptor modifies request", async () => {
+suite.test('onRequest interceptor modifies request', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	
 	client.use({
@@ -24,10 +24,10 @@ suite.test("onRequest interceptor modifies request", async () => {
 
 	const response = await client.getJson('/echo-headers');
 	
-	assert(response.data.headers['x-test-header'] === 'interceptor-added', "Header should be added by interceptor");
+	assert(response.data.headers['x-test-header'] === 'interceptor-added', 'Header should be added by interceptor');
 });
 
-suite.test("onRequest interceptors execute in Left→Right order", async () => {
+suite.test('onRequest interceptors execute in Left→Right order', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	const executionOrder = [];
 	
@@ -71,57 +71,58 @@ suite.test("onRequest interceptors execute in Left→Right order", async () => {
 	const response = await client.getJson('/echo-headers');
 	
 	// Verify execution order
-	assertEqual(executionOrder, ['first', 'second', 'third'], "onRequest should execute in L→R order");
+	assertEqual(executionOrder, ['first', 'second', 'third'], 'onRequest should execute in L→R order');
 	
 	// Verify final state (last interceptor wins)
-	assert(response.data.headers['x-order'] === 'third', "Last interceptor should have final say");
-	assert(response.data.headers['x-chain'] === 'second -> third', "Chain should show progression");
+	assert(response.data.headers['x-order'] === 'third', 'Last interceptor should have final say');
+	assert(response.data.headers['x-chain'] === 'second -> third', 'Chain should show progression');
 });
 
-suite.test("onRequest interceptor receives complete context", async () => {
+suite.test('onRequest interceptor receives complete context', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	let capturedContext = null;
 	
 	client.use({
 		onRequest(context) {
 			capturedContext = { ...context };
+
 			// Verify context structure
-			assert(context.req !== undefined, "Context should have req object");
-			assert(context.meta !== undefined, "Context should have meta object");
-			assert(context.meta.requestId !== undefined, "Context should have requestId");
-			assert(context.controller !== undefined, "Context should have AbortController");
-			assert(context.attempt === 1, "Initial attempt should be 1");
+			assert(context.req !== undefined, 'Context should have req object');
+			assert(context.meta !== undefined, 'Context should have meta object');
+			assert(context.meta.requestId !== undefined, 'Context should have requestId');
+			assert(context.controller !== undefined, 'Context should have AbortController');
+			assert(context.attempt === 1, 'Initial attempt should be 1');
 		}
 	});
 
 	await client.getJson('/json');
 	
-	assert(capturedContext !== null, "Context should be captured");
-	assert(capturedContext.req.method === 'GET', "Request method should be preserved");
+	assert(capturedContext !== null, 'Context should be captured');
+	assert(capturedContext.req.method === 'GET', 'Request method should be preserved');
 });
 
 // =============================================================================
 // onResponse Interceptor Tests (R→L execution order)
 // =============================================================================
 
-suite.test("onResponse interceptor modifies response", async () => {
+suite.test('onResponse interceptor modifies response', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	
 	client.use({
 		onResponse(context) {
 			context.res.data.modified = true;
-			context.res.data.timestamp = "2024-01-01";
+			context.res.data.timestamp = '2024-01-01';
 		}
 	});
 
 	const response = await client.getJson('/json');
 	
-	assert(response.data.message === 'Success', "Original data should be preserved");
-	assert(response.data.modified === true, "Data should be modified by interceptor");
-	assert(response.data.timestamp === "2024-01-01", "Timestamp should be added by interceptor");
+	assert(response.data.message === 'Success', 'Original data should be preserved');
+	assert(response.data.modified === true, 'Data should be modified by interceptor');
+	assert(response.data.timestamp === '2024-01-01', 'Timestamp should be added by interceptor');
 });
 
-suite.test("onResponse interceptors execute in Right→Left order", async () => {
+suite.test('onResponse interceptors execute in Right→Left order', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	const executionOrder = [];
 	
@@ -155,40 +156,41 @@ suite.test("onResponse interceptors execute in Right→Left order", async () => 
 	const response = await client.getJson('/json');
 	
 	// Verify execution order (reverse of registration)
-	assertEqual(executionOrder, ['third', 'second', 'first'], "onResponse should execute in R→L order");
+	assertEqual(executionOrder, ['third', 'second', 'first'], 'onResponse should execute in R→L order');
 	
 	// Verify data accumulation (shows execution sequence)
-	assert(response.data.order === 'third second first', "Data should show R→L execution sequence");
+	assert(response.data.order === 'third second first', 'Data should show R→L execution sequence');
 });
 
-suite.test("onResponse interceptor receives complete context with response", async () => {
+suite.test('onResponse interceptor receives complete context with response', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	let capturedContext = null;
 	
 	client.use({
 		onResponse(context) {
 			capturedContext = { ...context };
+
 			// Verify context structure
-			assert(context.req !== undefined, "Context should have req object");
-			assert(context.res !== undefined, "Context should have res object");
-			assert(context.meta !== undefined, "Context should have meta object");
-			assert(context.controller !== undefined, "Context should have AbortController");
-			assert(context.res.status !== undefined, "Response should have status");
-			assert(context.res.data !== undefined, "Response should have data");
+			assert(context.req !== undefined, 'Context should have req object');
+			assert(context.res !== undefined, 'Context should have res object');
+			assert(context.meta !== undefined, 'Context should have meta object');
+			assert(context.controller !== undefined, 'Context should have AbortController');
+			assert(context.res.status !== undefined, 'Response should have status');
+			assert(context.res.data !== undefined, 'Response should have data');
 		}
 	});
 
 	await client.getJson('/json');
 	
-	assert(capturedContext !== null, "Context should be captured");
-	assert(capturedContext.res.status === 200, "Response status should be available");
+	assert(capturedContext !== null, 'Context should be captured');
+	assert(capturedContext.res.status === 200, 'Response status should be available');
 });
 
 // =============================================================================
 // onResponseError Interceptor Tests
 // =============================================================================
 
-suite.test("onResponseError interceptor handles HTTP errors", async () => {
+suite.test('onResponseError interceptor handles HTTP errors', async () => {
 	const client = createLuminara({ 
 		baseURL: BASE_URL,
 		ignoreResponseError: false // Ensure errors are thrown
@@ -203,9 +205,9 @@ suite.test("onResponseError interceptor handles HTTP errors", async () => {
 			capturedError = context.error;
 			
 			// Verify error context structure
-			assert(context.error !== undefined, "Context should have error object");
-			assert(context.req !== undefined, "Context should have req object");
-			assert(context.meta !== undefined, "Context should have meta object");
+			assert(context.error !== undefined, 'Context should have error object');
+			assert(context.req !== undefined, 'Context should have req object');
+			assert(context.meta !== undefined, 'Context should have meta object');
 			
 			// Transform error or add additional data
 			context.error.handledByInterceptor = true;
@@ -214,16 +216,16 @@ suite.test("onResponseError interceptor handles HTTP errors", async () => {
 
 	try {
 		await client.getJson('/error/500');
-		assert(false, "Should throw error for 500 status");
+		assert(false, 'Should throw error for 500 status');
 	} catch (error) {
-		assert(errorHandled, "Error should be handled by interceptor");
-		assert(capturedError !== null, "Error should be captured");
-		assert(error.handledByInterceptor === true, "Error should be modified by interceptor");
-		assert(error.status === 500, "Error should preserve status");
+		assert(errorHandled, 'Error should be handled by interceptor');
+		assert(capturedError !== null, 'Error should be captured');
+		assert(error.handledByInterceptor === true, 'Error should be modified by interceptor');
+		assert(error.status === 500, 'Error should preserve status');
 	}
 });
 
-suite.test("onResponseError interceptors execute in R→L order", async () => {
+suite.test('onResponseError interceptors execute in R→L order', async () => {
 	const client = createLuminara({ 
 		baseURL: BASE_URL,
 		ignoreResponseError: false
@@ -260,13 +262,14 @@ suite.test("onResponseError interceptors execute in R→L order", async () => {
 
 	try {
 		await client.getJson('/error/400');
-		assert(false, "Should throw error");
+		assert(false, 'Should throw error');
 	} catch (error) {
+
 		// Verify execution order (reverse of registration)
-		assertEqual(executionOrder, ['third', 'second', 'first'], "onResponseError should execute in R→L order");
+		assertEqual(executionOrder, ['third', 'second', 'first'], 'onResponseError should execute in R→L order');
 		
 		// Verify error chain accumulation
-		assert(error.handlerChain === 'third second first', "Error should show R→L execution sequence");
+		assert(error.handlerChain === 'third second first', 'Error should show R→L execution sequence');
 	}
 });
 
@@ -274,7 +277,7 @@ suite.test("onResponseError interceptors execute in R→L order", async () => {
 // Mixed Interceptor Tests (Complex Scenarios)
 // =============================================================================
 
-suite.test("Complete interceptor pipeline: onRequest → driver → onResponse", async () => {
+suite.test('Complete interceptor pipeline: onRequest → driver → onResponse', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	const pipeline = [];
 	
@@ -311,14 +314,14 @@ suite.test("Complete interceptor pipeline: onRequest → driver → onResponse",
 	const response = await client.getJson('/echo-headers');
 	
 	// Verify pipeline execution order: req1 → req2 → driver → res2 → res1
-	assertEqual(pipeline, ['req1', 'req2', 'res2', 'res1'], "Pipeline should execute in correct order");
+	assertEqual(pipeline, ['req1', 'req2', 'res2', 'res1'], 'Pipeline should execute in correct order');
 	
 	// Verify request modifications
-	assert(response.data.headers['x-request-1'] === 'true', "First request interceptor should execute");
-	assert(response.data.headers['x-request-2'] === 'true', "Second request interceptor should execute");
+	assert(response.data.headers['x-request-1'] === 'true', 'First request interceptor should execute');
+	assert(response.data.headers['x-request-2'] === 'true', 'Second request interceptor should execute');
 });
 
-suite.test("Interceptors with retry attempts", async () => {
+suite.test('Interceptors with retry attempts', async () => {
 	const client = createLuminara({ 
 		baseURL: BASE_URL,
 		retry: 2,
@@ -342,35 +345,40 @@ suite.test("Interceptors with retry attempts", async () => {
 	});
 
 	try {
+
 		// This should fail on attempts 1 and 2, succeed on attempt 3
 		await client.getJson('/error-then-success/2');
 	} catch (error) {
+
 		// Might fail if all retries are exhausted
 	}
 	
 	// Verify interceptors are called for each attempt
-	assert(requestAttempts.length >= 2, "onRequest should be called for each retry attempt");
-	assert(requestAttempts[0] === 1, "First attempt should be 1");
-	assert(requestAttempts[1] === 2, "Second attempt should be 2");
+	assert(requestAttempts.length >= 2, 'onRequest should be called for each retry attempt');
+	assert(requestAttempts[0] === 1, 'First attempt should be 1');
+	assert(requestAttempts[1] === 2, 'Second attempt should be 2');
 });
 
-suite.test("Interceptor context modifications persist through pipeline", async () => {
+suite.test('Interceptor context modifications persist through pipeline', async () => {
 	const client = createLuminara({ baseURL: BASE_URL });
 	
 	client.use({
 		name: 'auth',
 		onRequest(context) {
+
 			// Add auth token
 			context.req.headers = {
 				...context.req.headers,
 				'Authorization': 'Bearer interceptor-token'
 			};
+
 			// Add custom metadata
 			context.meta.authAdded = true;
 		},
 		onResponse(context) {
+
 			// Verify metadata persisted
-			assert(context.meta.authAdded === true, "Metadata should persist to response");
+			assert(context.meta.authAdded === true, 'Metadata should persist to response');
 			context.res.data.authVerified = context.meta.authAdded;
 		}
 	});
@@ -378,14 +386,16 @@ suite.test("Interceptor context modifications persist through pipeline", async (
 	client.use({
 		name: 'logger',
 		onRequest(context) {
+
 			// Verify auth was added by previous interceptor
-			assert(context.req.headers.Authorization === 'Bearer interceptor-token', "Auth should be added by previous interceptor");
+			assert(context.req.headers.Authorization === 'Bearer interceptor-token', 'Auth should be added by previous interceptor');
 			context.meta.loggedRequest = true;
 		},
 		onResponse(context) {
+
 			// Verify all metadata is available
-			assert(context.meta.authAdded === true, "Auth metadata should be available");
-			assert(context.meta.loggedRequest === true, "Logger metadata should be available");
+			assert(context.meta.authAdded === true, 'Auth metadata should be available');
+			assert(context.meta.loggedRequest === true, 'Logger metadata should be available');
 			context.res.data.logged = true;
 		}
 	});
@@ -393,18 +403,18 @@ suite.test("Interceptor context modifications persist through pipeline", async (
 	const response = await client.getJson('/echo-headers');
 	
 	// Verify request modifications made it through
-	assert(response.data.headers.authorization === 'Bearer interceptor-token', "Auth header should be present");
+	assert(response.data.headers.authorization === 'Bearer interceptor-token', 'Auth header should be present');
 	
 	// Verify response modifications
-	assert(response.data.authVerified === true, "Auth verification should be added");
-	assert(response.data.logged === true, "Logging flag should be added");
+	assert(response.data.authVerified === true, 'Auth verification should be added');
+	assert(response.data.logged === true, 'Logging flag should be added');
 });
 
 // =============================================================================
 // Error Recovery and Transformation Tests
 // =============================================================================
 
-suite.test("onResponseError can transform errors", async () => {
+suite.test('onResponseError can transform errors', async () => {
 	const client = createLuminara({ 
 		baseURL: BASE_URL,
 		ignoreResponseError: false
@@ -412,9 +422,10 @@ suite.test("onResponseError can transform errors", async () => {
 	
 	client.use({
 		onResponseError(context) {
+
 			// Transform 404 errors into user-friendly messages
 			if (context.error.status === 404) {
-				context.error.message = "Resource not found - please check the URL";
+				context.error.message = 'Resource not found - please check the URL';
 				context.error.userFriendly = true;
 			}
 		}
@@ -422,11 +433,11 @@ suite.test("onResponseError can transform errors", async () => {
 
 	try {
 		await client.getJson('/error/404');
-		assert(false, "Should throw error");
+		assert(false, 'Should throw error');
 	} catch (error) {
-		assert(error.message === "Resource not found - please check the URL", "Error message should be transformed");
-		assert(error.userFriendly === true, "Error should be marked as user-friendly");
-		assert(error.status === 404, "Original status should be preserved");
+		assert(error.message === 'Resource not found - please check the URL', 'Error message should be transformed');
+		assert(error.userFriendly === true, 'Error should be marked as user-friendly');
+		assert(error.status === 404, 'Original status should be preserved');
 	}
 });
 

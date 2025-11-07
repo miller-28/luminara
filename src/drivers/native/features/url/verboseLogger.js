@@ -48,7 +48,7 @@ export class UrlVerboseLogger extends BaseVerboseLogger {
 	 * Log query parameter processing
 	 */
 	logQueryParameterProcessing(context, queryParams, processedQuery) {
-		this.debug(context, 'QUERY', `Query parameters processed`, {
+		this.debug(context, 'QUERY', 'Query parameters processed', {
 			original: queryParams,
 			processed: processedQuery,
 			paramCount: Object.keys(queryParams || {}).length

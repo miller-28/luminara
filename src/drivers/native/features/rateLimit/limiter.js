@@ -15,6 +15,7 @@ import { rateLimitLogger } from './verboseLogger.js';
  * @returns {Object} Rate limiter instance with schedule, update, stats, shutdown methods
  */
 export function createLimiter(config, { env, deriveKey }) {
+
 	// Helper function for conditional logging
 	const log = (message, data) => {
 		if (config.verbose) {
@@ -43,7 +44,7 @@ export function createLimiter(config, { env, deriveKey }) {
 	 * Normalize rate configuration to standard format
 	 */
 	function normalizeConfig(cfg) {
-		let limit, windowMs, burst;
+		let limit, windowMs;
 		
 		if (cfg.rps) {
 			limit = cfg.rps;
@@ -57,10 +58,10 @@ export function createLimiter(config, { env, deriveKey }) {
 		} else {
 			throw new Error('Rate limit configuration requires rps, rpm, or {limit, windowMs}');
 		}
-		
-		burst = cfg.burst !== undefined ? cfg.burst : limit;
+	
+		const burst = cfg.burst !== undefined ? cfg.burst : limit;
 		const ratePerMs = limit / windowMs;
-		
+
 		return {
 			limit,
 			windowMs,
@@ -89,6 +90,7 @@ export function createLimiter(config, { env, deriveKey }) {
 			});
 			log(`Created new bucket for key: ${key}`);
 		}
+
 		return buckets.get(key);
 	}
 	
@@ -120,7 +122,9 @@ export function createLimiter(config, { env, deriveKey }) {
 	 * Start the scheduler timer for processing queues
 	 */
 	function startScheduler() {
-		if (schedulerTimer || isShutdown) return;
+		if (schedulerTimer || isShutdown) {
+			return;
+		}
 		
 		log(`Starting scheduler with ${normalizedConfig.tickMs}ms interval`);
 		schedulerTimer = env.setInterval(() => {
@@ -132,10 +136,14 @@ export function createLimiter(config, { env, deriveKey }) {
 	 * Process all bucket queues, dispatching ready requests
 	 */
 	function processQueues() {
-		if (isShutdown) return;
+		if (isShutdown) {
+			return;
+		}
 		
 		for (const [key, bucket] of buckets.entries()) {
-			if (bucket.queue.length === 0) continue;
+			if (bucket.queue.length === 0) {
+				continue;
+			}
 			
 			// Dispatch as many requests as possible
 			while (bucket.queue.length > 0 && canDispatch(bucket)) {
@@ -182,6 +190,7 @@ export function createLimiter(config, { env, deriveKey }) {
 			if (normalizedConfig.verbose && req.debugRateLimit) {
 				log(`Bypassing rate limiting for key: ${key}`);
 			}
+
 			return dispatch();
 		}
 		
@@ -196,6 +205,7 @@ export function createLimiter(config, { env, deriveKey }) {
 		if (totalQueued >= normalizedConfig.queueLimit) {
 			stats.dropped += 1;
 			log(`Queue limit exceeded, dropping request for key: ${key}`);
+
 			return Promise.reject(new Error('Rate limit queue is full'));
 		}
 		
@@ -287,7 +297,9 @@ export function createLimiter(config, { env, deriveKey }) {
 	 * Shutdown the rate limiter
 	 */
 	function shutdown() {
-		if (isShutdown) return;
+		if (isShutdown) {
+			return;
+		}
 		
 		isShutdown = true;
 		

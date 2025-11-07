@@ -117,6 +117,7 @@ suite.test('HEAD request', async () => {
 	const response = await api.head('/json');
 	
 	assert(response.status === 200, 'Should handle HEAD requests');
+
 	// HEAD requests by HTTP spec should not return body content
 });
 
@@ -128,6 +129,7 @@ suite.test('OPTIONS request', async () => {
 	const response = await api.options('/json');
 	
 	assert(response.status === 200, 'Should handle OPTIONS requests');
+
 	// OPTIONS may not return body content in some implementations
 	// Just verify it completes successfully
 });
@@ -219,6 +221,7 @@ suite.test('postText helper', async () => {
 	const response = await api.postText('/text', textData);
 	
 	assert(response.status === 200, 'Should handle text POST requests');
+
 	// postText returns text responseType, so response.data is the raw JSON string
 	// Parse it to check the message
 	const responseData = JSON.parse(response.data);

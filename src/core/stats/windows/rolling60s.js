@@ -75,6 +75,7 @@ export class Rolling60sWindow {
 		const bucketsToRotate = Math.floor(timeElapsed / this.bucketSize);
 		
 		if (bucketsToRotate > 0) {
+
 			// Clear old buckets and move to new position
 			for (let i = 0; i < Math.min(bucketsToRotate, this.bucketCount); i++) {
 				this.currentBucketIndex = (this.currentBucketIndex + 1) % this.bucketCount;
@@ -91,6 +92,7 @@ export class Rolling60sWindow {
 	 */
 	_getCurrentBucketIndex(currentTime) {
 		this._rotateBuckets(currentTime);
+
 		return this.currentBucketIndex;
 	}
 
@@ -99,6 +101,7 @@ export class Rolling60sWindow {
 	 */
 	getStats() {
 		const data = this.getData();
+
 		return {
 			totalPoints: data.length,
 			timespan: 60000, // 60 seconds in ms

@@ -24,7 +24,7 @@ suite.test('HTTP error includes status, statusText, and data', async () => {
 		assert(error.name === 'LuminaraError', `Expected LuminaraError, got ${error.name}`);
 		assert(typeof error.status === 'number', `Expected error.status to be number, got ${typeof error.status}`);
 		assert(error.status === 404, `Expected status 404, got ${error.status}`);
-		assert(typeof error.message === 'string', `Expected error.message to be string`);
+		assert(typeof error.message === 'string', 'Expected error.message to be string');
 		assert(error.request, 'Expected error.request to exist');
 		assert(error.response, 'Expected error.response to exist');
 	}
@@ -96,6 +96,7 @@ suite.test('Network error has proper LuminaraError structure', async () => {
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
 		assert(error.name === 'LuminaraError', `Expected LuminaraError, got ${error.name}`);
+
 		// Network errors might be detected as timeout on some systems
 		assert(error.code === 'NETWORK_ERROR' || error.code === 'TIMEOUT', `Expected code NETWORK_ERROR or TIMEOUT, got ${error.code}`);
 		assert(typeof error.message === 'string', 'Expected error.message to be string');
@@ -196,8 +197,7 @@ suite.test('Error contains request and response snapshots', async () => {
 				headers: { 'X-Custom': 'test-value' },
 				timeout: 5000,
 				retry: 1
-			}
-		);
+			});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
 		assert(error.name === 'LuminaraError', `Expected LuminaraError, got ${error.name}`);
@@ -224,10 +224,12 @@ suite.test('Error data includes parsed JSON when available', async () => {
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
 		assert(error.name === 'LuminaraError', `Expected LuminaraError, got ${error.name}`);
+
 		// Check if data was parsed (should be an object if JSON parsing succeeded)
 		if (error.data && typeof error.data === 'object') {
 			assert(true, 'JSON data was successfully parsed');
 		} else {
+
 			// If not JSON, data might be string or null
 			assert(true, 'Non-JSON data handled appropriately');
 		}
@@ -329,7 +331,7 @@ suite.test('ignoreResponseError: true prevents throwing', async () => {
 	
 	// Should receive response object instead of throwing
 	assert(response.status === 404, 'Should receive response with error status');
-	assert(response.data != null, 'Should receive response data');
+	assert(response.data !== null, 'Should receive response data');
 });
 
 // Test ignoreResponseError works with different status codes
@@ -371,7 +373,7 @@ suite.test('ignoreResponseError works with POST requests', async () => {
 	});
 	
 	assert(response.status === 422, 'Should receive response with error status');
-	assert(response.data != null, 'Should receive response data');
+	assert(response.data !== null, 'Should receive response data');
 });
 
 // Test ignoreResponseError preserves response data

@@ -84,14 +84,17 @@ async function runAllTests() {
 	console.log(colorize('🚀 Starting mock servers...', 'blue'));
 	const serverPromises = TEST_SUITES.map(async ({ server }) => {
 		await server.start();
+
 		// Set baseUrl after server starts
 		server.baseUrl = `http://localhost:${server.port}`;
+
 		return server;
 	});
 	await Promise.all(serverPromises);
 	console.log(colorize('✅ All mock servers started\n', 'green'));
 	
 	try {
+
 		// Run each test suite
 		for (const { name, suite, server } of TEST_SUITES) {
 			printSeparator();
@@ -149,6 +152,7 @@ async function runAllTests() {
 		}
 		
 	} finally {
+
 		// Stop all mock servers
 		console.log(colorize('\n🛑 Stopping mock servers...', 'blue'));
 		const stopPromises = TEST_SUITES.map(({ server }) => server.stop());
@@ -243,6 +247,7 @@ if (args.includes('--version') || args.includes('-v')) {
 
 // Run all tests
 import { fileURLToPath } from 'url';
+
 const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] === __filename) {
 	await runAllTests();

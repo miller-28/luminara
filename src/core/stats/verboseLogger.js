@@ -61,7 +61,7 @@ export class StatsVerboseLogger extends BaseVerboseLogger {
 	 * Log stats snapshot creation
 	 */
 	logSnapshotCreation(context, snapshotSize, includeTimestamps) {
-		this.log(context, 'SNAPSHOT', `Stats snapshot created`, {
+		this.log(context, 'SNAPSHOT', 'Stats snapshot created', {
 			size: snapshotSize,
 			includeTimestamps: includeTimestamps,
 			operation: 'snapshot'

@@ -1,26 +1,28 @@
-import { buildFullUrl } from "./features/url/index.js";
-import { createTimeoutHandler } from "./features/timeout/index.js";
-import { parseResponseData } from "./features/response/index.js";
-import { createLuminaraError, createHttpError, createTimeoutError, createParseError, createAbortError, createNetworkError } from "./features/error/index.js";
-import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from "./features/retry/index.js";
-import { verboseLog } from "../../core/verbose/verboseLogger.js";
-import { urlLogger } from "./features/url/verboseLogger.js";
-import { timeoutLogger } from "./features/timeout/verboseLogger.js";
-import { responseLogger } from "./features/response/verboseLogger.js";
-import { errorLogger } from "./features/error/verboseLogger.js";
-import { retryLogger } from "./features/retry/verboseLogger.js";
+import { buildFullUrl } from './features/url/index.js';
+import { createTimeoutHandler } from './features/timeout/index.js';
+import { parseResponseData } from './features/response/index.js';
+import { createLuminaraError, createHttpError, createTimeoutError, createParseError, createAbortError, createNetworkError } from './features/error/index.js';
+import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from './features/retry/index.js';
+import { verboseLog } from '../../core/verbose/verboseLogger.js';
+import { urlLogger } from './features/url/verboseLogger.js';
+import { timeoutLogger } from './features/timeout/verboseLogger.js';
+import { responseLogger } from './features/response/verboseLogger.js';
+import { errorLogger } from './features/error/verboseLogger.js';
+import { retryLogger } from './features/retry/verboseLogger.js';
 
 export function NativeFetchDriver(config = {}) {
+
 	// Store global configuration
 	const globalConfig = { ...config };
 
 	return {
 		async request(opts, context = {}) {
+
 			// Merge global config with per-request options (per-request takes priority)
 			const mergedOpts = { ...globalConfig, ...opts };
 			
 			const { 
-				url, method = "GET", headers, query, body, signal, 
+				url, method = 'GET', headers, query, body, signal, 
 				timeout, retry = 0, retryDelay = 1000, retryStatusCodes,
 				backoffType, backoffMaxDelay, shouldRetry // Add custom retry policy support
 			} = mergedOpts;
@@ -92,6 +94,7 @@ export function NativeFetchDriver(config = {}) {
 			// Implement single request execution (no driver-level retry loop)
 			// LuminaraClient will handle retries and call us for each attempt
 			try {
+
 				// Log request execution start if verbose
 				if (mergedOpts.verbose) {
 					verboseLog(context, 'REQUEST', `Executing native fetch: ${method.toUpperCase()} ${fullUrl}`, {
@@ -124,6 +127,7 @@ export function NativeFetchDriver(config = {}) {
 						responseLogger.logResponseParsingSuccess(context, mergedOpts.responseType || 'auto', typeof data, JSON.stringify(data).length);
 					}
 				} catch (parseError) {
+
 					// Log parsing error if verbose
 					if (mergedOpts.verbose) {
 						responseLogger.logResponseParsingError(context, mergedOpts.responseType || 'auto', parseError, 'error');
@@ -133,6 +137,7 @@ export function NativeFetchDriver(config = {}) {
 				
 				// For non-2xx responses, check ignoreResponseError option
 				if (!response.ok && !mergedOpts.ignoreResponseError) {
+
 					// Log HTTP error if verbose
 					if (mergedOpts.verbose) {
 						errorLogger.logHttpError(context, response, { status: response.status, data });
@@ -147,6 +152,7 @@ export function NativeFetchDriver(config = {}) {
 				};
 				
 			} catch (error) {
+
 				// Clear timeout on error
 				timeoutCleanup();
 				
@@ -157,6 +163,7 @@ export function NativeFetchDriver(config = {}) {
 				
 				// Handle AbortError specifically
 				if (error.name === 'AbortError') {
+
 					// Check if this was a timeout abort
 					if (combinedSignal && combinedSignal.aborted && timeout !== undefined) {
 						if (mergedOpts.verbose) {
@@ -165,6 +172,7 @@ export function NativeFetchDriver(config = {}) {
 						}
 						throw createTimeoutError(timeout, requestContext, currentAttempt);
 					}
+
 					// Otherwise it's a user-initiated abort
 					if (mergedOpts.verbose) {
 						errorLogger.logAbortError(context, error, 'user');
@@ -209,6 +217,7 @@ export function NativeFetchDriver(config = {}) {
 
 		// Provide shouldRetry method for LuminaraClient to use
 		shouldRetry(error, context) {
+
 			// Extract retry configuration from context
 			const { retry = 0, retryStatusCodes, shouldRetry, backoffType, backoffMaxDelay } = context.req || {};
 			
@@ -235,7 +244,7 @@ export function NativeFetchDriver(config = {}) {
 			
 			// Log retry decision if verbose
 			if (context.req?.verbose) {
-				retryLogger.logRetryPolicyEvaluation(context, error, willRetry, `native-driver-policy`, 'native');
+				retryLogger.logRetryPolicyEvaluation(context, error, willRetry, 'native-driver-policy', 'native');
 			}
 			
 			return willRetry;

@@ -3,17 +3,19 @@
  * Handles retry decision-making and delay calculations
  */
 
-import { createBackoffHandler } from "./backoff.js";
+import { createBackoffHandler } from './backoff.js';
 import { 
 	defaultRetryPolicy, 
 	createRetryPolicy, 
 	calculateRetryDelayWithHeaders 
-} from "./retryPolicy.js";
-import { getBackoffStrategyInfo } from "./verboseLogger.js";
+} from './retryPolicy.js';
+import { getBackoffStrategyInfo } from './verboseLogger.js';
 
 export function shouldRetryRequest(error, context, customRetryPolicy) {
+
 	// Use custom retry policy if provided, otherwise use default
 	const retryPolicy = customRetryPolicy || defaultRetryPolicy;
+
 	return retryPolicy(error, context);
 }
 
@@ -27,13 +29,16 @@ export async function calculateRetryDelay(attempt, retryDelay, backoffType, back
 	
 	// Handle custom retry delay function
 	if (typeof retryDelay === 'function') {
+
 		// Pass the appropriate context to the custom function
 		const contextToPass = luminaraContext || retryContext;
 		baseDelay = await retryDelay(contextToPass);
 	} else if (backoffType) {
+
 		// Use Luminara's backoff strategy
 		const backoffHandler = createBackoffHandler(backoffType, retryDelay, backoffMaxDelay, backoffDelays, initialDelay);
 		if (backoffHandler) {
+
 			// Pass the Luminara context to the backoff handler if available, otherwise create a minimal one
 			const contextForBackoff = luminaraContext || { attempt };
 			baseDelay = backoffHandler(contextForBackoff) || retryDelay;

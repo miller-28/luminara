@@ -14,6 +14,7 @@ import { deriveKey } from './key.js';
  * @returns {Object} Rate limiting feature instance
  */
 export function createRateLimitFeature(config) {
+
 	// Create environment dependencies with proper binding
 	const env = {
 		now: () => Date.now(),
@@ -31,24 +32,30 @@ export function createRateLimitFeature(config) {
 	 * @returns {Promise} Promise that resolves when request can proceed
 	 */
 	async function schedule(keyOrReq, requestFn) {
+
 		// Support both key-only and full request object APIs
 		if (typeof keyOrReq === 'string') {
+
 			// String key API: schedule(key) - create minimal request object
 			return new Promise((resolve) => {
 				limiter.schedule({ url: keyOrReq }, () => {
 					resolve();
+
 					return Promise.resolve();
 				});
 			});
 		} else {
+
 			// Request object API: schedule(req, fn) - pass through full request object
 			if (requestFn) {
 				return limiter.schedule(keyOrReq, requestFn);
 			} else {
+
 				// schedule(req) without function - just wait for rate limiting
 				return new Promise((resolve) => {
 					limiter.schedule(keyOrReq, () => {
 						resolve();
+
 						return Promise.resolve();
 					});
 				});
@@ -75,6 +82,7 @@ export function createRateLimitFeature(config) {
 	 */
 	function wrapRequest(originalRequestFn) {
 		return async function(req) {
+
 			// Schedule the request through the rate limiter
 			return limiter.schedule(req, () => originalRequestFn.call(this, req));
 		};

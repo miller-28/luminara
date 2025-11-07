@@ -48,7 +48,7 @@ export const createTimeSchema = () => ({
  * @property {number} rpm - Requests per minute
  * @property {string} mode - Rate calculation mode
  */
-export const createRateSchema = (mode = "ema-30s") => ({
+export const createRateSchema = (mode = 'ema-30s') => ({
 	rps: 0,
 	rpm: 0,
 	mode
@@ -90,8 +90,8 @@ export const createErrorSchema = () => ({
 		timeout: 0,
 		network: 0,
 		aborted: 0,
-		"4xx": 0,
-		"5xx": 0,
+		'4xx': 0,
+		'5xx': 0,
 		other: 0
 	},
 	topCodes: []
@@ -113,7 +113,9 @@ export const mergeCounters = (a, b) => ({
  * Merge time metrics by calculating percentiles from combined samples
  */
 export const mergeTime = (samples) => {
-	if (!samples.length) return createTimeSchema();
+	if (!samples.length) {
+		return createTimeSchema();
+	}
 	
 	const sorted = samples.slice().sort((a, b) => a - b);
 	const len = sorted.length;
@@ -136,6 +138,7 @@ export const mergeErrors = (schemas) => {
 	const allCodes = new Map();
 	
 	for (const schema of schemas) {
+
 		// Merge by class
 		for (const [key, value] of Object.entries(schema.byClass)) {
 			merged.byClass[key] += value;
@@ -160,14 +163,14 @@ export const mergeErrors = (schemas) => {
 /**
  * Supported metric types
  */
-export const METRIC_TYPES = ["counters", "time", "rate", "retry", "error"];
+export const METRIC_TYPES = ['counters', 'time', 'rate', 'retry', 'error'];
 
 /**
  * Supported groupBy dimensions
  */
-export const GROUP_BY_DIMENSIONS = ["endpoint", "domain", "method", "tag", "none"];
+export const GROUP_BY_DIMENSIONS = ['endpoint', 'domain', 'method', 'tag', 'none'];
 
 /**
  * Supported time windows
  */
-export const TIME_WINDOWS = ["since-start", "since-reset", "rolling-60s"];
+export const TIME_WINDOWS = ['since-start', 'since-reset', 'rolling-60s'];

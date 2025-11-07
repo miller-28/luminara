@@ -1,11 +1,11 @@
-import { createLuminara } from "../../dist/index.mjs";
+import { createLuminara } from '../../dist/index.mjs';
 
 export const errorHandling = {
-	title: "🛠️ Error Handling",
+	title: '🛠️ Error Handling',
 	examples: [
 		{
-			id: "http-error-json",
-			title: "HTTP Error with JSON Data",
+			id: 'http-error-json',
+			title: 'HTTP Error with JSON Data',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -22,18 +22,21 @@ try {
   console.log('Attempt:', error.attempt);
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing HTTP error with JSON response...");
+				updateOutput('Testing HTTP error with JSON response...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
+
 					// This should return a 400 error with JSON data
 					await client.post('https://httpbingo.org/status/400', {
-						message: "Invalid request data"
+						message: 'Invalid request data'
 					}, { signal });
-					updateOutput("❌ Expected error but request succeeded");
+					updateOutput('❌ Expected error but request succeeded');
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					return `✅ Caught LuminaraError:
   Name: ${error.name}
@@ -49,8 +52,8 @@ try {
 			}
 		},
 		{
-			id: "network-error",
-			title: "Network Error",
+			id: 'network-error',
+			title: 'Network Error',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -65,16 +68,19 @@ try {
   console.log('Type: Network Error');
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing network error...");
+				updateOutput('Testing network error...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
+
 					// Use a non-existent domain to trigger network error
 					await client.get('https://this-domain-does-not-exist-12345.com/api/test', { signal });
-					updateOutput("❌ Expected error but request succeeded");
+					updateOutput('❌ Expected error but request succeeded');
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					return `✅ Caught LuminaraError:
   Name: ${error.name}
@@ -90,8 +96,8 @@ try {
 			}
 		},
 		{
-			id: "timeout-error",
-			title: "Timeout Error",
+			id: 'timeout-error',
+			title: 'Timeout Error',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -107,19 +113,22 @@ try {
   console.log('Timeout:', 100, 'ms');
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing timeout error...");
+				updateOutput('Testing timeout error...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
+
 					// This should timeout after 100ms
 					await client.get('https://httpbingo.org/delay/2', { 
 						timeout: 100,
 						signal 
 					});
-					updateOutput("❌ Expected timeout but request succeeded");
+					updateOutput('❌ Expected timeout but request succeeded');
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					return `✅ Caught LuminaraError:
   Name: ${error.name}
@@ -135,8 +144,8 @@ try {
 			}
 		},
 		{
-			id: "abort-error",
-			title: "Abort Error",
+			id: 'abort-error',
+			title: 'Abort Error',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -155,7 +164,7 @@ try {
   console.log('Request aborted by user');
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing abort error...");
+				updateOutput('Testing abort error...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				const controller = new AbortController();
@@ -167,9 +176,11 @@ try {
 					await client.get('https://httpbingo.org/delay/2', { 
 						signal: controller.signal
 					});
-					updateOutput("❌ Expected abort but request succeeded");
+					updateOutput('❌ Expected abort but request succeeded');
 				} catch (error) {
-					if (signal.aborted) throw error; // Re-throw if our main signal was aborted
+					if (signal.aborted) {
+						throw error;
+					} // Re-throw if our main signal was aborted
 					
 					return `✅ Caught LuminaraError:
   Name: ${error.name}
@@ -185,8 +196,8 @@ try {
 			}
 		},
 		{
-			id: "retry-error-tracking",
-			title: "Error Tracking Across Retries",
+			id: 'retry-error-tracking',
+			title: 'Error Tracking Across Retries',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -203,7 +214,7 @@ try {
   console.log('All retry attempts exhausted');
 }`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing error tracking across retries...");
+				updateOutput('Testing error tracking across retries...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				let attemptCount = 0;
@@ -220,15 +231,18 @@ try {
 				});
 				
 				try {
+
 					// This will retry 2 times on 500 errors
 					await client.get('https://httpbingo.org/status/500', { 
 						retry: 2,
 						retryDelay: 300,
 						signal 
 					});
-					updateOutput("❌ Expected error but request succeeded");
+					updateOutput('❌ Expected error but request succeeded');
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					return `✅ Final Error After ${attemptCount} Attempts:
   Name: ${error.name}
@@ -245,8 +259,8 @@ try {
 			}
 		},
 		{
-			id: "ignore-response-error",
-			title: "Ignore Response Errors",
+			id: 'ignore-response-error',
+			title: 'Ignore Response Errors',
 			code: `import { createLuminara } from 'luminara';
 
 const client = createLuminara();
@@ -261,11 +275,12 @@ console.log('Status Text:', errorResponse.statusText);
 console.log('Data:', errorResponse.data);
 console.log('No error thrown - response returned normally');`,
 			run: async (updateOutput, signal, options = {}) => {
-				updateOutput("Testing ignoreResponseError option...");
+				updateOutput('Testing ignoreResponseError option...');
 				
 				const client = createLuminara({ verbose: options.verbose || false });
 				
 				try {
+
 					// This should return the error response without throwing
 					const errorResponse = await client.get('https://httpbingo.org/status/404', { 
 						ignoreResponseError: true,
@@ -280,7 +295,9 @@ console.log('No error thrown - response returned normally');`,
   
 🎯 With ignoreResponseError: true, 4xx/5xx responses don't throw errors!`;
 				} catch (error) {
-					if (error.name === 'AbortError') throw error;
+					if (error.name === 'AbortError') {
+						throw error;
+					}
 					
 					return `❌ Unexpected error: ${error.message}`;
 				}
