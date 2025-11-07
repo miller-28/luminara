@@ -30,6 +30,7 @@ export const examples = {
 
 // Examples Controller Class
 export class ExamplesController {
+	
 	constructor() {
 		this.abortControllers = new Map();
 		this.verboseMode = false;

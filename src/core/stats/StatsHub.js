@@ -13,6 +13,7 @@ import { extractRequestMetadata } from "./query/selectors.js";
 import { statsLogger } from "./verboseLogger.js";
 
 export class StatsHub {
+	
 	constructor() {
 		// Initialize metric modules
 		this.modules = {

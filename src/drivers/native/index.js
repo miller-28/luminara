@@ -31,7 +31,8 @@ export function NativeFetchDriver(config = {}) {
 			// Convert retryStatusCodes to custom retry policy if provided
 			let effectiveRetryPolicy = shouldRetry;
 			if (retryStatusCodes && !shouldRetry) {
-				const statusCodeSet = Array.isArray(retryStatusCodes) ? new Set(retryStatusCodes) : retryStatusCodes;
+				const statusCodeSet = Array.isArray(retryStatusCodes) ? 
+					new Set(retryStatusCodes) : retryStatusCodes;
 				effectiveRetryPolicy = createRetryPolicy({ retryStatusCodes: statusCodeSet });
 			}
 			
@@ -49,7 +50,8 @@ export function NativeFetchDriver(config = {}) {
 			}
 			
 			// Setup timeout handling with signal combination
-			const { signal: combinedSignal, cleanup: timeoutCleanup } = createTimeoutHandler(timeout, signal, context);
+			const { signal: combinedSignal, cleanup: timeoutCleanup } = 
+				createTimeoutHandler(timeout, signal, context);
 			
 			// Log timeout configuration if verbose
 			if (mergedOpts.verbose && timeout) {

@@ -106,6 +106,7 @@ export function disableConsoleSuppressionForTesting() {
 
 // Test utilities for Luminara testing environment
 export class TestSuite {
+	
 	constructor(name) {
 		this.name = name;
 		this.tests = [];
@@ -506,6 +507,7 @@ export function sleep(ms) {
 }
 
 export class Timer {
+
 	constructor() {
 		this.times = [];
 	}

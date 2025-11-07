@@ -8,6 +8,7 @@ import { SinceResetWindow } from "../windows/sinceReset.js";
 import { SinceStartWindow } from "../windows/sinceStart.js";
 
 export class ErrorModule {
+	
 	constructor() {
 		this.windows = {
 			"rolling-60s": new Rolling60sWindow(),

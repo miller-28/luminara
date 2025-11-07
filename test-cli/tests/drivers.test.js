@@ -8,6 +8,7 @@ const BASE_URL = `http://localhost:${mockServer.port}`;
 
 // Create a custom mock driver for testing
 class MockDriver {
+
 	constructor(options = {}) {
 		this.options = options;
 		this.requestLog = [];
@@ -235,6 +236,7 @@ suite.test('Driver comparison - ofetch vs custom', async () => {
 });
 
 suite.test('Driver method requirements validation', async () => {
+	
 	// Test that driver must implement request method
 	class IncompleteDriver {
 		// Missing request method
@@ -256,6 +258,7 @@ suite.test('Driver method requirements validation', async () => {
 
 suite.test('Driver initialization options', async () => {
 	class ConfigurableDriver {
+
 		constructor(options = {}) {
 			this.config = options;
 		}

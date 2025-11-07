@@ -12,6 +12,7 @@ export { BaseVerboseLogger, verboseLog, formatDuration } from './verbose/BaseVer
 import { BaseVerboseLogger } from './verbose/BaseVerboseLogger.js';
 
 class RequestVerboseLogger extends BaseVerboseLogger {
+
 	constructor() {
 		super('REQUEST');
 	}
@@ -52,6 +53,7 @@ class RequestVerboseLogger extends BaseVerboseLogger {
 }
 
 class TimeoutVerboseLogger extends BaseVerboseLogger {
+
 	constructor() {
 		super('TIMEOUT');
 	}
@@ -77,6 +79,7 @@ class TimeoutVerboseLogger extends BaseVerboseLogger {
 }
 
 class ResponseVerboseLogger extends BaseVerboseLogger {
+
 	constructor() {
 		super('RESPONSE');
 	}
@@ -110,6 +113,7 @@ class ResponseVerboseLogger extends BaseVerboseLogger {
 }
 
 class ErrorVerboseLogger extends BaseVerboseLogger {
+	
 	constructor() {
 		super('ERROR');
 	}
@@ -138,6 +142,7 @@ class ErrorVerboseLogger extends BaseVerboseLogger {
 }
 
 class PluginVerboseLogger extends BaseVerboseLogger {
+
 	constructor() {
 		super('PLUGIN');
 	}

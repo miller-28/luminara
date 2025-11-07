@@ -6,6 +6,7 @@
 import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
 export class RateLimitVerboseLogger extends BaseVerboseLogger {
+	
 	constructor() {
 		super('RATE_LIMIT');
 	}

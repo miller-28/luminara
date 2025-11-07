@@ -4,6 +4,7 @@
  */
 
 export class SinceResetWindow {
+	
 	constructor() {
 		this.data = [];
 		this.resetTime = Date.now();

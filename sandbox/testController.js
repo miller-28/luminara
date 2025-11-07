@@ -28,6 +28,7 @@ export const examples = {
 
 // Test Controller Class
 export class TestController {
+	
 	constructor() {
 		this.abortControllers = new Map();
 	}

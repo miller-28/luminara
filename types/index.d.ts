@@ -101,6 +101,7 @@ export interface StatsInterface {
 }
 
 export interface LuminaraClient {
+	
 	constructor(driver: LuminaraDriver, plugins: LuminaraPlugin[], config: LuminaraConfig);
 	
 	use(plugin: LuminaraPlugin): this;

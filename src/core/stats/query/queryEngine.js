@@ -6,6 +6,7 @@ import { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from "./schemas.js";
 import { createFilterFunction, applyLimit } from "./selectors.js";
 
 export class QueryEngine {
+	
 	constructor(modules) {
 		this.modules = modules;
 	}

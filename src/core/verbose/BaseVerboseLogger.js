@@ -13,6 +13,7 @@
  * @param {object} details - optional details object
  */
 export function verboseLog(verbose, category, message, details = null) {
+	
 	// Check if verbose logging is enabled
 	const isVerbose = typeof verbose === 'boolean' ? verbose : (verbose?.verbose || verbose?.req?.verbose);
 	
@@ -40,6 +41,7 @@ export function verboseLog(verbose, category, message, details = null) {
  * Provides standardized structure and common functionality
  */
 export class BaseVerboseLogger {
+	
 	/**
 	 * Create a feature logger instance
 	 * @param {string} featureName - Name of the feature (e.g., 'RETRY', 'TIMEOUT')

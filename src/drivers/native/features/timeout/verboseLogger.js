@@ -6,6 +6,7 @@
 import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
 export class TimeoutVerboseLogger extends BaseVerboseLogger {
+	
 	constructor() {
 		super('TIMEOUT');
 	}

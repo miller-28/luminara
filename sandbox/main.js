@@ -2,6 +2,7 @@ import { ExamplesController, examples } from './examplesController.js';
 
 // Code Modal Manager - Handles modal display and interactions
 class CodeModal {
+	
 	constructor() {
 		this.modal = document.getElementById('code-modal');
 		this.modalTitle = document.getElementById('modal-title');
@@ -67,6 +68,7 @@ class CodeModal {
 
 // UI Management - Only handles DOM manipulation and rendering
 class SandboxUI {
+
 	constructor() {
 		this.container = document.getElementById('examples-container');
 		this.runAllBtn = document.getElementById('run-all');

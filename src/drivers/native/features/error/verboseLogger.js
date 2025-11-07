@@ -6,6 +6,7 @@
 import { BaseVerboseLogger } from '../../../../core/verbose/BaseVerboseLogger.js';
 
 export class ErrorVerboseLogger extends BaseVerboseLogger {
+	
 	constructor() {
 		super('ERROR');
 	}

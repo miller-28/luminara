@@ -4,6 +4,7 @@
  */
 
 export class SinceStartWindow {
+	
 	constructor() {
 		this.data = [];
 		this.startTime = Date.now();
