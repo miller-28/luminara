@@ -15,6 +15,68 @@
             ],
             "sourceMaps": true,
             "trace": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Lint and Build",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "lint:fix"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "postDebugTask": "build"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Lint Only",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "lint:fix"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Build Only",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run CLI Tests",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "test"
+            ],
+            "cwd": "${workspaceFolder}/test-cli",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Build and Test",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "postDebugTask": "test-cli"
         }
     ]
 }

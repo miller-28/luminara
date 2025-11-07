@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Timeout feature verbose logger
  * Handles detailed logging for timeout configuration, setup, and timeout events
  */
@@ -63,6 +63,7 @@ export class TimeoutVerboseLogger extends BaseVerboseLogger {
 			signal: 'cleared'
 		});
 	}
+
 }
 
 // Create singleton instance

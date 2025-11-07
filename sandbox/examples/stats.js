@@ -161,7 +161,6 @@ console.log('Total:', stats.total);  // 2`,
 					result += '\n✅ Runtime stats control working perfectly!';
 
 					return result;
-				
 				} catch (error) {
 					if (error.name === 'AbortError') {
 						return '⏹️ Request aborted';
@@ -295,7 +294,6 @@ console.log('API 2 requests:', stats2.total);  // 1
 					output += '\n✅ Each createLuminara instance has separate stats!';
 
 					return output;
-				
 				} catch (error) {
 					if (error.name === 'AbortError') {
 						return '⏹️ Request aborted';
@@ -469,7 +467,6 @@ await api.get('/orders');
 					output += '\n💡 Check browser console for full verbose output';
 				
 					return output;
-				
 				} catch (error) {
 
 					// Restore console

@@ -170,6 +170,7 @@ export class TestSuite {
 		
 		return { passed: this.passed, failed: this.failed, total };
 	}
+
 }
 
 export class MockServer {
@@ -478,6 +479,7 @@ export class MockServer {
 			});
 		}
 	}
+
 }
 
 export function assert(condition, message) {
@@ -555,4 +557,5 @@ export class Timer {
 	reset() {
 		this.times = [];
 	}
+
 }

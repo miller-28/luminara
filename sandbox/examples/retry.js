@@ -101,7 +101,6 @@ try {
 					const duration = Date.now() - startTime;
 
 					return `❌ UNEXPECTED: Request succeeded in ${duration}ms (should have failed with 429)`;
-					
 				} catch (error) {
 					if (error.name === 'AbortError') {
 						throw error;

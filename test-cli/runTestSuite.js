@@ -9,7 +9,6 @@ import { fileURLToPath } from 'url';
  * @param {Function} [beforeStart] - Optional function to run before starting mock server
  */
 export async function runTestSuiteIfDirect(importMetaUrl, suiteName, suite, mockServer, beforeStart) {
-
 	// Check if this file is being executed directly
 	if (fileURLToPath(importMetaUrl) === process.argv[1]) {
 		console.log(`🧪 Running ${suiteName} Tests...`);

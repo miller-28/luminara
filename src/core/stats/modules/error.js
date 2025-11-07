@@ -277,4 +277,5 @@ export class ErrorModule {
 			totalErrors: errorEvents.length
 		};
 	}
+
 }

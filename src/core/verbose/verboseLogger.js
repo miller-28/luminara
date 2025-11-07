@@ -52,6 +52,7 @@ class RequestVerboseLogger extends BaseVerboseLogger {
 				break;
 		}
 	}
+
 }
 
 class TimeoutVerboseLogger extends BaseVerboseLogger {
@@ -80,6 +81,7 @@ class TimeoutVerboseLogger extends BaseVerboseLogger {
 				break;
 		}
 	}
+
 }
 
 class ResponseVerboseLogger extends BaseVerboseLogger {
@@ -116,6 +118,7 @@ class ResponseVerboseLogger extends BaseVerboseLogger {
 				break;
 		}
 	}
+
 }
 
 class ErrorVerboseLogger extends BaseVerboseLogger {
@@ -147,6 +150,7 @@ class ErrorVerboseLogger extends BaseVerboseLogger {
 				break;
 		}
 	}
+
 }
 
 class PluginVerboseLogger extends BaseVerboseLogger {
@@ -182,6 +186,7 @@ class PluginVerboseLogger extends BaseVerboseLogger {
 				break;
 		}
 	}
+
 }
 
 // Create singleton instances for core loggers

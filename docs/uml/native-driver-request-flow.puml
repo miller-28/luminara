@@ -1,0 +1,143 @@
+@startuml native-driver-request-flow
+
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+
+title Native Driver - Request Flow Through Phases
+
+actor "Application" as App
+participant "NativeFetchDriver" as Driver #FFE082
+participant "Phase 1:\nPre-Flight" as PreFlight #E8F5E9
+participant "Phase 2:\nIn-Flight" as InFlight #E3F2FD
+participant "Phase 3:\nPost-Flight" as PostFlight #FFF3E0
+participant "Feature Modules" as Features #BBDEFB
+
+== Request Initiation ==
+
+App -> Driver: request(opts, context)
+activate Driver
+
+Driver -> PreFlight: Start Pre-Flight Phase
+activate PreFlight
+
+PreFlight -> Features: buildFullUrl(url, baseURL, query)
+Features --> PreFlight: fullUrl
+
+note over PreFlight
+  **FUTURE: Debouncer**
+  Check for duplicate in-flight requests
+  Return existing promise if found
+end note
+
+note over PreFlight
+  **FUTURE: Rate Limiter**
+  Queue request if rate limit reached
+  Wait for token availability
+end note
+
+PreFlight --> Driver: Prepared Request
+deactivate PreFlight
+
+== Request Execution ==
+
+Driver -> InFlight: Start In-Flight Phase
+activate InFlight
+
+InFlight -> Features: createTimeoutHandler(timeout, signal)
+Features --> InFlight: { combinedSignal, cleanup }
+
+InFlight -> InFlight: Prepare fetch options\n(method, headers, body)
+
+note over InFlight
+  **FUTURE: Request Hedging**
+  if (hedging.enabled):
+    - Send primary request
+    - After X ms, send hedge request(s)
+    - Promise.race() first response
+    - Cancel slower requests
+end note
+
+InFlight -> Features: fetch(fullUrl, fetchOptions)
+activate Features
+Features --> InFlight: Response Object
+deactivate Features
+
+InFlight -> InFlight: timeoutCleanup()
+
+InFlight --> Driver: { response, error }
+deactivate InFlight
+
+== Response Processing (Success Path) ==
+
+alt Successful Response (no error)
+  
+  Driver -> PostFlight: Start Post-Flight (Success)
+  activate PostFlight
+  
+  PostFlight -> Features: parseResponseData(response, responseType)
+  Features --> PostFlight: parsedData
+  
+  PostFlight -> PostFlight: Check HTTP status
+  
+  alt HTTP 2xx (OK)
+    PostFlight --> Driver: { status, headers, data }
+    deactivate PostFlight
+    Driver --> App: Success Response
+    
+  else HTTP non-2xx (Error)
+    PostFlight -> Features: createHttpError(response, context)
+    Features --> PostFlight: LuminaraError (HTTP)
+    PostFlight --> Driver: throw LuminaraError
+    deactivate PostFlight
+    Driver --> App: throw Error
+  end
+  
+== Response Processing (Error Path) ==
+
+else Error Occurred
+  
+  Driver -> PostFlight: Start Post-Flight (Error)
+  activate PostFlight
+  
+  PostFlight -> PostFlight: Classify error type
+  
+  alt AbortError (Timeout)
+    PostFlight -> Features: createTimeoutError(timeout, context)
+    Features --> PostFlight: LuminaraError (Timeout)
+    
+  else AbortError (User)
+    PostFlight -> Features: createAbortError(error, context)
+    Features --> PostFlight: LuminaraError (Abort)
+    
+  else TypeError (Network)
+    PostFlight -> Features: createNetworkError(error, context)
+    Features --> PostFlight: LuminaraError (Network)
+    
+  else String
+    PostFlight -> Features: createAbortError(string, context)
+    Features --> PostFlight: LuminaraError (Abort)
+    
+  else LuminaraError
+    PostFlight -> PostFlight: Re-throw as-is
+    
+  else Other Error
+    PostFlight -> Features: createLuminaraError(message, context)
+    Features --> PostFlight: LuminaraError (Generic)
+  end
+  
+  PostFlight --> Driver: throw LuminaraError
+  deactivate PostFlight
+  Driver --> App: throw Error
+  
+end
+
+deactivate Driver
+
+note over App, Driver
+  **Retry Coordination**
+  LuminaraClient (not driver) handles retries
+  Calls driver.shouldRetry() and driver.calculateRetryDelay()
+end note
+
+@enduml

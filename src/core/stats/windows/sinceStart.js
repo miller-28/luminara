@@ -72,4 +72,5 @@ export class SinceStartWindow {
 		// Since-start window doesn't support reset
 		// Data accumulates from process start
 	}
+
 }

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Response feature verbose logger
  * Handles detailed logging for response parsing, type detection, and transformation
  */
@@ -83,6 +83,7 @@ export class ResponseVerboseLogger extends BaseVerboseLogger {
 			errorType: error.name
 		});
 	}
+
 }
 
 // Create singleton instance

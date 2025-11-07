@@ -1,0 +1,104 @@
+@startuml luminara-client-architecture
+!theme plain
+
+title LuminaraClient Architecture - Refactored Structure
+
+skinparam componentStyle rectangle
+skinparam BackgroundColor white
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+
+package "LuminaraClient (Main Orchestrator)" as Main {
+	component [LuminaraClient\n266 lines] as Client
+}
+
+package "Orchestration Layer" as Orchestration {
+	component [ContextBuilder\n46 lines] as CB
+	component [SignalManager\n46 lines] as SM
+	component [PluginPipeline\n96 lines] as PP
+	component [RetryOrchestrator\n234 lines] as RO
+}
+
+package "API Layer" as API {
+	component [HttpVerbs\n43 lines] as HV
+	component [HeaderHelpers\n30 lines] as HH
+	component [TypedRequests\n97 lines] as TR
+}
+
+package "Stats Layer" as Stats {
+	component [StatsHub\nexisting] as SH
+	component [StatsEventEmitter\n101 lines] as SEE
+	component [StatsUtils\n60 lines] as SU
+}
+
+package "Configuration Layer" as Config {
+	component [ConfigManager\n123 lines] as CM
+}
+
+package "Driver Layer" as Driver {
+	component [NativeFetchDriver\n58 lines] as NFD
+	component [OfetchDriver\nexisting] as OFD
+}
+
+' Main dependencies
+Client --> CB : build context
+Client --> SM : merge signals
+Client --> PP : plugin execution
+Client --> RO : retry orchestration
+Client --> HV : HTTP methods
+Client --> TR : typed requests
+Client --> SEE : stats events
+Client --> SU : stats utils
+Client --> CM : configuration
+Client --> NFD : default driver
+Client -.-> OFD : optional driver
+
+' Internal dependencies
+TR --> HH : header helpers
+TR --> HV : uses HTTP verbs
+RO --> PP : executes pipeline
+RO --> SEE : emit events
+RO --> NFD : driver.shouldRetry()
+PP -.-> Client : plugin hooks
+SEE --> SH : emit to hub
+CM --> SEE : stats config
+SM --> SEE : abort events
+
+' Notes
+note right of Client
+	**Thin Orchestrator**
+	- 63% size reduction
+	- Delegates to specialized modules
+	- Clear separation of concerns
+end note
+
+note right of Orchestration
+	**Request Lifecycle**
+	1. ContextBuilder creates context
+	2. SignalManager merges signals
+	3. PluginPipeline runs interceptors
+	4. RetryOrchestrator handles retries
+end note
+
+note right of API
+	**User-Facing API**
+	- HttpVerbs: GET, POST, PUT, etc.
+	- TypedRequests: getJson, postForm, etc.
+	- HeaderHelpers: Accept, Content-Type
+end note
+
+note right of Stats
+	**Stats System**
+	- StatsEventEmitter emits lifecycle events
+	- StatsHub aggregates metrics
+	- StatsUtils provides utilities
+end note
+
+note right of Config
+	**Configuration**
+	- Merge global + per-request config
+	- Rate limiting management
+	- Config updates at runtime
+end note
+
+@enduml

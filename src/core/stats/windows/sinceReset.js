@@ -70,4 +70,5 @@ export class SinceResetWindow {
 	clear() {
 		this.data = [];
 	}
+
 }

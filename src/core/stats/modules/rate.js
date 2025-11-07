@@ -253,4 +253,5 @@ export class RateModule {
 			lastUpdate: this.emaState.lastUpdate
 		};
 	}
+
 }

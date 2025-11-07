@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Error feature verbose logger
  * Handles detailed logging for error catching, transformation, and handling decisions
  */
@@ -84,6 +84,7 @@ export class ErrorVerboseLogger extends BaseVerboseLogger {
 
 		return false;
 	}
+
 }
 
 // Create singleton instance

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * URL feature verbose logger
  * Handles detailed logging for URL building, base URL resolution, and query parameter processing
  */
@@ -85,6 +85,7 @@ export class UrlVerboseLogger extends BaseVerboseLogger {
 			});
 		}
 	}
+
 }
 
 // Create singleton instance

@@ -66,6 +66,7 @@ class CodeModal {
 			alert('Failed to copy code to clipboard');
 		}
 	}
+
 }
 
 // UI Management - Only handles DOM manipulation and rendering
@@ -307,7 +308,86 @@ class SandboxUI {
 			console.info('🔍 [Sandbox] Verbose logging disabled');
 		}
 	}
+
+}
+
+// Scroll to Top Button Manager
+class ScrollToTop {
+	
+	constructor() {
+		this.button = document.getElementById('scroll-to-top');
+		this.init();
+	}
+
+	init() {
+		// Check initial scroll position
+		this.updateVisibility();
+		
+		// Show/hide button based on scroll position
+		window.addEventListener('scroll', () => {
+			this.updateVisibility();
+		});
+		
+		// Scroll to top on button click
+		this.button.addEventListener('click', () => {
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
+		});
+	}
+
+	updateVisibility() {
+		if (window.scrollY > 300) {
+			this.button.classList.add('visible');
+		} else {
+			this.button.classList.remove('visible');
+		}
+	}
+
+}
+
+// Scroll to Bottom Button Manager
+class ScrollToBottom {
+	
+	constructor() {
+		this.button = document.getElementById('scroll-to-bottom');
+		this.init();
+	}
+
+	init() {
+		// Check initial scroll position
+		this.updateVisibility();
+		
+		// Show/hide button based on scroll position
+		window.addEventListener('scroll', () => {
+			this.updateVisibility();
+		});
+		
+		// Scroll to bottom on button click
+		this.button.addEventListener('click', () => {
+			window.scrollTo({
+				top: document.documentElement.scrollHeight,
+				behavior: 'smooth'
+			});
+		});
+	}
+
+	updateVisibility() {
+		if (window.scrollY < 100) {
+			this.button.classList.add('visible');
+		} else {
+			this.button.classList.remove('visible');
+		}
+	}
+
 }
 
 // Initialize sandbox UI when DOM is ready
 new SandboxUI();
+
+// Initialize scroll to top button
+new ScrollToTop();
+
+// Initialize scroll to bottom button
+new ScrollToBottom();

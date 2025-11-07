@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Stats feature verbose logger
  * Handles detailed logging for stats operations, queries, and module updates
  */
@@ -103,6 +103,7 @@ export class StatsVerboseLogger extends BaseVerboseLogger {
 			timestamp: Date.now()
 		});
 	}
+
 }
 
 // Create singleton instance

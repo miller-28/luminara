@@ -134,7 +134,6 @@ async function runAllTests() {
 					duration,
 					status
 				});
-				
 			} catch (error) {
 				suiteTimer.mark();
 				console.log(colorize(`   ❌ Suite failed to run: ${error.message}`, 'red'));
@@ -150,7 +149,6 @@ async function runAllTests() {
 				});
 			}
 		}
-		
 	} finally {
 
 		// Stop all mock servers

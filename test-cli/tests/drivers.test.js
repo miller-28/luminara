@@ -57,6 +57,7 @@ class MockDriver {
 	clearLog() {
 		this.requestLog = [];
 	}
+
 }
 
 // Test custom driver integration
@@ -240,7 +241,7 @@ suite.test('Driver comparison - ofetch vs custom', async () => {
 });
 
 suite.test('Driver method requirements validation', async () => {
-	
+
 	// Test that driver must implement request method
 	class IncompleteDriver {
 
@@ -280,6 +281,7 @@ suite.test('Driver initialization options', async () => {
 				}
 			};
 		}
+	
 	}
 	
 	const driverConfig = { timeout: 5000, customOption: 'test-value' };

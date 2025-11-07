@@ -32,6 +32,7 @@ export const DEFAULT_RETRY_STATUS_CODES = new Set([
  * @returns {number} Delay in milliseconds, or 0 if invalid
  */
 export function parseRetryAfter(retryAfterValue) {
+
 	if (!retryAfterValue) {
 		return 0;
 	}
@@ -74,6 +75,7 @@ export function isIdempotentMethod(method) {
  * @returns {boolean} Whether to retry the request
  */
 export function defaultRetryPolicy(error, context) {
+
 	const { request, attempt, maxAttempts } = context;
 	const method = request?.method?.toUpperCase() || 'GET';
 
@@ -99,7 +101,6 @@ export function defaultRetryPolicy(error, context) {
 
 	// Check status code based retries
 	if (error.status) {
-
 		// For non-idempotent methods, only retry on specific "safe" status codes
 		if (!isIdempotentMethod(method)) {
 			const safeStatusCodes = new Set([408, 429, 500, 502, 503, 504]);
@@ -123,6 +124,7 @@ export function defaultRetryPolicy(error, context) {
  * @returns {Function} Retry policy function
  */
 export function createRetryPolicy(options = {}) {
+
 	const {
 		retryStatusCodes = DEFAULT_RETRY_STATUS_CODES,
 		idempotentMethods = IDEMPOTENT_METHODS,
@@ -164,7 +166,6 @@ export function createRetryPolicy(options = {}) {
 
 		// Check status code based retries
 		if (error.status) {
-
 			// For non-idempotent methods, be more conservative
 			if (!isIdempotent) {
 				const safeStatusCodes = new Set([408, 429, 500, 502, 503, 504]);
@@ -188,6 +189,7 @@ export function createRetryPolicy(options = {}) {
  * @returns {number} Final delay in milliseconds
  */
 export function calculateRetryDelayWithHeaders(baseDelay, response, error) {
+
 	let retryAfterDelay = 0;
 
 	// Check for Retry-After header in response

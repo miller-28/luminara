@@ -4,7 +4,6 @@
  */
 
 export function buildFullUrl(url, baseURL, query) {
-
 	// Build full URL with baseURL if provided
 	let fullUrl = url;
 	if (baseURL && !url.startsWith('http')) {

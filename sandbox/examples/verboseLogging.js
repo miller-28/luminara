@@ -99,7 +99,6 @@ const response = await client.get('/data');
 						   '  • Retry policies and backoff strategies\n' +
 						   '  • HTTP status handling and transformations\n\n' +
 						   '🎯 Check browser console for detailed logs with timing, strategy info, and decision explanations!';
-
 				} catch (error) {
 					return `❌ Verbose logging test failed: ${error.message}\n\n` +
 						   '🔍 Check browser console for detailed error logs and troubleshooting information.';
@@ -183,7 +182,6 @@ try {
 						   '  • Network error handling\n' +
 						   '  • Error enrichment with context\n\n' +
 						   '🎯 All errors were logged with detailed reasoning and context!';
-
 				} catch (error) {
 					return `❌ Error handling test failed: ${error.message}`;
 				}

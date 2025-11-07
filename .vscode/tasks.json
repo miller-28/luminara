@@ -32,6 +32,26 @@
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "npm run build",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test-cli",
+            "type": "shell",
+            "command": "cd test-cli; npm test",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
         }
     ]
 }

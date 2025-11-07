@@ -50,6 +50,7 @@ export class RetryVerboseLogger extends BaseVerboseLogger {
 			finalOutcome: 'failed'
 		});
 	}
+
 }
 
 // Create singleton instance

@@ -42,44 +42,7 @@ export default [
 			
 			// Multi-line
 			'object-curly-newline': ['error', { 'multiline': true, 'consistent': true }],
-			'function-paren-newline': ['error', 'consistent'],
-			
-			// Blank lines - enforce space after class/function declarations
-			'lines-between-class-members': ['error', 'always', { 'exceptAfterSingleLine': false }],
-			'lines-around-directive': ['error', 'always'],
-			'lines-around-comment': ['error', {
-				'beforeBlockComment': true,
-				'afterBlockComment': false,
-				'beforeLineComment': true,
-				'afterLineComment': false,
-				'allowBlockStart': false,
-				'allowBlockEnd': false,
-				'allowObjectStart': true,
-				'allowObjectEnd': true,
-				'allowArrayStart': true,
-				'allowArrayEnd': true,
-				'allowClassStart': false,
-				'allowClassEnd': false
-			}],
-			'padding-line-between-statements': [
-				'error',
-
-				// Require blank line after import statements
-				{ 'blankLine': 'always', 'prev': 'import', 'next': '*' },
-				{ 'blankLine': 'any', 'prev': 'import', 'next': 'import' },
-
-				// Require blank line after function declarations (including export function)
-				{ 'blankLine': 'always', 'prev': ['function', 'class'], 'next': '*' },
-
-				// Require blank line after export default
-				{ 'blankLine': 'always', 'prev': 'export', 'next': '*' },
-
-				// Allow consecutive exports without blank lines
-				{ 'blankLine': 'any', 'prev': 'export', 'next': 'export' },
-
-				// Require blank line before return statements
-				{ 'blankLine': 'always', 'prev': '*', 'next': 'return' }
-			]
+			'function-paren-newline': ['error', 'consistent']
 		}
 	},
 	{
@@ -96,6 +59,7 @@ export default [
 	},
 	{
 		ignores: [
+      'eslint.config.js',
 			'node_modules/**',
 			'dist/**',
 			'*.min.js',

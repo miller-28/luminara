@@ -80,6 +80,7 @@ export class RateLimitVerboseLogger extends BaseVerboseLogger {
 			delta: newCount - oldCount
 		});
 	}
+
 }
 
 // Create singleton instance

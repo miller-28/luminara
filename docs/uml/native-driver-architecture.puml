@@ -1,0 +1,133 @@
+@startuml native-driver-architecture
+
+!define PHASE_COLOR #E8F5E9
+!define HANDLER_COLOR #E3F2FD
+!define FEATURE_COLOR #FFF3E0
+!define FUTURE_COLOR #F3E5F5
+
+title Native Driver - Handler-Based Architecture
+
+' Main Driver Entry Point
+package "Native Fetch Driver" {
+  component [request(opts, context)] as Request #FFE082
+  component [shouldRetry(error, context)] as ShouldRetry #FFE082
+  component [calculateRetryDelay(context)] as CalcDelay #FFE082
+}
+
+' Phase 1: Pre-Flight
+package "PHASE 1: PRE-FLIGHT\n(Request Dispatcher)" as PreFlight PHASE_COLOR {
+  component [Build Complete URL] as BuildURL FEATURE_COLOR
+  component [Check Debouncer\n(FUTURE)] as Debouncer FUTURE_COLOR
+  component [Apply Rate Limiting\n(FUTURE)] as RateLimit FUTURE_COLOR
+}
+
+' Phase 2: In-Flight
+package "PHASE 2: IN-FLIGHT\n(Execution)" as InFlight PHASE_COLOR {
+  component [Setup Timeout + Signal] as SetupTimeout FEATURE_COLOR
+  component [Prepare Fetch Options] as PrepareFetch FEATURE_COLOR
+  component [Execute Request\n(fetch API)] as ExecuteFetch FEATURE_COLOR
+  component [Request Hedging\n(FUTURE)] as Hedging FUTURE_COLOR
+}
+
+' Phase 3: Post-Flight
+package "PHASE 3: POST-FLIGHT\n(Response Handlers)" as PostFlight PHASE_COLOR {
+  package "Success Path" as SuccessPath #C8E6C9 {
+    component [Parse Response Data] as ParseResponse FEATURE_COLOR
+    component [Check HTTP Status] as CheckStatus FEATURE_COLOR
+    component [Return Result] as ReturnSuccess FEATURE_COLOR
+  }
+  
+  package "Error Path" as ErrorPath #FFCDD2 {
+    component [Classify Error Type] as ClassifyError FEATURE_COLOR
+    component [Transform Error] as TransformError FEATURE_COLOR
+    component [Enrich Error Info] as EnrichError FEATURE_COLOR
+    component [Throw LuminaraError] as ThrowError FEATURE_COLOR
+  }
+}
+
+' Feature Modules
+package "Feature Modules" as Features {
+  component [URL Builder] as URLFeature FEATURE_COLOR
+  component [Timeout Handler] as TimeoutFeature FEATURE_COLOR
+  component [Response Parser] as ResponseFeature FEATURE_COLOR
+  component [Error Factory] as ErrorFeature FEATURE_COLOR
+  component [Retry Policy] as RetryFeature FEATURE_COLOR
+  
+  ' Future Features
+  component [Debouncer\n(Placeholder)] as DebouncerFeature FUTURE_COLOR
+  component [Hedging\n(Placeholder)] as HedgingFeature FUTURE_COLOR
+  component [Rate Limiter\n(Design Only)] as RateLimitFeature FUTURE_COLOR
+}
+
+' Request Flow
+Request --> BuildURL : "1. Pre-Flight"
+BuildURL --> Debouncer : "check duplicate"
+Debouncer --> RateLimit : "check limit"
+
+RateLimit --> SetupTimeout : "2. In-Flight"
+SetupTimeout --> PrepareFetch
+PrepareFetch --> ExecuteFetch
+ExecuteFetch --> Hedging : "if enabled"
+
+ExecuteFetch --> ParseResponse : "on success"
+ExecuteFetch --> ClassifyError : "on error"
+
+ParseResponse --> CheckStatus
+CheckStatus --> ReturnSuccess : "HTTP 2xx"
+CheckStatus --> ClassifyError : "HTTP non-2xx"
+
+ClassifyError --> TransformError
+TransformError --> EnrichError
+EnrichError --> ThrowError
+
+' Feature Dependencies
+BuildURL ..> URLFeature : uses
+SetupTimeout ..> TimeoutFeature : uses
+ParseResponse ..> ResponseFeature : uses
+TransformError ..> ErrorFeature : uses
+ShouldRetry ..> RetryFeature : uses
+CalcDelay ..> RetryFeature : uses
+
+Debouncer ..> DebouncerFeature : uses (future)
+Hedging ..> HedgingFeature : uses (future)
+RateLimit ..> RateLimitFeature : uses (future)
+
+note right of Debouncer
+  **TODO:** Request Deduplication
+  - Dedupe identical in-flight requests
+  - Strategies: byUrl, byKey
+  - 300ms default delay
+end note
+
+note right of Hedging
+  **TODO:** Request Hedging
+  - Send redundant requests
+  - Promise.race() first response
+  - Reduce tail latency
+end note
+
+note right of RateLimit
+  **TODO:** Rate Limiting
+  - Token bucket algorithm
+  - Queue requests when limit reached
+  - Integration with existing feature
+end note
+
+note bottom of Request
+  **Entry Point**
+  Single request execution
+  (no driver-level retry loop)
+  
+  LuminaraClient handles retries
+end note
+
+note bottom of PostFlight
+  **Error Classification:**
+  AbortError → TimeoutError | AbortError
+  TypeError → NetworkError
+  String → AbortError
+  LuminaraError → Re-thrown
+  Other → LuminaraError
+end note
+
+@enduml

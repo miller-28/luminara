@@ -302,19 +302,16 @@ export class StatsHub {
 			this.modules.counters.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const countersData = this.modules.counters.getMetrics('since-start');
-
 			}
 			
 			this.modules.time.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const timeData = this.modules.time.getMetrics('since-start');
-
 			}
 			
 			this.modules.retry.onRequestSuccess(enrichedEvent);
 			if (this.verboseEnabled) {
 				const retryData = this.modules.retry.getMetrics('since-start');
-
 			}
 			
 			this.activeRequests.delete(id);
@@ -337,25 +334,21 @@ export class StatsHub {
 			this.modules.counters.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const countersData = this.modules.counters.getMetrics('since-start');
-
 			}
 			
 			this.modules.time.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const timeData = this.modules.time.getMetrics('since-start');
-
 			}
 			
 			this.modules.retry.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const retryData = this.modules.retry.getMetrics('since-start');
-
 			}
 			
 			this.modules.error.onRequestFail(enrichedEvent);
 			if (this.verboseEnabled) {
 				const errorData = this.modules.error.getMetrics('since-start');
-
 			}
 			
 			this.activeRequests.delete(id);
@@ -481,4 +474,5 @@ export class StatsHub {
 
 		return data;
 	}
+
 }

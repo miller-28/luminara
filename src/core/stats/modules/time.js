@@ -204,4 +204,5 @@ export class TimeModule {
 				success: point.success
 			}));
 	}
+
 }

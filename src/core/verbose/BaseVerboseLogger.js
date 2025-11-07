@@ -13,7 +13,6 @@
  * @param {object} details - optional details object
  */
 export function verboseLog(verbose, category, message, details = null) {
-	
 	// Check if verbose logging is enabled
 	const isVerbose = typeof verbose === 'boolean' ? verbose : (verbose?.verbose || verbose?.req?.verbose);
 	
@@ -201,6 +200,7 @@ export class BaseVerboseLogger {
 		const phaseUpper = phase.toUpperCase();
 		this.log(context, `LIFECYCLE[${phaseUpper}]`, message, details);
 	}
+
 }
 
 /**
@@ -209,6 +209,7 @@ export class BaseVerboseLogger {
  * @returns {string} Emoji for category
  */
 function getCategoryEmoji(category) {
+
 	const emojis = {
 		'REQUEST': '🚀',
 		'RETRY': '🔄', 
@@ -232,6 +233,7 @@ function getCategoryEmoji(category) {
  * @returns {string} Formatted details string
  */
 function formatDetails(details) {
+
 	if (!details || typeof details !== 'object') {
 		return '';
 	}
@@ -256,6 +258,7 @@ function formatDetails(details) {
  * @returns {string} Formatted duration string
  */
 export function formatDuration(ms) {
+
 	if (ms < 1) {
 		return `${(ms * 1000).toFixed(1)}μs`;
 	} else if (ms < 1000) {
@@ -274,6 +277,7 @@ export function formatDuration(ms) {
  * @returns {string} Formatted rate string
  */
 export function formatRate(rate, windowMs) {
+
 	const ratePerSecond = rate * 1000;
 	const ratePerMinute = rate * 60000;
 	
@@ -294,6 +298,7 @@ export function formatRate(rate, windowMs) {
  * @returns {object} No-op logger instance
  */
 export function createNoOpLogger() {
+
 	const noop = () => {};
 	
 	return {

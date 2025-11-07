@@ -4,6 +4,77 @@ This directory contains comprehensive UML diagrams documenting Luminara's intern
 
 ## 📋 Diagram Index
 
+### LuminaraClient Architecture (NEW!)
+
+#### 12. **LuminaraClient Architecture** (`luminara-client-architecture.puml`)
+Component diagram showing the refactored modular architecture of the LuminaraClient.
+
+**Key Components:**
+- Thin Orchestrator (266 lines, 63% reduction)
+- Orchestration Layer (ContextBuilder, SignalManager, PluginPipeline, RetryOrchestrator)
+- API Layer (HttpVerbs, TypedRequests, HeaderHelpers)
+- Stats Layer (StatsHub, StatsEventEmitter, StatsUtils)
+- Configuration Layer (ConfigManager)
+- Driver Layer (NativeFetchDriver, OfetchDriver)
+
+**Use Cases:**
+- Understanding LuminaraClient separation of concerns
+- Planning feature integration
+- Visualizing module dependencies
+
+---
+
+#### 13. **LuminaraClient Request Flow** (`luminara-client-request-flow.puml`)
+Sequence diagram showing request flow through the refactored LuminaraClient architecture.
+
+**Key Components:**
+- Configuration merging and rate limiting
+- Context building and signal management
+- Stats lifecycle events (start, success, fail, retry)
+- Plugin pipeline execution (L→R for onRequest, R→L for onResponse)
+- Retry orchestration with backoff
+
+**Use Cases:**
+- Understanding request lifecycle in LuminaraClient
+- Debugging plugin execution order
+- Planning retry and error handling strategies
+
+---
+
+### Native Driver Architecture
+
+#### 10. **Native Driver Architecture** (`native-driver-architecture.puml`)
+Component diagram showing the refactored handler-based architecture of the Native Fetch Driver.
+
+**Key Components:**
+- Three-phase architecture (Pre-Flight, In-Flight, Post-Flight)
+- Feature modules (URL Builder, Timeout, Response Parser, Error Factory)
+- Future features (Debouncer, Hedging, Rate Limiter)
+- Request Dispatcher, Execution, Response Handlers
+
+**Use Cases:**
+- Understanding Native Driver architecture
+- Planning feature integration (debouncer, hedging)
+- Visualizing separation of concerns
+
+---
+
+#### 11. **Native Driver Request Flow** (`native-driver-request-flow.puml`)
+Sequence diagram showing request flow through the three phases of the Native Driver.
+
+**Key Components:**
+- Phase 1: Pre-Flight (URL building, debouncing, rate limiting)
+- Phase 2: In-Flight (timeout, execution, hedging)
+- Phase 3: Post-Flight (success/error path processing)
+- Error classification and transformation
+
+**Use Cases:**
+- Understanding request lifecycle in Native Driver
+- Debugging request flow issues
+- Planning error handling strategies
+
+---
+
 ### Sequence Diagrams
 
 #### 1. **Basic HTTP Request Flow** (`sequence-basic-request.puml`)
@@ -230,12 +301,32 @@ When making changes to Luminara:
 2. **Architecture Changes**: Update class/component diagrams
 3. **State Changes**: Update state machine diagram
 4. **Plugin System**: Update plugin lifecycle diagram
+5. **Native Driver Changes**: Update native-driver-architecture.puml or native-driver-request-flow.puml
 
 ---
 
-## 📖 Additional Resources
+## � Diagram Summary
+
+**Total Diagrams: 11**
+
+| Type | Count | Diagrams |
+|------|-------|----------|
+| Sequence | 7 | Basic Request, Retry Backoff, Plugin Lifecycle, Stats System, Complete Lifecycle, **Native Driver Request Flow** |
+| Class | 1 | Core Architecture |
+| Component | 2 | Driver Comparison, **Native Driver Architecture** |
+| State | 1 | Request Lifecycle |
+
+**Recent Additions (v0.8.1):**
+- ✅ Native Driver Architecture (component diagram)
+- ✅ Native Driver Request Flow (sequence diagram)
+
+---
+
+## �📖 Additional Resources
 
 - [Luminara README](../../README.md) - Main documentation
+- [Native Driver Architecture](../../src/drivers/native/ARCHITECTURE.md) - Detailed handler architecture
+- [Refactoring Summary](../../REFACTORING_SUMMARY.md) - Refactoring overview
 - [PlantUML Syntax](https://plantuml.com/) - Diagram syntax reference
 - [Separation of Concerns](../../.github/SEPARATION_OF_CONCERNS.md) - Architecture principles
 
@@ -252,8 +343,12 @@ When adding new diagrams:
 5. Follow PlantUML best practices
 
 **Diagram Types:**
-- `sequence-` - Sequence diagrams
-- `class-` - Class diagrams
-- `component-` - Component diagrams
-- `state-` - State diagrams
-- `activity-` - Activity diagrams
+- `sequence-` - Sequence diagrams (7 diagrams)
+- `class-` - Class diagrams (1 diagram)
+- `component-` - Component diagrams (2 diagrams)
+- `state-` - State diagrams (1 diagram)
+- `activity-` - Activity diagrams (future)
+
+**NEW in v0.8.1:**
+- `native-driver-architecture.puml` - Component diagram of refactored Native Driver
+- `native-driver-request-flow.puml` - Sequence diagram showing 3-phase request flow

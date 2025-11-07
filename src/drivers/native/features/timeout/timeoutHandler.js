@@ -17,7 +17,6 @@ export function createTimeoutHandler(timeout, userSignal, context = null) {
 	
 	const timeoutController = new AbortController();
 	const timeoutId = setTimeout(() => {
-
 		// Log timeout trigger
 		if (context) {
 			logTimeout(context, 'triggered', { timeout });
