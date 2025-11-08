@@ -138,15 +138,16 @@ export class TestSuite {
 		this.startTime = Date.now();
 		
 		for (const { description, testFn } of this.tests) {
+			const testStart = Date.now();
 			try {
-				const testStart = Date.now();
 				await testFn();
 				const duration = Date.now() - testStart;
 				
 				console.log(chalk.green(`  ✅ ${description}`) + chalk.gray(` (${duration}ms)`));
 				this.passed++;
 			} catch (error) {
-				console.log(chalk.red(`  ❌ ${description}`));
+				const duration = Date.now() - testStart;
+				console.log(chalk.red(`  ❌ ${description}`) + chalk.gray(` (${duration}ms)`));
 				console.log(chalk.red(`     ${error.message}`));
 				if (process.env.VERBOSE) {
 					console.log(chalk.gray(`     ${error.stack}`));
@@ -184,7 +185,7 @@ export class MockServer {
 	async start() {
 		const { createServer } = await import('http');
 		
-		this.server = createServer((req, res) => {
+		this.server = createServer(async (req, res) => {
 
 			// CORS headers
 			res.setHeader('Access-Control-Allow-Origin', '*');
@@ -197,6 +198,10 @@ export class MockServer {
 
 				return;
 			}
+			
+			// Simulate realistic API latency (50-150ms)
+			const baseLatency = 50 + Math.random() * 100;
+			await new Promise(resolve => setTimeout(resolve, baseLatency));
 			
 			const url = new URL(req.url, `http://localhost:${this.port}`);
 			const path = url.pathname;
@@ -514,6 +519,45 @@ export function assertRange(value, min, max, message) {
 	if (value < min || value > max) {
 		throw new Error(message || `Expected ${value} to be between ${min} and ${max}`);
 	}
+}
+
+export async function assertThrows(fn, expectedErrorCode, message) {
+	try {
+		await fn();
+		throw new Error(`${message || 'Expected error but none was thrown'}`);
+	} catch (error) {
+		if (!expectedErrorCode) {
+			// Just verify that an error was thrown
+			return;
+		}
+		
+		// Verify specific error code
+		if (error.code !== expectedErrorCode) {
+			throw new Error(
+				`${message || 'Error code mismatch'} - Expected ${expectedErrorCode}, got ${error.code || error.message}`
+			);
+		}
+	}
+}
+
+export async function assertEventuallyTrue(condition, timeout = 5000, message) {
+	return new Promise((resolve, reject) => {
+		const start = Date.now();
+		const interval = setInterval(() => {
+			try {
+				if (condition()) {
+					clearInterval(interval);
+					resolve();
+				} else if (Date.now() - start > timeout) {
+					clearInterval(interval);
+					reject(new Error(`${message || 'Condition not met'} - Timeout after ${timeout}ms`));
+				}
+			} catch (error) {
+				clearInterval(interval);
+				reject(error);
+			}
+		}, 100);
+	});
 }
 
 export async function measureTime(fn) {

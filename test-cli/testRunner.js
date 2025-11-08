@@ -15,6 +15,7 @@ import { suite as errorsSuite, mockServer as errorsServer } from './tests/errors
 import { suite as parseResponseSuite, mockServer as parseResponseServer } from './tests/parseResponse.test.js';
 import { suite as statsSuite, mockServer as statsServer } from './tests/stats.test.js';
 import { suite as rateLimitSuite, mockServer as rateLimitServer } from './tests/rateLimit.test.js';
+import { suite as edgeCasesSuite, mockServer as edgeCasesServer } from './tests/edgeCases.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -29,7 +30,8 @@ const TEST_SUITES = [
 	{ name: 'Error Handling', suite: errorsSuite, server: errorsServer },
 	{ name: 'Response Types', suite: responseTypesSuite, server: responseTypesServer },
 	{ name: 'parseResponse Option', suite: parseResponseSuite, server: parseResponseServer },
-	{ name: 'Stats', suite: statsSuite, server: statsServer }
+	{ name: 'Stats', suite: statsSuite, server: statsServer },
+	{ name: 'Edge Cases', suite: edgeCasesSuite, server: edgeCasesServer }
 ];
 
 // Standalone tests (no mock server needed)

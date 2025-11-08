@@ -180,8 +180,10 @@ suite.test('Custom retry delay function', async () => {
 		
 		const totalTime = timer.getDuration();
 
-		// Total delays: 100 + 200 + 300 + 400 = 1000ms plus request time
-		assertRange(totalTime, 950, 1300, `Total time should include custom delays, got ${totalTime}ms`);
+		// Total delays: 100 + 200 + 300 + 400 = 1000ms
+		// Plus base latency: 5 requests × 100ms avg = ~500ms
+		// Total expected: ~1500ms, allow generous tolerance
+		assertRange(totalTime, 1100, 2000, `Total time should include custom delays, got ${totalTime}ms`);
 	}
 });
 

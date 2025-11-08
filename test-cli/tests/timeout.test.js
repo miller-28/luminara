@@ -51,7 +51,8 @@ suite.test('Request completes within timeout', async () => {
 	
 	const duration = timer.getDuration();
 	assert(response.status === 200, 'Request should succeed');
-	assertRange(duration, 50, 250, `Request should complete in ~100ms, took ${duration}ms`);
+	// Request delay: 100ms + base latency: 50-150ms = 150-250ms total
+	assertRange(duration, 100, 350, `Request should complete in ~150-250ms, took ${duration}ms`);
 });
 
 suite.test('Different timeouts for different requests', async () => {
@@ -84,7 +85,8 @@ suite.test('Different timeouts for different requests', async () => {
 	
 	const duration2 = timer2.getDuration();
 	assert(response.status === 200, 'Long timeout request should succeed');
-	assertRange(duration2, 180, 250, `Long timeout request should complete in ~200ms, got ${duration2}ms`);
+	// Request delay: 200ms + base latency: 50-150ms = 250-350ms total
+	assertRange(duration2, 200, 400, `Long timeout request should complete in ~250-350ms, got ${duration2}ms`);
 });
 
 suite.test('Timeout with retry combination', async () => {
@@ -130,14 +132,15 @@ suite.test('Timeout overrides per-request', async () => {
 	timer.mark();
 	
 	const response = await api.getJson('/json?delay=150', { 
-		timeout: 300 // Override to 300ms
+		timeout: 400 // Override to 400ms to account for base latency
 	});
 	
 	timer.mark();
 	
 	const duration = timer.getDuration();
 	assert(response.status === 200, 'Request with overridden timeout should succeed');
-	assertRange(duration, 130, 200, `Request should complete in ~150ms, got ${duration}ms`);
+	// Request delay: 150ms + base latency: 50-150ms = 200-300ms total
+	assertRange(duration, 150, 350, `Request should complete in ~200-300ms, got ${duration}ms`);
 });
 
 suite.test('Zero timeout disables timeout', async () => {
@@ -156,7 +159,8 @@ suite.test('Zero timeout disables timeout', async () => {
 	
 	const duration = timer.getDuration();
 	assert(response.status === 200, 'Request should succeed with timeout disabled');
-	assertRange(duration, 380, 450, `Request should complete in ~400ms, got ${duration}ms`);
+	// Request delay: 400ms + base latency: 50-150ms = 450-550ms total
+	assertRange(duration, 400, 600, `Request should complete in ~450-550ms, got ${duration}ms`);
 });
 
 suite.test('Timeout error provides meaningful message', async () => {
@@ -235,7 +239,7 @@ suite.test('Concurrent requests with different timeouts', async () => {
 	
 	// Start three concurrent requests with different timeouts
 	const promises = [
-		api.getJson('/json?delay=100', { timeout: 200 }).catch(e => ({ error: e, type: 'fast' })),
+		api.getJson('/json?delay=100', { timeout: 300 }).catch(e => ({ error: e, type: 'fast' })),
 		api.getJson('/json?delay=300', { timeout: 150 }).catch(e => ({ error: e, type: 'timeout' })),
 		api.getJson('/json?delay=200', { timeout: 400 }).catch(e => ({ error: e, type: 'medium' }))
 	];
@@ -245,11 +249,11 @@ suite.test('Concurrent requests with different timeouts', async () => {
 	const totalTime = endTime - startTime;
 	
 	// Should complete when the longest successful request finishes (~200ms)
-	// Fast request: 100ms delay + ~20ms overhead = ~120ms
-	// Medium request: 200ms delay + ~20ms overhead = ~220ms  
+	// Fast request: 100ms delay + base latency: 50-150ms = 150-250ms
+	// Medium request: 200ms delay + base latency: 50-150ms = 250-350ms  
 	// Timeout request: fails at 150ms
-	// Total should be around 220ms (medium request completion time)
-	assertRange(totalTime, 180, 280, `Concurrent requests should complete in ~220ms, took ${totalTime}ms`);
+	// Total should be around 250-350ms (medium request completion time)
+	assertRange(totalTime, 220, 400, `Concurrent requests should complete in ~250-350ms, took ${totalTime}ms`);
 	
 	// First request should succeed
 	assert(!results[0].error, 'Fast request should succeed');

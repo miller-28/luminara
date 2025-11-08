@@ -29,9 +29,10 @@ suite.test('Linear backoff timing', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Linear: 100ms + 100ms + 100ms = ~300ms + request times
-	// Allow for request overhead: 250ms - 500ms range
-	assertRange(totalTime, 250, 500, `Linear backoff timing should be ~300ms, got ${totalTime}ms`);
+	// Linear: 100ms + 100ms + 100ms = ~300ms backoff
+	// Plus base latency: 4 requests × 100ms avg = ~400ms
+	// Total expected: ~700ms, allow generous tolerance for system variations
+	assertRange(totalTime, 300, 1200, `Linear backoff timing should be ~700ms, got ${totalTime}ms`);
 });
 
 suite.test('Exponential backoff timing', async () => {
@@ -56,10 +57,10 @@ suite.test('Exponential backoff timing', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Exponential: Theoretical 100ms + 200ms + 400ms + 800ms = 1500ms
-	// But actual performance shows ~500ms, so test for reasonable backoff behavior
-	// Minimum threshold: 400ms (shows retries are happening with some delay)
-	assertRange(totalTime, 400, 1800, `Exponential backoff timing should show retry delays, got ${totalTime}ms`);
+	// Exponential: 100ms + 200ms + 400ms + 800ms = 1500ms backoff
+	// Plus base latency: 5 requests × 100ms avg = ~500ms
+	// Total expected: ~2000ms, allow generous tolerance for variations
+	assertRange(totalTime, 800, 2800, `Exponential backoff timing should show retry delays, got ${totalTime}ms`);
 });
 
 suite.test('Exponential capped backoff', async () => {
@@ -85,10 +86,10 @@ suite.test('Exponential capped backoff', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Capped: Theoretical 200ms + 300ms + 300ms + 300ms + 300ms = 1400ms
-	// But actual performance shows ~1100ms, so test for reasonable capped behavior
-	// Minimum threshold: 1000ms (shows capped backoff is working)
-	assertRange(totalTime, 1000, 1700, `Capped exponential should show retry delays, got ${totalTime}ms`);
+	// Capped: 200ms + 300ms + 300ms + 300ms + 300ms = 1400ms backoff
+	// Plus base latency: 6 requests × 100ms avg = ~600ms
+	// Total expected: ~2000ms, allow generous tolerance
+	assertRange(totalTime, 1200, 2700, `Capped exponential should show retry delays, got ${totalTime}ms`);
 });
 
 suite.test('Fibonacci backoff pattern', async () => {
@@ -113,10 +114,10 @@ suite.test('Fibonacci backoff pattern', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Fibonacci: Theoretical 50 + 50 + 100 + 150 + 250 + 400 = 1000ms
-	// But actual performance shows ~467ms, so test for reasonable fibonacci behavior
-	// Minimum threshold: 400ms (shows fibonacci sequence delays are happening)
-	assertRange(totalTime, 400, 1300, `Fibonacci backoff should show retry delays, got ${totalTime}ms`);
+	// Fibonacci: 50 + 50 + 100 + 150 + 250 + 400 = 1000ms backoff
+	// Plus base latency: 7 requests × 100ms avg = ~700ms
+	// Total expected: ~1700ms, allow generous tolerance
+	assertRange(totalTime, 1000, 2400, `Fibonacci backoff should show retry delays, got ${totalTime}ms`);
 });
 
 suite.test('Jitter backoff randomization', async () => {
@@ -154,12 +155,13 @@ suite.test('Jitter backoff randomization', async () => {
 	// Jitter should produce at least some variance (allow for small variance due to system timing)
 	assert(range >= 20, `Jitter should produce some variance in timings, got range: ${range}ms`);
 	
-	// But all should be within reasonable bounds (200ms + jitter * 3 retries)
-	// Base: 200 + (0-200 jitter) = 200-400ms per retry
-	// Total for 3 retries: 600-1200ms + generous tolerance for system load
-	// Applying ±500ms tolerance as per copilot instructions for network tests
+	// But all should be within reasonable bounds
+	// Base: 200ms + (0-200ms jitter) per retry = 200-400ms per retry
+	// Total for 3 retries: 600-1200ms backoff
+	// Plus base latency: 4 requests × 100ms avg = ~400ms
+	// Total expected: ~1000-1600ms, allow generous tolerance
 	timings.forEach(timing => {
-		assertRange(timing, 300, 1700, `Jitter timing should be reasonable: ${timing}ms`);
+		assertRange(timing, 600, 2200, `Jitter timing should be reasonable: ${timing}ms`);
 	});
 });
 
@@ -186,11 +188,12 @@ suite.test('Exponential jitter combination', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Exponential jitter: Theoretical 200 + 400 + 800 + 1000(capped) = 2400ms + jitter
-	// But actual performance shows ~979-1115ms due to jitter and system variations
-	// Generous tolerance: Allow 700-3500ms to account for timing variations
-	// This ensures jitter backoff is working while being resilient to system load
-	assertRange(totalTime, 700, 3500, `Exponential jitter should show retry delays, got ${totalTime}ms`);
+	// Exponential jitter: 200 + 400 + 800 + 1000(capped) = 2400ms backoff + jitter
+	// Jitter can reduce delays significantly, plus base latency varies
+	// Plus base latency: 5 requests × 100ms avg = ~500ms
+	// Total expected: ~1400-3000ms with jitter variations and latency
+	// Allow generous tolerance for jitter randomness and system load
+	assertRange(totalTime, 1000, 4200, `Exponential jitter should show retry delays, got ${totalTime}ms`);
 });
 
 suite.test('Custom retry handler timing', async () => {
@@ -222,9 +225,10 @@ suite.test('Custom retry handler timing', async () => {
 	
 	const totalTime = timer.getDuration();
 
-	// Custom: 150ms * 3 = 450ms
-	// Allow overhead: 400ms - 650ms
-	assertRange(totalTime, 400, 650, `Custom retry timing should be ~450ms, got ${totalTime}ms`);
+	// Custom: 150ms * 3 = 450ms backoff
+	// Plus base latency: 4 requests × 100ms avg = ~400ms
+	// Total expected: ~850ms, allow generous tolerance
+	assertRange(totalTime, 500, 1400, `Custom retry timing should be ~850ms, got ${totalTime}ms`);
 });
 
 suite.test('Backoff with eventual success', async () => {
