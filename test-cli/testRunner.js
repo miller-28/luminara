@@ -5,6 +5,7 @@ import { Timer } from './testUtils.js';
 // Import all test suites
 import { suite as basicSuite, mockServer as basicServer } from './tests/basic.test.js';
 import { suite as backoffSuite, mockServer as backoffServer } from './tests/backoff.test.js';
+import { suite as debouncerSuite, mockServer as debouncerServer } from './tests/debouncer.test.js';
 import { suite as interceptorsSuite, mockServer as interceptorsServer } from './tests/interceptors.test.js';
 import { suite as retrySuite, mockServer as retryServer } from './tests/retry.test.js';
 import { suite as timeoutSuite, mockServer as timeoutServer } from './tests/timeout.test.js';
@@ -21,6 +22,7 @@ import { suite as edgeCasesSuite, mockServer as edgeCasesServer } from './tests/
 const TEST_SUITES = [
 	{ name: 'Basic HTTP Operations', suite: basicSuite, server: basicServer },
 	{ name: 'Backoff Strategies', suite: backoffSuite, server: backoffServer },
+	{ name: 'Debouncer Feature', suite: debouncerSuite, server: debouncerServer },
 	{ name: 'Interceptors', suite: interceptorsSuite, server: interceptorsServer },
 	{ name: 'Retry', suite: retrySuite, server: retryServer },
 	{ name: 'Rate Limiting', suite: rateLimitSuite, server: rateLimitServer },

@@ -4,6 +4,7 @@ import { handleErrorResponse } from './handlers/ErrorResponseHandler.js';
 import { handleSuccessResponse } from './handlers/SuccessResponseHandler.js';
 import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from './features/retry/index.js';
 import { retryLogger } from './features/retry/verboseLogger.js';
+import { Debouncer, generateKey, createVerboseLogger as createDebounceVerboseLogger } from './features/debouncer/index.js';
 
 /**
  * Native Fetch Driver for Luminara
@@ -42,6 +43,14 @@ export function NativeFetchDriver(config = {}) {
 	// Store global configuration
 	const globalConfig = { ...config };
 	
+	// Initialize debouncer if debounce configuration exists
+	let debouncer = null;
+	if (globalConfig.debounce && globalConfig.debounce !== false) {
+		const debounceConfig = typeof globalConfig.debounce === 'object' ? globalConfig.debounce : { delay: 300 };
+		const debounceVerboseLogger = globalConfig.verbose ? createDebounceVerboseLogger('Debouncer') : null;
+		debouncer = new Debouncer(debounceConfig, globalConfig.statsHub, debounceVerboseLogger);
+	}
+	
 	return {
 		async request(opts, context = {}) {
 
@@ -60,27 +69,48 @@ export function NativeFetchDriver(config = {}) {
 			
 			//  ═══════════════════════════════════════════════════════════════
 			//  PHASE 2: IN-FLIGHT (Execute Request)
-			//  Timeout handling, request execution
+			//  Debouncing (if enabled), timeout handling, request execution
 			//  ═══════════════════════════════════════════════════════════════
 			
-			try {
-				const response = await executeRequest(preparedRequest, currentAttempt);
-				
-				//  ═══════════════════════════════════════════════════════════════
-				//  PHASE 3: POST-FLIGHT (Response Handlers)
-				//  Success path: Parse response data
-				//  ═══════════════════════════════════════════════════════════════
-				
-				return await handleSuccessResponse(response, preparedRequest, currentAttempt);
-			} catch (error) {
+			// Determine if debouncing should be applied for this request
+			const effectiveDebounce = opts.debounce !== undefined ? opts.debounce : globalConfig.debounce;
+			const shouldDebounce = effectiveDebounce && effectiveDebounce !== false && debouncer;
+			
+			// Define request execution function that will be passed to debouncer or executed directly
+			const executeRequestFunction = async () => {
+				try {
+					const response = await executeRequest(preparedRequest, currentAttempt);
+					
+					//  ═══════════════════════════════════════════════════════════════
+					//  PHASE 3: POST-FLIGHT (Response Handlers)
+					//  Success path: Parse response data
+					//  ═══════════════════════════════════════════════════════════════
+					
+					return await handleSuccessResponse(response, preparedRequest, currentAttempt);
+				} catch (error) {
 
-				//  ═══════════════════════════════════════════════════════════════
-				//  PHASE 3: POST-FLIGHT (Response Handlers)
-				//  Error path: Transform and enrich error information
-				//  ═══════════════════════════════════════════════════════════════
+					//  ═══════════════════════════════════════════════════════════════
+					//  PHASE 3: POST-FLIGHT (Response Handlers)
+					//  Error path: Transform and enrich error information
+					//  ═══════════════════════════════════════════════════════════════
+					
+					throw await handleErrorResponse(error, preparedRequest, currentAttempt);
+				}
+			};
+			
+			// Apply debouncing if enabled
+			if (shouldDebounce) {
+				// Support per-request debounce configuration override
+				const requestDebounceConfig = typeof effectiveDebounce === 'object' ? effectiveDebounce : {};
 				
-				throw await handleErrorResponse(error, preparedRequest, currentAttempt);
+				return await debouncer.process(
+					{ ...preparedRequest, ...requestDebounceConfig },
+					executeRequestFunction
+				);
 			}
+			
+			// Execute request directly without debouncing
+			return await executeRequestFunction();
 		},
 		
 		// Provide shouldRetry method for LuminaraClient to use

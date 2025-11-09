@@ -102,8 +102,7 @@ suite.test('Race condition: Multiple rapid requests to same endpoint', async () 
 	
 	// Fire 10 rapid requests
 	const requests = Array.from({ length: 10 }, () => 
-		client.getJson('/json')
-	);
+		client.getJson('/json'));
 	
 	const results = await Promise.all(requests);
 	
@@ -216,6 +215,10 @@ suite.test('Abort during successful request processing', async () => {
 // =============================================================================
 
 suite.test('Exponential backoff respects maximum delay cap', async () => {
+	// CRITICAL: Wait for any in-flight requests from previous test to complete
+	// The previous test has a 500ms delay + abort, and there could be race conditions
+	await new Promise(resolve => setTimeout(resolve, 100));
+	
 	const client = createLuminara({
 		baseURL: BASE_URL,
 		retry: 8, // Many retries to reach cap
@@ -247,8 +250,8 @@ suite.test('Exponential backoff respects maximum delay cap', async () => {
 		
 		// Should still make all retry attempts
 		const requestCount = mockServer.getRequestCount('GET', '/json');
-		// Note: With retry=8, we get initial request + 8 retry attempts + 1 final = 10 total
-		assert(requestCount === 10, 
+		// Note: With retry=8, we get initial request + 8 retry attempts = 9 total
+		assert(requestCount === 9, 
 			`Should make all retry attempts, got ${requestCount} requests`);
 	}
 });
@@ -425,8 +428,7 @@ suite.test('Stats handle rapid request bursts', async () => {
 	
 	// Fire 20 concurrent requests (more reasonable number)
 	const requests = Array.from({ length: 20 }, () => 
-		client.get('/json').catch(() => {}) // Ignore errors
-	);
+		client.get('/json').catch(() => {}));
 	
 	await Promise.all(requests);
 	

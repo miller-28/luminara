@@ -393,6 +393,36 @@ export class StatsHub {
 		}
 	}
 
+	onDebounceStart(event) {
+		const { id } = event;
+		const enrichedEvent = this._enrichEvent(event);
+		
+		// Notify modules
+		this.modules.counters.onDebounceStart(enrichedEvent);
+		
+		this._notifyUpdateListeners('debounce.start', enrichedEvent);
+	}
+
+	onDebounceEnd(event) {
+		const { id } = event;
+		const enrichedEvent = this._enrichEvent(event);
+		
+		// Notify modules
+		this.modules.counters.onDebounceEnd(enrichedEvent);
+		
+		this._notifyUpdateListeners('debounce.end', enrichedEvent);
+	}
+
+	onDebounceCancelled(event) {
+		const { id } = event;
+		const enrichedEvent = this._enrichEvent(event);
+		
+		// Notify modules
+		this.modules.counters.onDebounceCancelled(enrichedEvent);
+		
+		this._notifyUpdateListeners('debounce.cancelled', enrichedEvent);
+	}
+
 	/**
 	 * Enrich event with extracted metadata
 	 */

@@ -9,6 +9,7 @@
 		"test:basic": "node --experimental-fetch tests/basic.test.js",
 		"test:retry": "node --experimental-fetch tests/retry.test.js",
 		"test:backoff": "node --experimental-fetch tests/backoff.test.js",
+		"test:debouncer": "node --experimental-fetch tests/debouncer.test.js",
 		"test:interceptors": "node --experimental-fetch tests/interceptors.test.js",
 		"test:timeout": "node --experimental-fetch tests/timeout.test.js",
 		"test:drivers": "node --experimental-fetch tests/drivers.test.js",

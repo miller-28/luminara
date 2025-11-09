@@ -12,6 +12,8 @@
  * @property {number} inflight - Currently in-flight requests
  * @property {number} retried - Requests that were retried
  * @property {number} aborted - Aborted requests
+ * @property {number} debouncing - Currently debouncing requests
+ * @property {number} cancelledByDebouncing - Requests cancelled by debouncing
  */
 export const createCountersSchema = () => ({
 	total: 0,
@@ -19,7 +21,9 @@ export const createCountersSchema = () => ({
 	fail: 0,
 	inflight: 0,
 	retried: 0,
-	aborted: 0
+	aborted: 0,
+	debouncing: 0,
+	cancelledByDebouncing: 0
 });
 
 /**

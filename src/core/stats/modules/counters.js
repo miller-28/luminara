@@ -18,6 +18,9 @@ export class CountersModule {
 		
 		// Track current in-flight requests
 		this.inflightRequests = new Set();
+		
+		// Track current debouncing requests
+		this.debouncingRequests = new Set();
 	}
 
 	/**
@@ -98,6 +101,45 @@ export class CountersModule {
 		Object.values(this.windows).forEach(window => window.add(dataPoint));
 	}
 
+	onDebounceStart(event) {
+		const { id } = event;
+		
+		this.debouncingRequests.add(id);
+		
+		const dataPoint = {
+			type: 'debounce-start',
+			id
+		};
+		
+		Object.values(this.windows).forEach(window => window.add(dataPoint));
+	}
+
+	onDebounceEnd(event) {
+		const { id } = event;
+		
+		this.debouncingRequests.delete(id);
+		
+		const dataPoint = {
+			type: 'debounce-end',
+			id
+		};
+		
+		Object.values(this.windows).forEach(window => window.add(dataPoint));
+	}
+
+	onDebounceCancelled(event) {
+		const { id } = event;
+		
+		this.debouncingRequests.delete(id);
+		
+		const dataPoint = {
+			type: 'debounce-cancelled',
+			id
+		};
+		
+		Object.values(this.windows).forEach(window => window.add(dataPoint));
+	}
+
 	/**
 	 * Get counter metrics for a specific window
 	 */
@@ -140,11 +182,18 @@ export class CountersModule {
 				case 'request-abort':
 					counters.aborted++;
 					break;
+				
+				case 'debounce-cancelled':
+					counters.cancelledByDebouncing++;
+					break;
 			}
 		}
 		
 		// Add current in-flight count
 		counters.inflight = this.inflightRequests.size;
+		
+		// Add current debouncing count
+		counters.debouncing = this.debouncingRequests.size;
 		
 		return counters;
 	}
@@ -248,6 +297,10 @@ export class CountersModule {
 				
 				case 'request-abort':
 					counters.aborted++;
+					break;
+				
+				case 'debounce-cancelled':
+					counters.cancelledByDebouncing++;
 					break;
 			}
 		}
