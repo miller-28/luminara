@@ -1,10 +1,10 @@
 /**
- * RequestDispatcher - Pre-flight request coordination
+ * RequestDispatcher - Pre-flight request coordination (PHASE 1)
  * 
  * Responsibilities:
  * 1. Build complete URL from config
- * 2. Debounce duplicate requests (future)
- * 3. Apply rate limiting with internal queue (future)
+ * 2. Debounce duplicate requests
+ * 3. Apply rate limiting with internal queue
  * 
  * This is the entry point for all requests before execution.
  */
@@ -13,22 +13,30 @@ import { buildFullUrl } from '../features/url/index.js';
 import { urlLogger } from '../features/url/verboseLogger.js';
 
 /**
- * Prepare request for execution
- * Handles pre-flight concerns: URL building, debouncing, rate limiting
+ * Dispatch request through pre-flight pipeline
+ * Coordinates URL building, debouncing, and rate limiting before execution
  * 
  * @param {object} config - Request configuration
  * @param {object} context - Request context
- * @returns {object} Prepared request configuration
+ * @param {object} features - Driver features (debouncer, rateLimiter)
+ * @param {Function} executeFunction - Function to execute the actual request
+ * @returns {Promise} Result of the request execution
  */
-export function prepareRequest(config, context) {
+export async function dispatchRequest(config, context, features = {}, executeFunction) {
 	const {
 		url, baseURL, query, method = 'GET', headers, body,
 		signal, timeout, retry = 0, retryDelay = 1000,
 		retryStatusCodes, backoffType, backoffMaxDelay, shouldRetry,
-		responseType, ignoreResponseError, parseResponse, verbose
+		responseType, ignoreResponseError, parseResponse, verbose,
+		debounce, rateLimit
 	} = config;
 	
-	// 1. Build complete URL
+	const { debouncer, rateLimiter, globalDebounce, globalRateLimit } = features;
+	
+	//  ═══════════════════════════════════════════════════════════════
+	//  STEP 1: Build complete URL
+	//  ═══════════════════════════════════════════════════════════════
+	
 	const fullUrl = buildFullUrl(url, baseURL, query);
 	
 	// Log URL construction if verbose
@@ -42,18 +50,8 @@ export function prepareRequest(config, context) {
 		});
 	}
 	
-	// 2. Debounce duplicate requests (FUTURE FEATURE - Placeholder)
-	// if (this.debouncer && config.debounce) {
-	//   const debounced = await this.debouncer.check(fullUrl, config);
-	//   if (debounced) return debounced; // Return existing pending request
-	// }
-	
-	// 3. Apply rate limiting (FUTURE FEATURE - Placeholder)
-	// if (this.rateLimiter && config.rateLimit) {
-	//   await this.rateLimiter.schedule(fullUrl, config);
-	// }
-	
-	return {
+	// Create prepared request object
+	const preparedRequest = {
 		fullUrl,
 		method,
 		headers,
@@ -73,4 +71,42 @@ export function prepareRequest(config, context) {
 		verbose,
 		context
 	};
+	
+	//  ═══════════════════════════════════════════════════════════════
+	//  STEP 2: Apply debouncing (prevents duplicate in-flight requests)
+	//  ═══════════════════════════════════════════════════════════════
+	
+	// Determine if debouncing should be applied
+	const effectiveDebounce = debounce !== undefined ? debounce : globalDebounce;
+	const shouldDebounce = effectiveDebounce && effectiveDebounce !== false && debouncer;
+	
+	// Create execution function wrapper
+	let executionFn = () => executeFunction(preparedRequest);
+	
+	// Wrap execution with debouncing if enabled
+	if (shouldDebounce) {
+		const requestDebounceConfig = typeof effectiveDebounce === 'object' ? effectiveDebounce : {};
+		executionFn = async () => {
+			return await debouncer.process(
+				{ ...preparedRequest, ...requestDebounceConfig },
+				() => executeFunction(preparedRequest)
+			);
+		};
+	}
+	
+	//  ═══════════════════════════════════════════════════════════════
+	//  STEP 3: Apply rate limiting (throttles/queues request execution)
+	//  ═══════════════════════════════════════════════════════════════
+	
+	// Determine if rate limiting should be applied
+	const effectiveRateLimit = rateLimit !== undefined ? rateLimit : globalRateLimit;
+	const shouldRateLimit = effectiveRateLimit && effectiveRateLimit !== false && rateLimiter;
+	
+	// Apply rate limiting if enabled
+	if (shouldRateLimit) {
+		return await rateLimiter.schedule(preparedRequest, executionFn);
+	}
+	
+	// Execute directly if no rate limiting
+	return await executionFn();
 }

@@ -1,5 +1,5 @@
 /**
- * InFlightHandler - Active request execution coordination
+ * InFlightHandler - Active request execution coordination (PHASE 2)
  * 
  * Responsibilities:
  * 1. Setup timeout handling

@@ -1,18 +1,19 @@
-import { prepareRequest } from './handlers/RequestDispatcher.js';
+import { dispatchRequest } from './handlers/RequestDispatcher.js';
 import { executeRequest } from './handlers/InFlightHandler.js';
 import { handleErrorResponse } from './handlers/ErrorResponseHandler.js';
 import { handleSuccessResponse } from './handlers/SuccessResponseHandler.js';
 import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetryPolicy } from './features/retry/index.js';
 import { retryLogger } from './features/retry/verboseLogger.js';
 import { Debouncer, generateKey, createVerboseLogger as createDebounceVerboseLogger } from './features/debouncer/index.js';
+import { createRateLimitFeature } from './features/rateLimit/index.js';
 
 /**
  * Native Fetch Driver for Luminara
  * 
  * Zero external dependencies. Uses Node.js/browser native fetch() API.
  * Handler-based architecture with clean separation of concerns:
- * - Request Dispatcher: URL building, rate limiting, debouncing (pre-flight)
- * - In-Flight Handler: Request execution with timeout (execution)
+ * - Request Dispatcher: URL building, debouncing, rate limiting (pre-flight)
+ * - In-Flight Handler: Timeout handling, request execution (execution)
  * - Response Handlers: Error and success response processing (post-flight)
  * 
  * Supported options:
@@ -30,6 +31,8 @@ import { Debouncer, generateKey, createVerboseLogger as createDebounceVerboseLog
  * - shouldRetry: function - Custom retry policy
  * - backoffType: string - Backoff strategy (linear, exponential, decorrelated)
  * - backoffMaxDelay: number - Maximum backoff delay in ms
+ * - debounce: boolean|object - Debounce configuration
+ * - rateLimit: object - Rate limiting configuration ({ rps, burst, etc. })
  * - responseType: string - Response parsing type (json, text, blob, etc.)
  * - ignoreResponseError: boolean - Don't throw on non-2xx responses
  * - parseResponse: boolean - Whether to parse response body
@@ -51,6 +54,13 @@ export function NativeFetchDriver(config = {}) {
 		debouncer = new Debouncer(debounceConfig, globalConfig.statsHub, debounceVerboseLogger);
 	}
 	
+	// Initialize rate limiter if rateLimit configuration exists
+	let rateLimiter = null;
+	if (globalConfig.rateLimit) {
+		const rateLimitConfig = typeof globalConfig.rateLimit === 'object' ? globalConfig.rateLimit : { rps: 10 };
+		rateLimiter = createRateLimitFeature(rateLimitConfig);
+	}
+	
 	return {
 		async request(opts, context = {}) {
 
@@ -62,23 +72,17 @@ export function NativeFetchDriver(config = {}) {
 			
 			//  ═══════════════════════════════════════════════════════════════
 			//  PHASE 1: PRE-FLIGHT (Request Dispatcher)
-			//  URL building, rate limiting, debouncing
+			//  URL building, debouncing, rate limiting - ALL handled by dispatchRequest
 			//  ═══════════════════════════════════════════════════════════════
 			
-			const preparedRequest = prepareRequest(mergedOpts, context);
-			
-			//  ═══════════════════════════════════════════════════════════════
-			//  PHASE 2: IN-FLIGHT (Execute Request)
-			//  Debouncing (if enabled), timeout handling, request execution
-			//  ═══════════════════════════════════════════════════════════════
-			
-			// Determine if debouncing should be applied for this request
-			const effectiveDebounce = opts.debounce !== undefined ? opts.debounce : globalConfig.debounce;
-			const shouldDebounce = effectiveDebounce && effectiveDebounce !== false && debouncer;
-			
-			// Define request execution function that will be passed to debouncer or executed directly
-			const executeRequestFunction = async () => {
+			// Define execution function for PHASE 2 & 3
+			const executeRequestFunction = async (preparedRequest) => {
 				try {
+					//  ═══════════════════════════════════════════════════════════════
+					//  PHASE 2: IN-FLIGHT (Execute Request)
+					//  Timeout handling, request execution
+					//  ═══════════════════════════════════════════════════════════════
+					
 					const response = await executeRequest(preparedRequest, currentAttempt);
 					
 					//  ═══════════════════════════════════════════════════════════════
@@ -98,19 +102,19 @@ export function NativeFetchDriver(config = {}) {
 				}
 			};
 			
-			// Apply debouncing if enabled
-			if (shouldDebounce) {
-				// Support per-request debounce configuration override
-				const requestDebounceConfig = typeof effectiveDebounce === 'object' ? effectiveDebounce : {};
-				
-				return await debouncer.process(
-					{ ...preparedRequest, ...requestDebounceConfig },
-					executeRequestFunction
-				);
-			}
-			
-			// Execute request directly without debouncing
-			return await executeRequestFunction();
+			// Dispatch request through pre-flight pipeline (PHASE 1)
+			// This handles URL building, debouncing, and rate limiting
+			return await dispatchRequest(
+				mergedOpts,
+				context,
+				{
+					debouncer,
+					rateLimiter,
+					globalDebounce: globalConfig.debounce,
+					globalRateLimit: globalConfig.rateLimit
+				},
+				executeRequestFunction
+			);
 		},
 		
 		// Provide shouldRetry method for LuminaraClient to use
@@ -172,6 +176,17 @@ export function NativeFetchDriver(config = {}) {
 			}
 			
 			return delay;
+		},
+		
+		// Expose rate limiter for external stats access (if configured)
+		getRateLimitStats() {
+			return rateLimiter ? rateLimiter.getStats() : null;
+		},
+		
+		resetRateLimitStats() {
+			if (rateLimiter) {
+				rateLimiter.resetStats();
+			}
 		}
 	};
 }
