@@ -1,9 +1,9 @@
 # 🌌 Luminara
 
-**Luminara** is a modern, framework-agnostic HTTP client built on native fetch, engineered for developers and teams who demand reliability, scalability, and architectural clarity.
+**Luminara** is a modern, universal HTTP client built on native fetch, engineered for developers and teams who demand reliability, scalability, and architectural clarity.
 It provides full lifecycle control over HTTP requests — from orchestration and interception to retries, deduplication, and analytics — all with zero external dependencies.
 
-Lightweight by design yet powerful in scope, Luminara enables consistent, predictable network behavior across all environments — React, Vue, Angular, Svelte, Node.js, or vanilla JavaScript.
+Lightweight by design yet powerful in scope, Luminara enables consistent, predictable network behavior across all environments — browsers (React, Vue, Angular, Svelte, vanilla JS) and Node.js 18+.
 Its domain-driven architecture and type-safe foundation make it ideal for enterprise-grade applications that need transparent debugging, real-time visibility, and extendable control over every request.
 
 ---
@@ -12,13 +12,14 @@ Its domain-driven architecture and type-safe foundation make it ideal for enterp
 
 ### Core Architecture
 - ⚡ Built on modern native `fetch` - Zero external dependencies
-- 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
+- 🌐 **Universal compatibility** - Browsers + Node.js 18+ with native fetch
+- 🏗️ **Framework-agnostic** - Works with React, Vue, Angular, Svelte, vanilla JS, and Node.js
 - 🏗️ **Domain-driven architecture** - Feature-based modular structure
-- � **Dual export support** - ESM/CJS compatibility with auto-detection
+- 📦 **Dual export support** - ESM/CJS compatibility with auto-detection
 - 🚗 **Extensible driver architecture** - Custom drivers via forking
 - 💎 **Ultra-compact footprint**
 - 🪶 **Zero dependencies** - Truly standalone
-- 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
+- 🔄 **Same API everywhere** - Identical behavior in all environments
 
 ### Request Lifecycle (Orchestration Layer)
 - 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
@@ -68,9 +69,36 @@ pnpm add luminara
 
 ### Framework-Specific Imports
 
-**React, Vue, Angular, Svelte, etc.**
+**React, Vue, Angular, Svelte (Browser)**
 ```javascript
 import { createLuminara } from 'luminara';
+```
+
+**Node.js (ESM)**
+```javascript
+import { createLuminara } from 'luminara';
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com',
+  retry: 3,
+  timeout: 5000
+});
+
+const data = await api.getJson('/users');
+console.log(data);
+```
+
+**Node.js (CommonJS)**
+```javascript
+const { createLuminara } = require('luminara');
+
+const api = createLuminara({
+  baseURL: 'https://api.example.com'
+});
+
+api.getJson('/users')
+  .then(data => console.log(data))
+  .catch(err => console.error(err));
 ```
 
 **Vanilla JavaScript (Browser)**
@@ -1174,9 +1202,14 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 - ✅ Edge 88+
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
+### Node.js Support
+- ✅ Node.js 18.x (LTS - Maintenance)
+- ✅ Node.js 20.x (LTS - Active)
+- ✅ Node.js 22.x (LTS - Current)
+
 ### Runtime Requirements
-- **Browser Environment Only** - Not for server-side/Node.js use
-- Modern `fetch` API support
+- **Universal**: Works in browsers and Node.js 18+
+- Modern `fetch` API support (native in all supported environments)
 - ES2020+ JavaScript features
 - ES Modules support
 
