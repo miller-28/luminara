@@ -40,7 +40,7 @@ npx serve .
 
 ## 📦 Example Categories
 
-**59 interactive examples across 12 feature categories**
+**75+ interactive examples across 14 feature categories**
 
 ### 📦 **Basic Usage**
 Core HTTP operations with Luminara's helper methods:
@@ -143,6 +143,30 @@ Detailed debugging and tracing (3 examples):
 Driver extensibility demonstration (1 example):
 - **Browser Fetch Driver** - Custom HTTP driver implementation
 
+### ⏱️ **Debouncer**
+Request debouncing with intelligent delay (8 examples):
+- **Search-as-You-Type** - Debounce rapid search input (300ms delay)
+- **Button Click Protection** - Prevent double-submit spam
+- **Method-Specific Debouncing** - Debounce only GET requests
+- **Custom Key Generation** - Deduplicate by URL pattern
+- **Delay Configuration** - Test different delay values
+- **Cancellation Behavior** - Watch previous requests get cancelled
+- **Stats Integration** - Track debounced vs executed requests
+- **Debouncer + Retry** - Debouncing works seamlessly with retry logic
+
+### 🔄 **Request Deduplicator**
+Automatic in-flight duplicate prevention (10 examples):
+- **Disabled by Default** - Deduplication requires explicit config
+- **Basic Deduplication** - 3 concurrent identical requests → 1 network call
+- **Double-Click Prevention** - Button spam protection
+- **Key Generation Strategies** - `url` vs `url+method` comparison
+- **Method Filtering** - Exclude mutations (POST/PUT/DELETE) from deduplication
+- **Cache TTL & Burst Protection** - Short-lived result caching (100ms default)
+- **Per-Request Disable** - Force fresh data with `deduplicate: { disabled: true }`
+- **Custom Key Generator** - Implement custom deduplication logic
+- **Error Propagation** - Failed requests share errors with duplicates
+- **Integration with Retry** - Deduplication + retry work together
+
 ## 🏗️ Architecture
 
 ### **Separation of Concerns**
@@ -166,7 +190,9 @@ sandbox/
     ├── errorHandling.js     # 🛠️ Error scenarios
     ├── stats.js             # 📊 Statistics system
     ├── verboseLogging.js    # 📝 Debugging and tracing
-    └── customDriver.js      # 🚗 Driver extensibility
+    ├── customDriver.js      # 🚗 Driver extensibility
+    ├── debouncer.js         # ⏱️ Request debouncing
+    └── deduplicator.js      # 🔄 Duplicate prevention
 ```
 
 ### **Layer Responsibilities**

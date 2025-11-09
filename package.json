@@ -1,6 +1,6 @@
 {
   "name": "luminara",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Lightweight, framework-agnostic HTTP client with native fetch, zero dependencies, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
   "type": "module",
   "main": "./dist/index.cjs",

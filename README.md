@@ -1,31 +1,45 @@
 # 🌌 Luminara
 
-**Luminara** is a lightweight, framework-agnostic HTTP client built on native fetch.  
-Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision across all modern JavaScript frameworks and vanilla applications. ✨
+**Luminara** is a modern, framework-agnostic HTTP client built on native fetch, engineered for developers and teams who demand reliability, scalability, and architectural clarity.
+It provides full lifecycle control over HTTP requests — from orchestration and interception to retries, deduplication, and analytics — all with zero external dependencies.
 
-🌐 **Universal Compatibility**: Works seamlessly with React, Vue, Angular, Svelte, vanilla JavaScript, and any modern browser environment.
+Lightweight by design yet powerful in scope, Luminara enables consistent, predictable network behavior across all environments — React, Vue, Angular, Svelte, Node.js, or vanilla JavaScript.
+Its domain-driven architecture and type-safe foundation make it ideal for enterprise-grade applications that need transparent debugging, real-time visibility, and extendable control over every request.
 
 ---
 
 ## ✨ Features
 
+### Core Architecture
 - ⚡ Built on modern native `fetch` - Zero external dependencies
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
 - 🏗️ **Domain-driven architecture** - Feature-based modular structure
-- 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
-- 🔄 **Dual export support** - ESM/CJS compatibility with auto-detection
-- 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
-- 🚦 **Advanced rate limiting** - Token bucket algorithm with global, domain, and endpoint scoping
-- 🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
-- 📝 **Verbose logging system** - Detailed debugging and request tracing
-- 🎯 **Response type handling** - JSON, text, form data, binary support
-- ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
-- 🛡️ **Robust error handling** - Comprehensive error categorization and handling
+- � **Dual export support** - ESM/CJS compatibility with auto-detection
+- 🚗 **Extensible driver architecture** - Custom drivers via forking
 - 💎 **Ultra-compact footprint**
 - 🪶 **Zero dependencies** - Truly standalone
-- 🎯 **Fully promise-based** with TypeScript support
-- � **Extensible driver architecture** - Custom drivers via forking
 - 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
+
+### Request Lifecycle (Orchestration Layer)
+- 🔌 **Enhanced interceptor architecture** - Deterministic order, mutable context, retry-aware
+- 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
+- 📝 **Verbose logging system** - Detailed debugging and request tracing
+
+### Pre-Flight Features (Request Dispatcher - Phase 1)
+- 🔄 **Request deduplication** - Automatic in-flight duplicate request prevention
+- ⏱️ **Request debouncing** - Intelligent request delay with automatic cancellation
+- 🚦 **Advanced rate limiting** - Token bucket algorithm with global, domain, and endpoint scoping
+
+### In-Flight Features (Request Execution - Phase 2)
+- ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
+- 🔄 **Comprehensive retry system** - 6 backoff strategies (exponential, fibonacci, jitter, etc.)
+
+### Post-Flight Features (Response Handlers - Phase 3)
+- 🎯 **Response type handling** - JSON, text, form data, binary support
+- 🛡️ **Robust error handling** - Comprehensive error categorization and handling
+
+### Developer Experience
+- 🎯 **Fully promise-based** with TypeScript support
 
 ---
 
@@ -929,7 +943,7 @@ Luminara includes a **beautiful interactive sandbox** where you can explore all 
 🌐 **[Try the Sandbox](./sandbox/)** • [Sandbox Documentation](./sandbox/README.md) • [Architecture Guide](./sandbox/ARCHITECTURE.md)
 
 The sandbox features:
-- **65+ Interactive Examples** across 12 feature categories
+- **75+ Interactive Examples** across 14 feature categories
 - **Live Retry Logging** - Watch backoff strategies in action
 - **Individual Test Controls** - Run and stop tests independently
 - **Real-time Feedback** - Color-coded outputs with detailed logs
@@ -949,14 +963,8 @@ The sandbox features:
 10. 📝 **Verbose Logging** - Detailed debugging and tracing
 11. 🚗 **Custom Drivers** - Replace the HTTP backend
 12. 🚦 **Rate Limiting** - Token bucket algorithm examples
-4. 🔄 **Retry** - Basic retry with status codes
-5. 📈 **Backoff Strategies** - All 6 strategies with live visualization
-6. 🔌 **Interceptors** - Request/response/error interceptors
-7. 🛡️ **Error Handling** - Comprehensive error scenarios
-8. 🎯 **Response Types** - JSON, text, form, binary data handling
-9. 📊 **Stats System** - Real-time metrics and analytics
-10. 📝 **Verbose Logging** - Detailed debugging and tracing
-11. 🚗 **Custom Drivers** - Replace the HTTP backend
+13. ⏱️ **Debouncer** - Search debouncing, button spam protection, method filtering
+14. � **Request Deduplicator** - Automatic duplicate prevention, key strategies, TTL
 
 **Quick Start:**
 ```bash

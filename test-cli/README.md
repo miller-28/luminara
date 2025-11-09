@@ -16,6 +16,8 @@ test-cli/
 │   ├── retry.test.js      # Retry system validation
 │   ├── backoff.test.js    # All backoff strategies
 │   ├── rateLimit.test.js  # Rate limiting with token bucket algorithm
+│   ├── debouncer.test.js  # Request debouncing validation
+│   ├── deduplicator.test.js  # Request deduplication tests
 │   ├── interceptors.test.js    # Interceptor system tests
 │   ├── timeout.test.js    # Timeout and abort scenarios
 │   ├── drivers.test.js    # Custom driver tests
@@ -42,6 +44,8 @@ npm run test:basic
 npm run test:retry
 npm run test:backoff
 npm run test:rate-limit
+npm run test:debouncer
+npm run test:deduplicator
 npm run test:interceptors
 npm run test:timeout
 npm run test:drivers
@@ -81,6 +85,32 @@ npm run test:watch
 - Pattern-based include/exclude rules
 - Statistics tracking accuracy
 - Dynamic configuration updates
+
+### Debouncer
+- Search-as-you-type patterns (300ms delay)
+- Button click spam protection
+- Method-specific debouncing (GET only)
+- Custom key generation strategies
+- Request cancellation behavior
+- Delay configuration validation
+- Stats integration accuracy
+- Debouncer + retry interaction
+
+### Request Deduplicator
+- Disabled by default verification
+- Basic deduplication (3→1 request)
+- Key strategy validation (url vs url+method)
+- Method filtering (excludeMethods/methods)
+- Cache TTL burst protection (100ms default)
+- Cache TTL = 0 (in-flight only mode)
+- Per-request disable override
+- Custom key generator functions
+- Error propagation to duplicates
+- AbortController integration
+- Sequential request behavior
+- Integration with retry logic
+- maxCacheSize enforcement
+- Concurrent identical requests
 
 ### Interceptors
 - Request interceptors
