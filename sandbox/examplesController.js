@@ -11,7 +11,8 @@ import { responseTypes } from './examples/responseTypes.js';
 import { errorHandling } from './examples/errorHandling.js';
 import { verboseLogging } from './examples/verboseLogging.js';
 import { stats } from './examples/stats.js';
-import { rateLimitingExamples } from './examples/rateLimiting.js';
+import { rateLimiting } from './examples/rateLimiting.js';
+import { deduplicator } from './examples/deduplicator.js';
 
 // Aggregate all examples
 export const examples = {
@@ -27,7 +28,8 @@ export const examples = {
 	customDriver,
 	verboseLogging,
 	stats,
-	rateLimiting: rateLimitingExamples
+	rateLimiting,
+	deduplicator
 };
 
 // Examples Controller Class

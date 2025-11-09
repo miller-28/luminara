@@ -5,7 +5,7 @@
  * Shows token bucket behavior, scoping, configuration patterns, and real-time statistics.
  */
 
-export const rateLimitingExamples = {
+export const rateLimiting = {
 	title: 'Rate Limiting',
 	examples: [
 		{
@@ -464,4 +464,4 @@ console.log('Request 3:', Date.now() - startTime, 'ms');
 	]
 };
 
-export default rateLimitingExamples;
+export default rateLimiting;

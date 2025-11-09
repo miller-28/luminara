@@ -3,8 +3,9 @@
  * 
  * Responsibilities:
  * 1. Build complete URL from config
- * 2. Debounce duplicate requests
- * 3. Apply rate limiting with internal queue
+ * 2. Deduplicate concurrent identical requests
+ * 3. Debounce duplicate requests
+ * 4. Apply rate limiting with internal queue
  * 
  * This is the entry point for all requests before execution.
  */
@@ -28,10 +29,10 @@ export async function dispatchRequest(config, context, features = {}, executeFun
 		signal, timeout, retry = 0, retryDelay = 1000,
 		retryStatusCodes, backoffType, backoffMaxDelay, shouldRetry,
 		responseType, ignoreResponseError, parseResponse, verbose,
-		debounce, rateLimit
+		debounce, rateLimit, deduplicate
 	} = config;
 	
-	const { debouncer, rateLimiter, globalDebounce, globalRateLimit } = features;
+	const { debouncer, rateLimiter, deduplicator, globalDebounce, globalRateLimit, globalDeduplicate } = features;
 	
 	//  ═══════════════════════════════════════════════════════════════
 	//  STEP 1: Build complete URL
@@ -73,29 +74,51 @@ export async function dispatchRequest(config, context, features = {}, executeFun
 	};
 	
 	//  ═══════════════════════════════════════════════════════════════
-	//  STEP 2: Apply debouncing (prevents duplicate in-flight requests)
+	//  STEP 2: Apply deduplication (prevents duplicate concurrent requests)
+	//  ═══════════════════════════════════════════════════════════════
+	
+	// Determine if deduplication should be applied
+	const effectiveDeduplicate = deduplicate !== undefined ? deduplicate : globalDeduplicate;
+	const shouldDeduplicate = effectiveDeduplicate && effectiveDeduplicate !== false && deduplicator;
+	
+	// Create execution function wrapper
+	let executionFn = () => executeFunction(preparedRequest);
+	
+	// Wrap execution with deduplication if enabled
+	if (shouldDeduplicate) {
+		const requestDeduplicateConfig = typeof effectiveDeduplicate === 'object' ? effectiveDeduplicate : {};
+		const deduplicationWrapper = async () => {
+			return await deduplicator.process(
+				preparedRequest,
+				() => executeFunction(preparedRequest),
+				requestDeduplicateConfig
+			);
+		};
+		executionFn = deduplicationWrapper;
+	}
+	
+	//  ═══════════════════════════════════════════════════════════════
+	//  STEP 3: Apply debouncing (delays execution)
 	//  ═══════════════════════════════════════════════════════════════
 	
 	// Determine if debouncing should be applied
 	const effectiveDebounce = debounce !== undefined ? debounce : globalDebounce;
 	const shouldDebounce = effectiveDebounce && effectiveDebounce !== false && debouncer;
 	
-	// Create execution function wrapper
-	let executionFn = () => executeFunction(preparedRequest);
-	
 	// Wrap execution with debouncing if enabled
 	if (shouldDebounce) {
 		const requestDebounceConfig = typeof effectiveDebounce === 'object' ? effectiveDebounce : {};
+		const previousFn = executionFn;
 		executionFn = async () => {
 			return await debouncer.process(
 				{ ...preparedRequest, ...requestDebounceConfig },
-				() => executeFunction(preparedRequest)
+				previousFn
 			);
 		};
 	}
 	
 	//  ═══════════════════════════════════════════════════════════════
-	//  STEP 3: Apply rate limiting (throttles/queues request execution)
+	//  STEP 4: Apply rate limiting (throttles/queues request execution)
 	//  ═══════════════════════════════════════════════════════════════
 	
 	// Determine if rate limiting should be applied

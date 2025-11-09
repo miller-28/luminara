@@ -20,6 +20,7 @@
 		"test:stats": "node --experimental-fetch tests/stats.test.js",
 		"test:rate-limit": "node --experimental-fetch tests/rateLimit.test.js",
 		"test:edge-cases": "node --experimental-fetch tests/edgeCases.test.js",
+		"test:deduplicator": "node --experimental-fetch tests/deduplicator.test.js",
 		"test:watch": "nodemon --experimental-fetch testRunner.js"
 	},
 	"dependencies": {

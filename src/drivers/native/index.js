@@ -6,6 +6,7 @@ import { shouldRetryRequest, calculateRetryDelay, createRetryContext, createRetr
 import { retryLogger } from './features/retry/verboseLogger.js';
 import { Debouncer, generateKey, createVerboseLogger as createDebounceVerboseLogger } from './features/debouncer/index.js';
 import { createRateLimitFeature } from './features/rateLimit/index.js';
+import { Deduplicator, createDeduplicateVerboseLogger } from './features/deduplicator/index.js';
 
 /**
  * Native Fetch Driver for Luminara
@@ -32,6 +33,7 @@ import { createRateLimitFeature } from './features/rateLimit/index.js';
  * - backoffType: string - Backoff strategy (linear, exponential, decorrelated)
  * - backoffMaxDelay: number - Maximum backoff delay in ms
  * - debounce: boolean|object - Debounce configuration
+ * - deduplicate: boolean|object - Deduplication configuration
  * - rateLimit: object - Rate limiting configuration ({ rps, burst, etc. })
  * - responseType: string - Response parsing type (json, text, blob, etc.)
  * - ignoreResponseError: boolean - Don't throw on non-2xx responses
@@ -52,6 +54,14 @@ export function NativeFetchDriver(config = {}) {
 		const debounceConfig = typeof globalConfig.debounce === 'object' ? globalConfig.debounce : { delay: 300 };
 		const debounceVerboseLogger = globalConfig.verbose ? createDebounceVerboseLogger('Debouncer') : null;
 		debouncer = new Debouncer(debounceConfig, globalConfig.statsHub, debounceVerboseLogger);
+	}
+	
+	// Initialize deduplicator if deduplicate configuration exists
+	let deduplicator = null;
+	if (globalConfig.deduplicate && globalConfig.deduplicate !== false) {
+		const deduplicateConfig = typeof globalConfig.deduplicate === 'object' ? globalConfig.deduplicate : {};
+		const deduplicateVerboseLogger = globalConfig.verbose ? createDeduplicateVerboseLogger() : null;
+		deduplicator = new Deduplicator(deduplicateConfig, globalConfig.statsHub, deduplicateVerboseLogger);
 	}
 	
 	// Initialize rate limiter if rateLimit configuration exists
@@ -103,14 +113,16 @@ export function NativeFetchDriver(config = {}) {
 			};
 			
 			// Dispatch request through pre-flight pipeline (PHASE 1)
-			// This handles URL building, debouncing, and rate limiting
+			// This handles URL building, deduplication, debouncing, and rate limiting
 			return await dispatchRequest(
 				mergedOpts,
 				context,
 				{
 					debouncer,
+					deduplicator,
 					rateLimiter,
 					globalDebounce: globalConfig.debounce,
+					globalDeduplicate: globalConfig.deduplicate,
 					globalRateLimit: globalConfig.rateLimit
 				},
 				executeRequestFunction
