@@ -102,7 +102,7 @@ suite.test('Timeout with retry combination', async () => {
 	
 	try {
 
-		// ofetch doesn't retry timeout errors by default, so this will just timeout once
+		// Native fetch doesn't retry timeout errors by default, so this will just timeout once
 		await api.getJson('/json?delay=300');
 		assert(false, 'Request should timeout');
 	} catch (error) {

@@ -84,14 +84,14 @@ export class Debouncer {
 					this.statsHub.onDebounceEnd({ id: key });
 				}
 				
-			// Log execution
-			if (this.logger) {
-				this.logger.log('Executing debounced request', {
-					method: options.method,
-					url: options.fullUrl || options.url,
-					waitedMs: delay
-				});
-			}				try {
+				// Log execution
+				if (this.logger) {
+					this.logger.log('Executing debounced request', {
+						method: options.method,
+						url: options.fullUrl || options.url,
+						waitedMs: delay
+					});
+				}				try {
 					// Execute the request with internal abort signal
 					const mergedOptions = {
 						...options,
@@ -119,24 +119,26 @@ export class Debouncer {
 				this.statsHub.onDebounceStart({ id: key });
 			}
 			
-		// Log debounce
-		if (this.logger) {
-			this.logger.log('Request debounced', {
-				method: options.method,
-				url: options.fullUrl || options.url,
-				delayMs: delay,
-				key
-			});
-		}
-	});
-}	/**
+			// Log debounce
+			if (this.logger) {
+				this.logger.log('Request debounced', {
+					method: options.method,
+					url: options.fullUrl || options.url,
+					delayMs: delay,
+					key
+				});
+			}
+		});
+	}	/**
 	 * Cancel a pending debounced request
 	 * @param {string} key - Request key
 	 * @param {string} reason - Reason for cancellation
 	 */
 	cancelPending(key, reason) {
 		const pending = this.pending.get(key);
-		if (!pending) return;
+		if (!pending) {
+			return;
+		}
 		
 		// Clear timer
 		clearTimeout(pending.timer);
@@ -144,15 +146,15 @@ export class Debouncer {
 		// Abort the request
 		pending.controller.abort();
 		
-	// Log cancellation (only if verbose enabled globally)
-	if (this.logger) {
-		this.logger.log('Cancelled debounced request', {
-			method: pending.options.method,
-			url: pending.options.fullUrl || pending.options.url,
-			reason,
-			key
-		});
-	}		// Reject the promise with cancellation error
+		// Log cancellation (only if verbose enabled globally)
+		if (this.logger) {
+			this.logger.log('Cancelled debounced request', {
+				method: pending.options.method,
+				url: pending.options.fullUrl || pending.options.url,
+				reason,
+				key
+			});
+		}		// Reject the promise with cancellation error
 		pending.reject(new Error(`Request cancelled: ${reason}`));
 		
 		// Remove from map

@@ -90,6 +90,30 @@ class SandboxUI {
 	init() {
 		this.renderExamples();
 		this.attachEventListeners();
+		this.loadVerboseState();
+	}
+
+	// Load verbose state from localStorage
+	loadVerboseState() {
+		try {
+			const savedVerbose = localStorage.getItem('luminara-sandbox-verbose');
+			if (savedVerbose !== null) {
+				const isVerbose = savedVerbose === 'true';
+				this.verboseToggle.checked = isVerbose;
+				this.handleVerboseToggle(isVerbose);
+			}
+		} catch (error) {
+			console.warn('Failed to load verbose state from localStorage:', error);
+		}
+	}
+
+	// Save verbose state to localStorage
+	saveVerboseState(isVerbose) {
+		try {
+			localStorage.setItem('luminara-sandbox-verbose', isVerbose.toString());
+		} catch (error) {
+			console.warn('Failed to save verbose state to localStorage:', error);
+		}
 	}
 
 	renderExamples() {
@@ -294,6 +318,9 @@ class SandboxUI {
 	}
 
 	handleVerboseToggle(isVerbose) {
+
+		// Save to localStorage
+		this.saveVerboseState(isVerbose);
 
 		// Update examples controller with verbose state
 		this.examplesController.setVerboseMode(isVerbose);

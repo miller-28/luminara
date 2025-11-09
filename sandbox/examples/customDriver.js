@@ -62,7 +62,7 @@ console.log('Custom driver response:', response.data);`,
 				
 				const response = await client.getJson('https://jsonplaceholder.typicode.com/todos/1', { signal });
 
-				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver instead of default OfetchDriver`;
+				return `Custom Driver: Native Fetch\nStatus: ${response.status}\nTodo Title: ${response.data.title}\n\n✅ Using custom driver (users can fork and implement their own drivers)`;
 			}
 		}
 	]

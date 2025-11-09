@@ -87,7 +87,7 @@ suite.test('Retry with timeout combination', async () => {
 	
 	try {
 
-		// Request with 300ms delay should timeout (ofetch doesn't retry timeout errors by default)
+		// Request with 300ms delay should timeout (native fetch doesn't retry timeout errors by default)
 		await api.getJson('/json?delay=300');
 		assert(false, 'Should timeout');
 	} catch (error) {
@@ -96,7 +96,7 @@ suite.test('Retry with timeout combination', async () => {
 		const totalTime = timer.getDuration();
 		const requestCount = mockServer.getRequestCount('GET', '/json');
 		
-		// ofetch doesn't retry timeout errors by default, so only 1 request
+		// Native fetch doesn't retry timeout errors by default, so only 1 request
 		assert(requestCount === 1, `Should make 1 request (timeout not retried), made ${requestCount}`);
 
 		// Single timeout: ~200ms (can have overhead in test environment)
@@ -344,7 +344,7 @@ suite.test('Default policy retries GET on 500 status', async () => {
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
-		assert(error.message.includes('500'), 'Should get 500 error after retries');
+		assert(error.status === 500, `Should get 500 error after retries, got ${error.status}`);
 	}
 });
 
@@ -360,7 +360,7 @@ suite.test('Default policy retries POST on safe status codes', async () => {
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
-		assert(error.message.includes('500'), 'Should get 500 error after retries');
+		assert(error.status === 500, `Should get 500 error after retries, got ${error.status}`);
 	}
 });
 
@@ -384,7 +384,7 @@ suite.test('Custom retry policy overrides default behavior', async () => {
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
-		assert(error.message.includes('400'), 'Should get 400 error after custom retries');
+		assert(error.status === 400, `Should get 400 error after custom retries, got ${error.status}`);
 	}
 });
 
@@ -440,7 +440,7 @@ suite.test('Status 409 triggers retry for GET requests', async () => {
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
-		assert(error.message.includes('409'), 'Should get 409 error after retries');
+		assert(error.status === 409, `Should get 409 error after retries, got ${error.status}`);
 	}
 });
 
@@ -456,7 +456,7 @@ suite.test('Status 425 triggers retry for PUT requests', async () => {
 		});
 		assert(false, 'Should have thrown an error');
 	} catch (error) {
-		assert(error.message.includes('425'), 'Should get 425 error after retries');
+		assert(error.status === 425, `Should get 425 error after retries, got ${error.status}`);
 	}
 });
 

@@ -1,7 +1,7 @@
 {
   "name": "luminara",
   "version": "0.8.1",
-  "description": "Lightweight, framework-agnostic HTTP client with native fetch, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
+  "description": "Lightweight, framework-agnostic HTTP client with native fetch, zero dependencies, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Universal browser compatibility across React, Vue, Angular, Svelte, and vanilla JavaScript.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -53,9 +53,8 @@
     "svelte",
     "vanilla-js",
     "pure-javascript",
-    "drivers",
-    "pluggable-drivers",
-    "ofetch-optional",
+    "zero-dependencies",
+    "no-dependencies",
     "interceptors",
     "enhanced-interceptors",
     "deterministic-order",
@@ -98,14 +97,6 @@
     "url": "https://github.com/miller-28/luminara/issues"
   },
   "homepage": "https://github.com/miller-28/luminara#readme",
-  "peerDependencies": {
-    "ofetch": "^1.5.0"
-  },
-  "peerDependenciesMeta": {
-    "ofetch": {
-      "optional": true
-    }
-  },
   "files": [
     "dist/*.cjs",
     "dist/*.mjs",

@@ -10,7 +10,6 @@ export default defineConfig({
 	minify: true, // Enable minification for smaller bundle size
 	splitting: false,
 	bundle: true,
-	external: ['ofetch'], // Keep ofetch as external peer dependency
 	platform: 'browser',
 	target: 'es2020',
 	treeshake: true,

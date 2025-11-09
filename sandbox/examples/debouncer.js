@@ -91,7 +91,7 @@ for (const query of searches) {
 					}
 				}
 				
-				updateOutput(`\n📊 Results:\n`);
+				updateOutput('\n📊 Results:\n');
 				updateOutput(`   ✅ Executed: ${successCount} (only last search)\n`);
 				updateOutput(`   🚫 Cancelled: ${cancelledCount} (debounced)\n`);
 				updateOutput(`   💡 Saved ${cancelledCount} unnecessary API calls!\n`);
@@ -193,7 +193,7 @@ for (let i = 0; i < 5; i++) {
 					}
 				}
 				
-				updateOutput(`\n📊 Results:\n`);
+				updateOutput('\n📊 Results:\n');
 				updateOutput(`   ✅ Submitted: ${successCount} time(s)\n`);
 				updateOutput(`   🚫 Prevented: ${cancelledCount} duplicate submission(s)\n`);
 				updateOutput(`   💡 Protected against ${cancelledCount} accidental double-submissions!\n`);
@@ -331,7 +331,7 @@ api.post('/posts', { title: 'Post 3' });
 				updateOutput('✅ Summary:\n');
 				updateOutput(`   GET (debounced): ${getExecuted} executed, ${getCancelled} saved\n`);
 				updateOutput(`   POST (immediate): ${postExecuted} executed, ${postCancelled} saved\n`);
-				updateOutput(`   💡 Method-specific debouncing works as expected!\n`);
+				updateOutput('   💡 Method-specific debouncing works as expected!\n');
 				
 				return `Method-specific debouncing: GET=${getCancelled} saved, POST=${postCancelled} saved`;
 			}
@@ -407,7 +407,7 @@ console.log('Success:', counters.success);`,
 				const stats = api.stats();
 				const stats1 = stats.counters.get();
 				
-				updateOutput(`\n📈 Stats after batch 1:\n`);
+				updateOutput('\n📈 Stats after batch 1:\n');
 				updateOutput(`   Total requests: ${stats1.total}\n`);
 				updateOutput(`   Success: ${stats1.success}\n\n`);
 				
@@ -425,7 +425,7 @@ console.log('Success:', counters.success);`,
 				// Check stats after second batch
 				const stats2 = stats.counters.get();
 				
-				updateOutput(`\n📈 Stats after batch 2:\n`);
+				updateOutput('\n📈 Stats after batch 2:\n');
 				updateOutput(`   Total requests: ${stats2.total}\n`);
 				updateOutput(`   Success: ${stats2.success}\n\n`);
 				
@@ -433,7 +433,7 @@ console.log('Success:', counters.success);`,
 				updateOutput('✅ Final Summary:\n');
 				updateOutput(`   📊 Total requests made: ${stats2.total}\n`);
 				updateOutput(`   ✅ Successful requests: ${stats2.success}\n`);
-				updateOutput(`   💡 Stats tracking with debouncing works!\n`);
+				updateOutput('   💡 Stats tracking with debouncing works!\n');
 				
 				return `Stats: ${stats2.total} total requests, ${stats2.success} succeeded`;
 			}
@@ -526,7 +526,7 @@ for (let i = 0; i < 5; i++) {
 					}
 				}
 				
-				updateOutput(`\n📊 Debouncing Results:\n`);
+				updateOutput('\n📊 Debouncing Results:\n');
 				updateOutput(`   ✅ Executed: ${executed} (only last request)\n`);
 				updateOutput(`   🚫 Cancelled: ${cancelled} (debounced)\n`);
 				updateOutput(`   🔄 Retry attempts: ${retryAttempts} (none needed - request succeeded)\n\n`);
@@ -562,11 +562,11 @@ for (let i = 0; i < 5; i++) {
 					}
 				}
 				
-				updateOutput(`\n📊 Retry Results:\n`);
+				updateOutput('\n📊 Retry Results:\n');
 				updateOutput(`   🚫 Cancelled by debounce: ${cancelledFailing}\n`);
 				updateOutput(`   ❌ Failed after retries: ${failedAfterRetry}\n`);
 				updateOutput(`   🔄 Total retry attempts: ${retryAttempts}\n`);
-				updateOutput(`   💡 Only the final debounced request triggered retries!\n\n`);
+				updateOutput('   💡 Only the final debounced request triggered retries!\n\n');
 				
 				updateOutput('✅ Summary:\n');
 				updateOutput('   Debouncing happens BEFORE retry logic\n');
@@ -665,7 +665,7 @@ for (let i = 0; i < 4; i++) {
 				updateOutput(`   ✅ Executed: ${executed}\n`);
 				updateOutput(`   🚫 Cancelled: ${cancelled}\n`);
 				updateOutput(`   ⏰ Timed out: ${timedOut}\n`);
-				updateOutput(`   💡 Timeout started AFTER debounce delay!\n`);
+				updateOutput('   💡 Timeout started AFTER debounce delay!\n');
 				
 				return `Debouncer + Timeout: ${executed} executed, ${cancelled} cancelled, ${timedOut} timed out`;
 			}
@@ -784,7 +784,7 @@ for (let i = 0; i < 4; i++) {
 					}
 				}
 				
-				updateOutput(`\n📊 Results:\n`);
+				updateOutput('\n📊 Results:\n');
 				updateOutput(`   ✅ Executed: ${executed}\n`);
 				updateOutput(`   🚫 Cancelled: ${cancelled}\n`);
 				updateOutput(`   🔵 onRequest called: ${requestLog.length} time(s)\n`);
@@ -792,9 +792,9 @@ for (let i = 0; i < 4; i++) {
 				updateOutput(`   🔴 onError called: ${errorLog.length} time(s)\n\n`);
 				
 				updateOutput('💡 Key Insights:\n');
-				updateOutput(`   Interceptors run AFTER debouncing\n`);
-				updateOutput(`   Only the final request triggers interceptors\n`);
-				updateOutput(`   Cancelled requests don't trigger onRequest/onSuccess\n`);
+				updateOutput('   Interceptors run AFTER debouncing\n');
+				updateOutput('   Only the final request triggers interceptors\n');
+				updateOutput('   Cancelled requests don\'t trigger onRequest/onSuccess\n');
 				
 				return `Debouncer + Interceptors: ${requestLog.length} onRequest, ${responseLog.length} onSuccess`;
 			}
@@ -913,7 +913,7 @@ setTimeout(() => controller.abort(), 300);
 					}
 				});
 				
-				updateOutput(`\n📊 Results:\n`);
+				updateOutput('\n📊 Results:\n');
 				updateOutput(`   ✅ Executed: ${executed}\n`);
 				updateOutput(`   🚫 Debounced: ${debounced}\n`);
 				updateOutput(`   🛑 Manually aborted: ${aborted}\n\n`);

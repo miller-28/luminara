@@ -141,9 +141,6 @@ export class LuminaraClient {
 		if (this.driver.request) {
 			features.push('request');
 		}
-		if (this.driver.constructor.name === 'OfetchDriver') {
-			features.push('ofetch-based');
-		}
 		if (this.driver.constructor.name === 'NativeFetchDriver') {
 			features.push('native-fetch');
 		}

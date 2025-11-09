@@ -54,7 +54,7 @@ export async function calculateRetryDelay(attempt, retryDelay, backoffType, back
 export function createRetryContext(url, method, headers, retry, attempt, response = null, error = null) {
 	return {
 		request: { url, method, headers },
-		options: { retry: retry - (attempt - 1) }, // Match ofetch behavior: remaining retries
+		options: { retry: retry - (attempt - 1) }, // Remaining retries
 		response,
 		error,
 		attempt,

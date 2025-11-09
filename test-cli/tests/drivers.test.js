@@ -1,4 +1,4 @@
-import { createLuminara, OfetchDriver, LuminaraClient } from '../../src/index.js';
+import { createLuminara, NativeFetchDriver, LuminaraClient } from '../../src/index.js';
 import { TestSuite, MockServer, assert, assertEqual } from '../testUtils.js';
 import { runTestSuiteIfDirect } from '../runTestSuite.js';
 
@@ -116,16 +116,16 @@ suite.test('Custom driver receives all request options', async () => {
 	assert(request.body !== undefined, 'Should receive request body');
 });
 
-suite.test('Default OfetchDriver functionality', async () => {
+suite.test('Default NativeFetchDriver functionality', async () => {
 
-	// Test that the default OfetchDriver works correctly
+	// Test that the default NativeFetchDriver works correctly
 	const api = createLuminara({
 		baseURL: BASE_URL
 	});
 	
 	const response = await api.getJson('/json');
 	
-	assert(response.status === 200, 'OfetchDriver should return 200');
+	assert(response.status === 200, 'NativeFetchDriver should return 200');
 	assert(response.data.message === 'Success', 'Should get correct response data');
 });
 
@@ -217,14 +217,14 @@ suite.test('Custom driver with backoff strategies', async () => {
 	assert(log.length === 1, 'Should make one request (custom driver handles retry logic itself)');
 });
 
-suite.test('Driver comparison - ofetch vs custom', async () => {
+suite.test('Driver comparison - native vs custom', async () => {
 
-	// Test with OfetchDriver
-	const ofetchApi = createLuminara({
+	// Test with NativeFetchDriver (default)
+	const nativeApi = createLuminara({
 		baseURL: BASE_URL
 	});
 	
-	const ofetchResponse = await ofetchApi.getJson('/json');
+	const nativeResponse = await nativeApi.getJson('/json');
 	
 	// Test with custom driver
 	const mockDriver = new MockDriver();
@@ -233,10 +233,10 @@ suite.test('Driver comparison - ofetch vs custom', async () => {
 	const customResponse = await customApi.getJson('/mock-success');
 	
 	// Both should return valid responses but with different data
-	assert(ofetchResponse.status === 200, 'Ofetch driver should work');
+	assert(nativeResponse.status === 200, 'Native driver should work');
 	assert(customResponse.status === 200, 'Custom driver should work');
 	
-	assert(ofetchResponse.data.message === 'Success', 'Ofetch should get real server response');
+	assert(nativeResponse.data.message === 'Success', 'Native driver should get real server response');
 	assert(customResponse.data.driver === 'custom', 'Custom driver should get mock response');
 });
 

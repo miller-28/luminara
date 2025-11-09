@@ -562,8 +562,12 @@ suite.test('Stats track debouncing counts', async () => {
 	const promise2 = client.get('/json');
 	const promise3 = client.get('/json');
 	
-	try { await promise1; } catch (e) { /* expected */ }
-	try { await promise2; } catch (e) { /* expected */ }
+	try {
+		await promise1; 
+	} catch (e) { /* expected */ }
+	try {
+		await promise2; 
+	} catch (e) { /* expected */ }
 	await promise3;
 	
 	const stats = client.stats().counters.get();

@@ -9,7 +9,7 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 
 ## ✨ Features
 
-- ⚡ Built on modern native `fetch` (with optional ofetch driver support)
+- ⚡ Built on modern native `fetch` - Zero external dependencies
 - 🌐 **Framework-agnostic** - Works with React, Vue, Angular, Svelte, and vanilla JS
 - 🏗️ **Domain-driven architecture** - Feature-based modular structure
 - 📊 **Comprehensive stats system** - Real-time metrics, analytics, and query interface
@@ -21,10 +21,10 @@ Like light traveling through space, Luminara guides your HTTP requests with grac
 - 🎯 **Response type handling** - JSON, text, form data, binary support
 - ⏱️ **Configurable timeouts** - Request timeouts and abort controller support
 - 🛡️ **Robust error handling** - Comprehensive error categorization and handling
-- 💎 **Ultra-compact footprint** (~12KB minified, ~4KB gzipped)
-- 🪶 **Zero dependencies** (ofetch optional)
+- 💎 **Ultra-compact footprint**
+- 🪶 **Zero dependencies** - Truly standalone
 - 🎯 **Fully promise-based** with TypeScript support
-- 🚗 **Pluggable driver architecture** (native fetch, ofetch, custom)
+- � **Extensible driver architecture** - Custom drivers via forking
 - 🌍 **Universal browser compatibility** - Chrome, Firefox, Safari, Edge
 
 ---
@@ -203,23 +203,15 @@ const api = createLuminara({
 ```js
 import { 
   LuminaraClient, 
-  NativeFetchDriver, 
-  OfetchDriver 
+  NativeFetchDriver
 } from "luminara";
 
-// Use native fetch driver
-const nativeDriver = NativeFetchDriver({
+// Use native fetch driver (default and only driver)
+const driver = NativeFetchDriver({
   timeout: 10000,
   retry: 5
 });
-const api = new LuminaraClient(nativeDriver);
-
-// Or use ofetch driver (optional)
-const ofetchDriver = OfetchDriver({
-  timeout: 10000,
-  retry: 5
-});
-const apiWithOfetch = new LuminaraClient(ofetchDriver);
+const api = new LuminaraClient(driver);
 ```
 
 ### Feature Utilities & Constants
@@ -1200,8 +1192,6 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 ## 🧠 License
 
 MIT © 2025 [Jonathan Miller](mailto:jonathan@miller28.com) • [LinkedIn](https://www.linkedin.com/in/miller28/)
-
-Optional compatibility with [ofetch](https://github.com/unjs/ofetch) (MIT License)
 
 ---
 

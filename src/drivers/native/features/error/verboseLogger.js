@@ -66,6 +66,51 @@ export class ErrorVerboseLogger extends BaseVerboseLogger {
 	}
 
 	/**
+	 * Log timeout error
+	 */
+	logTimeoutError(context, error, timeout) {
+		this.error(context, 'TIMEOUT', `Request timed out after ${timeout}ms`, {
+			timeout: timeout,
+			originalError: error.name,
+			message: error.message
+		});
+	}
+
+	/**
+	 * Log abort error
+	 */
+	logAbortError(context, error, source = 'unknown') {
+		this.error(context, 'ABORT', `Request aborted from ${source}`, {
+			source: source,
+			errorName: error.name,
+			message: error.message
+		});
+	}
+
+	/**
+	 * Log network error
+	 */
+	logNetworkError(context, error) {
+		this.error(context, 'NETWORK', 'Network error occurred', {
+			errorType: error.name,
+			message: error.message,
+			cause: error.cause || 'unknown'
+		});
+	}
+
+	/**
+	 * Log HTTP error (non-2xx response)
+	 */
+	logHttpError(context, response, details) {
+		this.error(context, 'HTTP_ERROR', `HTTP ${response.status} ${response.statusText}`, {
+			status: response.status,
+			statusText: response.statusText,
+			url: response.url,
+			data: details?.data ? (typeof details.data === 'string' ? details.data.substring(0, 100) : 'object') : 'none'
+		});
+	}
+
+	/**
 	 * Check if error is retryable (private method)
 	 */
 	#isRetryableError(error) {

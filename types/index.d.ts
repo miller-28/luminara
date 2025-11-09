@@ -154,9 +154,8 @@ export interface LuminaraClient {
 // Factory function
 export function createLuminara(config?: LuminaraConfig): LuminaraClient;
 
-// Driver exports
+// Driver export
 export function NativeFetchDriver(config?: LuminaraConfig): LuminaraDriver;
-export function OfetchDriver(config?: LuminaraConfig): LuminaraDriver;
 
 // Backoff strategies
 export function createBackoffHandler(backoffType: string, baseDelay: number, backoffMaxDelay?: number, backoffDelays?: number[], initialDelay?: number): (context: any) => number;

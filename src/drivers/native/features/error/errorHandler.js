@@ -114,12 +114,18 @@ function createRequestSnapshot(requestContext) {
  * @param {Response} response - Fetch Response object
  * @param {Object} requestContext - Request context
  * @param {number} attempt - Current retry attempt
+ * @param {any} preParsedData - Optional pre-parsed response data (to avoid re-consuming body)
  * @returns {Promise<LuminaraError>} Normalized HTTP error
  */
-export async function createHttpError(response, requestContext, attempt = 1) {
+export async function createHttpError(response, requestContext, attempt = 1, preParsedData = undefined) {
 
-	// Try to parse JSON error data from server
-	const errorData = await safeParseJson(response);
+	// Use pre-parsed data if provided, otherwise try to parse JSON from response
+	let errorData = preParsedData !== undefined ? preParsedData : await safeParseJson(response);
+	
+	// Only use errorData if it's an object (not string, number, etc.)
+	if (typeof errorData !== 'object' || errorData === null) {
+		errorData = undefined;
+	}
 	
 	// Create meaningful error message
 	const message = errorData?.message || 

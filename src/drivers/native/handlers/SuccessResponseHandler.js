@@ -63,7 +63,7 @@ export async function handleSuccessResponse(result, preparedRequest, currentAtte
 		
 		// Create request context for error
 		const requestContext = createRequestContext(preparedRequest, response);
-		throw await createHttpError(response, requestContext, currentAttempt);
+		throw await createHttpError(response, requestContext, currentAttempt, data);
 	}
 	
 	return {

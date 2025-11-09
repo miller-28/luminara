@@ -51,6 +51,18 @@ export class RetryVerboseLogger extends BaseVerboseLogger {
 		});
 	}
 
+	logRetryPolicyEvaluation(context, error, willRetry, policySource, driverName) {
+		this.log(context, 'POLICY', `Retry policy evaluation: ${willRetry ? 'WILL RETRY' : 'NO RETRY'}`, {
+			errorStatus: error?.status,
+			errorMessage: error?.message,
+			willRetry: willRetry,
+			policySource: policySource,
+			driver: driverName,
+			attempt: context.attempt,
+			maxRetries: context.req?.retry
+		});
+	}
+
 }
 
 // Create singleton instance
