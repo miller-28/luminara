@@ -42,6 +42,25 @@ export interface RateLimitConfig {
 	verbose?: boolean;
 }
 
+export interface DebounceConfig {
+	delay?: number;
+	methods?: string[];
+	excludeMethods?: string[];
+	key?: 'url' | 'method+url' | 'method+url+body' | ((options: any) => string);
+}
+
+export interface DeduplicateConfig {
+	keyStrategy?: 'url' | 'url+method' | 'url+method+body' | 'custom';
+	keyGenerator?: ((req: any) => string) | null;
+	includeHeaders?: string[];
+	excludeMethods?: string[];
+	methods?: string[] | null;
+	cacheTTL?: number;
+	maxCacheSize?: number;
+	condition?: ((req: any) => boolean) | null;
+	disabled?: boolean;
+}
+
 export interface LuminaraConfig {
 	baseURL?: string;
 	timeout?: number;
@@ -59,6 +78,8 @@ export interface LuminaraConfig {
 	verbose?: boolean;
 	statsEnabled?: boolean;
 	rateLimit?: RateLimitConfig;
+	debounce?: DebounceConfig;
+	deduplicate?: DeduplicateConfig;
 	query?: Record<string, any>;
 	shouldRetry?: (error: Error, context: any) => boolean;
 	[key: string]: any;
