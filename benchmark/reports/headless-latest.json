@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-11-12T11:09:58.399Z",
+  "browsers": {
+    "chromium": [
+      {
+        "name": "createLuminara()",
+        "mean": 0.004211794030108345,
+        "hz": 237428.51451220558,
+        "p99": 0.10000002384185791
+      },
+      {
+        "name": "api.use() - 1 plugin",
+        "mean": 0.0039992321502881675,
+        "hz": 250047.99982115175,
+        "p99": 0.10000002384185791
+      },
+      {
+        "name": "api.updateConfig()",
+        "mean": 0.003848758633414291,
+        "hz": 259824.03555218145,
+        "p99": 0.10000002384185791
+      }
+    ],
+    "firefox": [
+      {
+        "name": "createLuminara()",
+        "mean": 0.024968789013732832,
+        "hz": 40050,
+        "p99": 1
+      },
+      {
+        "name": "api.use() - 1 plugin",
+        "mean": 0.030262760495318636,
+        "hz": 33043.9121756487,
+        "p99": 1
+      },
+      {
+        "name": "api.updateConfig()",
+        "mean": 0.030023371486786122,
+        "hz": 33307.385229540916,
+        "p99": 1
+      }
+    ],
+    "webkit": [
+      {
+        "name": "createLuminara()",
+        "mean": 0.006003193699047904,
+        "hz": 166577.9999999997,
+        "p99": 0
+      },
+      {
+        "name": "api.use() - 1 plugin",
+        "mean": 0.005434369949344294,
+        "hz": 184013.9720558883,
+        "p99": 0
+      },
+      {
+        "name": "api.updateConfig()",
+        "mean": 0.005535688584303001,
+        "hz": 180646,
+        "p99": 0
+      }
+    ]
+  },
+  "summary": {
+    "totalBrowsers": 3,
+    "successfulBrowsers": 3,
+    "failedBrowsers": 0,
+    "totalBenchmarks": 3
+  }
+}

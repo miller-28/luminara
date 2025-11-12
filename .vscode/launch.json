@@ -4,10 +4,10 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Run Luminara Sandbox",
+            "name": "Luminara - Run Sandbox",
             "url": "http://localhost:2880/sandbox/",
             "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "serve-sandbox",
+            "preLaunchTask": "serve",
             "userDataDir": true,
             "runtimeArgs": [
                 "--remote-debugging-port=9222",
@@ -19,7 +19,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Lint and Build",
+            "name": "Luminara - Lint and Build",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
@@ -32,7 +32,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Lint Only",
+            "name": "Luminara - Lint Only",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
@@ -44,7 +44,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Build Only",
+            "name": "Luminara - Build Only",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
@@ -56,7 +56,19 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run CLI Tests",
+            "name": "Luminara - Run Dev",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Luminara - Run CLI Tests",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "test"
@@ -68,7 +80,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Build and Test",
+            "name": "Luminara - Build and Test",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
@@ -77,6 +89,48 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "postDebugTask": "test-cli"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Luminara - Run CLI Benchmarks",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "benchmark"
+            ],
+            "cwd": "${workspaceFolder}/benchmark",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Luminara - Run Headless Benchmarks",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "benchmark:headless:full"
+            ],
+            "cwd": "${workspaceFolder}/benchmark",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "preLaunchTask": "serve"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Luminara - Run Browser Benchmarks",
+            "url": "http://localhost:2880/benchmark/browser/",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "serve",
+            "userDataDir": true,
+            "runtimeArgs": [
+                "--remote-debugging-port=9222",
+                "--user-data-dir=${workspaceFolder}/.vscode/chrome-debug-profile"
+            ],
+            "sourceMaps": true,
+            "trace": true
         }
     ]
 }

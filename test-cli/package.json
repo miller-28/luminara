@@ -2,6 +2,11 @@
 	"name": "@luminara/test-env",
 	"version": "1.0.0",
 	"description": "Testing environment for Luminara HTTP client - simulates real React application usage",
+	"author": {
+		"name": "Jonathan Miller",
+		"email": "jonathan@miller28.com",
+		"url": "https://www.linkedin.com/in/miller28/"
+	},
 	"type": "module",
 	"private": true,
 	"scripts": {

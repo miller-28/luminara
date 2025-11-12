@@ -1,7 +1,12 @@
 {
   "name": "luminara",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Lightweight, universal HTTP client with native fetch for browsers and Node.js. Zero dependencies, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Works across React, Vue, Angular, Svelte, vanilla JavaScript, and Node.js 18+.",
+  "author": {
+		"name": "Jonathan Miller",
+		"email": "jonathan@miller28.com",
+		"url": "https://www.linkedin.com/in/miller28/"
+	},
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -34,12 +39,6 @@
     "lint:report": "eslint . --output-file eslint-report.txt --no-color"
   },
   "sideEffects": false,
-  "license": "MIT",
-  "author": {
-    "name": "Jonathan Miller",
-    "email": "jonathan@miller28.com",
-    "url": "https://www.linkedin.com/in/miller28/"
-  },
   "keywords": [
     "fetch",
     "native-fetch",
@@ -128,5 +127,6 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
-  }
+  },
+  "license": "MIT"
 }

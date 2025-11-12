@@ -24,3 +24,12 @@ export {
 // Export stats system components
 export { StatsHub } from './core/stats/StatsHub.js';
 export { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from './core/stats/query/schemas.js';
+
+// Export orchestration components (for benchmarking and advanced usage)
+export { PluginPipeline } from './core/orchestration/PluginPipeline.js';
+export { RetryOrchestrator } from './core/orchestration/RetryOrchestrator.js';
+export { ContextBuilder } from './core/orchestration/ContextBuilder.js';
+export { SignalManager } from './core/orchestration/SignalManager.js';
+
+// Export config manager (for benchmarking and advanced usage)
+export { ConfigManager } from './core/config/ConfigManager.js';

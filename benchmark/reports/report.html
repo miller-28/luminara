@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Luminara Benchmark Report</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+	<style>
+		:root {
+			--primary: #6366f1;
+			--secondary: #8b5cf6;
+			--success: #10b981;
+			--bg-dark: #1e1e1e;
+			--bg-light: #2d2d2d;
+			--text: #e4e4e7;
+			--text-dim: #a1a1aa;
+			--border: #3f3f46;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+			color: var(--text);
+			padding: 40px;
+			line-height: 1.6;
+		}
+
+		.container {
+			max-width: 1400px;
+			margin: 0 auto;
+		}
+
+		header {
+			text-align: center;
+			margin-bottom: 50px;
+		}
+
+		h1 {
+			font-size: 3rem;
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			margin-bottom: 10px;
+		}
+
+		.subtitle {
+			color: var(--text-dim);
+			font-size: 1.2rem;
+		}
+
+		.summary-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 20px;
+			margin-bottom: 50px;
+		}
+
+		.summary-card {
+			background: var(--bg-light);
+			padding: 25px;
+			border-radius: 12px;
+			border: 1px solid var(--border);
+			text-align: center;
+		}
+
+		.summary-label {
+			color: var(--text-dim);
+			font-size: 0.9rem;
+			margin-bottom: 10px;
+		}
+
+		.summary-value {
+			font-size: 2rem;
+			font-weight: 700;
+			color: var(--primary);
+		}
+
+		.section {
+			background: var(--bg-light);
+			padding: 30px;
+			border-radius: 12px;
+			margin-bottom: 30px;
+			border: 1px solid var(--border);
+		}
+
+		h2 {
+			font-size: 1.8rem;
+			margin-bottom: 20px;
+			color: var(--text);
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		thead {
+			background: var(--bg-dark);
+		}
+
+		th {
+			padding: 15px;
+			text-align: left;
+			font-weight: 600;
+			color: var(--text-dim);
+			text-transform: uppercase;
+			font-size: 0.85rem;
+		}
+
+		td {
+			padding: 15px;
+			border-bottom: 1px solid var(--border);
+		}
+
+		tbody tr:hover {
+			background: rgba(99, 102, 241, 0.1);
+		}
+
+		.chart-container {
+			height: 400px;
+			margin-top: 20px;
+		}
+
+		.metric-highlight {
+			color: var(--success);
+			font-weight: 600;
+		}
+
+		.category-badge {
+			display: inline-block;
+			padding: 4px 12px;
+			border-radius: 20px;
+			background: rgba(99, 102, 241, 0.2);
+			color: var(--primary);
+			font-size: 0.85rem;
+			font-weight: 600;
+		}
+
+		footer {
+			text-align: center;
+			margin-top: 50px;
+			color: var(--text-dim);
+			font-size: 0.9rem;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<header>
+			<h1>🌟 Luminara Benchmark Report</h1>
+			<p class="subtitle">Generated on 12/11/2025, 13:04:28</p>
+		</header>
+
+		<div class="summary-grid">
+			<div class="summary-card">
+				<div class="summary-label">Total Benchmarks</div>
+				<div class="summary-value">73</div>
+			</div>
+			<div class="summary-card">
+				<div class="summary-label">Duration</div>
+				<div class="summary-value">N/A</div>
+			</div>
+			<div class="summary-card">
+				<div class="summary-label">Node.js</div>
+				<div class="summary-value">v22.14.0</div>
+			</div>
+			<div class="summary-card">
+				<div class="summary-label">Luminara</div>
+				<div class="summary-value">0.10.0</div>
+			</div>
+		</div>
+
+		<div class="section">
+			<h2>📊 Benchmark Results</h2>
+			<table>
+				<thead>
+					<tr>
+						<th>Benchmark</th>
+						<th>Category</th>
+						<th>Mean (ms)</th>
+						<th>Ops/sec</th>
+						<th>P99 (ms)</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+						<tr>
+							<td>createLuminara() - cold start</td>
+							<td><span class="category-badge">core</span></td>
+							<td>6.149</td>
+							<td class="metric-highlight">162,625</td>
+							<td>11.300</td>
+						</tr>
+					
+						<tr>
+							<td>createLuminara() - warm start</td>
+							<td><span class="category-badge">core</span></td>
+							<td>6.344</td>
+							<td class="metric-highlight">157,617</td>
+							<td>12.700</td>
+						</tr>
+					
+						<tr>
+							<td>api.use() - register 1 plugin</td>
+							<td><span class="category-badge">core</span></td>
+							<td>0.154</td>
+							<td class="metric-highlight">6,493,234</td>
+							<td>1.200</td>
+						</tr>
+					
+						<tr>
+							<td>api.use() - register 10 plugins</td>
+							<td><span class="category-badge">core</span></td>
+							<td>1.243</td>
+							<td class="metric-highlight">804,579</td>
+							<td>3.200</td>
+						</tr>
+					
+						<tr>
+							<td>api.updateConfig() - simple</td>
+							<td><span class="category-badge">core</span></td>
+							<td>0.619</td>
+							<td class="metric-highlight">1,615,589</td>
+							<td>0.300</td>
+						</tr>
+					
+						<tr>
+							<td>api.updateConfig() - complex</td>
+							<td><span class="category-badge">core</span></td>
+							<td>0.785</td>
+							<td class="metric-highlight">1,274,295</td>
+							<td>0.400</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - empty (onRequest)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>30.352</td>
+							<td class="metric-highlight">32,946</td>
+							<td>59.100</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - empty (onResponse)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>26.342</td>
+							<td class="metric-highlight">37,962</td>
+							<td>38.000</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 1 plugin (onRequest)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>38.754</td>
+							<td class="metric-highlight">25,804</td>
+							<td>50.500</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 1 plugin (onResponse)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>42.414</td>
+							<td class="metric-highlight">23,577</td>
+							<td>52.700</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 5 plugins (onRequest L→R)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>72.347</td>
+							<td class="metric-highlight">13,822</td>
+							<td>100.900</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 5 plugins (onResponse R→L)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>68.081</td>
+							<td class="metric-highlight">14,688</td>
+							<td>98.600</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 10 plugins (onRequest)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>109.007</td>
+							<td class="metric-highlight">9,174</td>
+							<td>161.400</td>
+						</tr>
+					
+						<tr>
+							<td>PluginPipeline - 10 plugins (onResponse)</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>103.441</td>
+							<td class="metric-highlight">9,667</td>
+							<td>144.700</td>
+						</tr>
+					
+						<tr>
+							<td>ContextBuilder - simple request</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>0.628</td>
+							<td class="metric-highlight">1,592,242</td>
+							<td>0.900</td>
+						</tr>
+					
+						<tr>
+							<td>ContextBuilder - complex request</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>0.997</td>
+							<td class="metric-highlight">1,003,415</td>
+							<td>0.900</td>
+						</tr>
+					
+						<tr>
+							<td>SignalManager - create AbortController</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>0.091</td>
+							<td class="metric-highlight">10,943,479</td>
+							<td>0.200</td>
+						</tr>
+					
+						<tr>
+							<td>SignalManager - merge user signal</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>0.637</td>
+							<td class="metric-highlight">1,569,511</td>
+							<td>1.100</td>
+						</tr>
+					
+						<tr>
+							<td>Full request with __benchmark flag</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>2115.931</td>
+							<td class="metric-highlight">473</td>
+							<td>7981.400</td>
+						</tr>
+					
+						<tr>
+							<td>Full request without __benchmark flag</td>
+							<td><span class="category-badge">orchestration</span></td>
+							<td>2048.104</td>
+							<td class="metric-highlight">488</td>
+							<td>7809.900</td>
+						</tr>
+					
+						<tr>
+							<td>Pre-Flight - URL building (simple path)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>1.502</td>
+							<td class="metric-highlight">665,584</td>
+							<td>2.400</td>
+						</tr>
+					
+						<tr>
+							<td>Pre-Flight - URL building (10 query params)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>5.213</td>
+							<td class="metric-highlight">191,843</td>
+							<td>6.100</td>
+						</tr>
+					
+						<tr>
+							<td>Pre-Flight - Headers preparation</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>1.279</td>
+							<td class="metric-highlight">782,008</td>
+							<td>1.700</td>
+						</tr>
+					
+						<tr>
+							<td>In-Flight - Native fetch (GET JSON 1KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2056.584</td>
+							<td class="metric-highlight">486</td>
+							<td>7293.700</td>
+						</tr>
+					
+						<tr>
+							<td>In-Flight - Native fetch (GET JSON 10KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2170.196</td>
+							<td class="metric-highlight">461</td>
+							<td>7507.500</td>
+						</tr>
+					
+						<tr>
+							<td>In-Flight - Native fetch (GET JSON 100KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>3224.535</td>
+							<td class="metric-highlight">310</td>
+							<td>7486.200</td>
+						</tr>
+					
+						<tr>
+							<td>In-Flight - Request with timeout (no timeout)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2240.874</td>
+							<td class="metric-highlight">446</td>
+							<td>6708.000</td>
+						</tr>
+					
+						<tr>
+							<td>Post-Flight - JSON parse (1KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>1.369</td>
+							<td class="metric-highlight">730,568</td>
+							<td>1.900</td>
+						</tr>
+					
+						<tr>
+							<td>Post-Flight - JSON parse (100KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>63.639</td>
+							<td class="metric-highlight">15,714</td>
+							<td>91.400</td>
+						</tr>
+					
+						<tr>
+							<td>Post-Flight - Text response (1KB)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>0.089</td>
+							<td class="metric-highlight">11,272,507</td>
+							<td>0.100</td>
+						</tr>
+					
+						<tr>
+							<td>Typed Request - getJson()</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>NaN</td>
+							<td class="metric-highlight">NaN</td>
+							<td>NaN</td>
+						</tr>
+					
+						<tr>
+							<td>Typed Request - getText()</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2148.362</td>
+							<td class="metric-highlight">465</td>
+							<td>5103.700</td>
+						</tr>
+					
+						<tr>
+							<td>Typed Request - getBlob()</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>13244.332</td>
+							<td class="metric-highlight">76</td>
+							<td>36085.700</td>
+						</tr>
+					
+						<tr>
+							<td>HTTP Verb - GET</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2767.342</td>
+							<td class="metric-highlight">361</td>
+							<td>8644.600</td>
+						</tr>
+					
+						<tr>
+							<td>HTTP Verb - POST with JSON body</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>3217.513</td>
+							<td class="metric-highlight">311</td>
+							<td>9665.700</td>
+						</tr>
+					
+						<tr>
+							<td>HTTP Verb - PUT with JSON body</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>3555.789</td>
+							<td class="metric-highlight">281</td>
+							<td>11708.000</td>
+						</tr>
+					
+						<tr>
+							<td>HTTP Verb - PATCH with JSON body</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>3384.194</td>
+							<td class="metric-highlight">295</td>
+							<td>10908.200</td>
+						</tr>
+					
+						<tr>
+							<td>HTTP Verb - DELETE</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2627.164</td>
+							<td class="metric-highlight">381</td>
+							<td>8625.100</td>
+						</tr>
+					
+						<tr>
+							<td>Config - Minimal (no options)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2574.608</td>
+							<td class="metric-highlight">388</td>
+							<td>8831.300</td>
+						</tr>
+					
+						<tr>
+							<td>Config - With headers</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>2552.302</td>
+							<td class="metric-highlight">392</td>
+							<td>8783.000</td>
+						</tr>
+					
+						<tr>
+							<td>Config - With query params</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>NaN</td>
+							<td class="metric-highlight">NaN</td>
+							<td>NaN</td>
+						</tr>
+					
+						<tr>
+							<td>Config - Complex (all options)</td>
+							<td><span class="category-badge">driver</span></td>
+							<td>3435.293</td>
+							<td class="metric-highlight">291</td>
+							<td>10728.100</td>
+						</tr>
+					
+						<tr>
+							<td>Retry - Linear backoff (success first try)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2243.786</td>
+							<td class="metric-highlight">446</td>
+							<td>7330.100</td>
+						</tr>
+					
+						<tr>
+							<td>Retry - Exponential backoff (success first try)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2355.528</td>
+							<td class="metric-highlight">425</td>
+							<td>8366.200</td>
+						</tr>
+					
+						<tr>
+							<td>Retry - Fibonacci backoff (success first try)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2451.078</td>
+							<td class="metric-highlight">408</td>
+							<td>3560.700</td>
+						</tr>
+					
+						<tr>
+							<td>Retry - Custom backoff handler (success first try)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2452.227</td>
+							<td class="metric-highlight">408</td>
+							<td>3947.400</td>
+						</tr>
+					
+						<tr>
+							<td>Rate Limit - tokens available</td>
+							<td><span class="category-badge">features</span></td>
+							<td>5059.826</td>
+							<td class="metric-highlight">198</td>
+							<td>39359.100</td>
+						</tr>
+					
+						<tr>
+							<td>Rate Limit - endpoint scoped</td>
+							<td><span class="category-badge">features</span></td>
+							<td>5084.754</td>
+							<td class="metric-highlight">197</td>
+							<td>34121.000</td>
+						</tr>
+					
+						<tr>
+							<td>Stats - collection enabled</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2558.101</td>
+							<td class="metric-highlight">391</td>
+							<td>8685.800</td>
+						</tr>
+					
+						<tr>
+							<td>Stats - query simple</td>
+							<td><span class="category-badge">features</span></td>
+							<td>57.568</td>
+							<td class="metric-highlight">17,371</td>
+							<td>77.000</td>
+						</tr>
+					
+						<tr>
+							<td>Stats - query complex with groupBy</td>
+							<td><span class="category-badge">features</span></td>
+							<td>82.177</td>
+							<td class="metric-highlight">12,169</td>
+							<td>161.800</td>
+						</tr>
+					
+						<tr>
+							<td>Stats - reset all</td>
+							<td><span class="category-badge">features</span></td>
+							<td>1.256</td>
+							<td class="metric-highlight">796,481</td>
+							<td>2.500</td>
+						</tr>
+					
+						<tr>
+							<td>Deduplication - cache miss (first request)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>NaN</td>
+							<td class="metric-highlight">NaN</td>
+							<td>NaN</td>
+						</tr>
+					
+						<tr>
+							<td>Deduplication - key generation (url)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>0.088</td>
+							<td class="metric-highlight">11,333,383</td>
+							<td>0.200</td>
+						</tr>
+					
+						<tr>
+							<td>Deduplication - key generation (url+method)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>0.087</td>
+							<td class="metric-highlight">11,443,090</td>
+							<td>0.100</td>
+						</tr>
+					
+						<tr>
+							<td>Deduplication - key generation (url+method+body)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>0.345</td>
+							<td class="metric-highlight">2,898,071</td>
+							<td>0.600</td>
+						</tr>
+					
+						<tr>
+							<td>Debouncing - first request</td>
+							<td><span class="category-badge">features</span></td>
+							<td>NaN</td>
+							<td class="metric-highlight">NaN</td>
+							<td>NaN</td>
+						</tr>
+					
+						<tr>
+							<td>Debouncing - key generation (url)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>0.090</td>
+							<td class="metric-highlight">11,132,540</td>
+							<td>0.100</td>
+						</tr>
+					
+						<tr>
+							<td>Debouncing - key generation (method+url)</td>
+							<td><span class="category-badge">features</span></td>
+							<td>0.091</td>
+							<td class="metric-highlight">10,982,611</td>
+							<td>0.200</td>
+						</tr>
+					
+						<tr>
+							<td>All features OFF - baseline</td>
+							<td><span class="category-badge">features</span></td>
+							<td>2260.305</td>
+							<td class="metric-highlight">442</td>
+							<td>8241.400</td>
+						</tr>
+					
+						<tr>
+							<td>All features ON - full overhead</td>
+							<td><span class="category-badge">features</span></td>
+							<td>5065.316</td>
+							<td class="metric-highlight">197</td>
+							<td>30815.000</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - Bare minimum GET</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>2306.073</td>
+							<td class="metric-highlight">434</td>
+							<td>7877.000</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - GET with retry (success first attempt)</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>2457.305</td>
+							<td class="metric-highlight">407</td>
+							<td>7573.500</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - GET with stats collection</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>2767.846</td>
+							<td class="metric-highlight">361</td>
+							<td>8921.000</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - GET with 1 plugin</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>3210.761</td>
+							<td class="metric-highlight">311</td>
+							<td>8545.100</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - GET with 3 plugins</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>2691.987</td>
+							<td class="metric-highlight">371</td>
+							<td>8810.100</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - ALL features enabled</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>2633.319</td>
+							<td class="metric-highlight">380</td>
+							<td>8393.100</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - 10 concurrent requests</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>25458.563</td>
+							<td class="metric-highlight">39</td>
+							<td>39104.800</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - 50 concurrent requests</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>128166.650</td>
+							<td class="metric-highlight">8</td>
+							<td>159475.000</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - 10 sequential requests</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>25694.169</td>
+							<td class="metric-highlight">39</td>
+							<td>35660.000</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - Mixed HTTP methods (GET/POST/PUT)</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>9306.826</td>
+							<td class="metric-highlight">107</td>
+							<td>15899.300</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - Large payload (100KB)</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>3663.479</td>
+							<td class="metric-highlight">273</td>
+							<td>12604.300</td>
+						</tr>
+					
+						<tr>
+							<td>Scenario - Very large payload (1MB blob)</td>
+							<td><span class="category-badge">integrated</span></td>
+							<td>11965.630</td>
+							<td class="metric-highlight">84</td>
+							<td>32758.800</td>
+						</tr>
+					
+				</tbody>
+			</table>
+		</div>
+
+		<div class="section">
+			<h2>⚡ Operations per Second</h2>
+			<div class="chart-container">
+				<canvas id="opsChart"></canvas>
+			</div>
+		</div>
+
+		
+		<div class="section">
+			<h2>📈 Performance Trends</h2>
+			<div class="chart-container">
+				<canvas id="trendChart"></canvas>
+			</div>
+		</div>
+		
+
+		<footer>
+			<p>Generated by Luminara Benchmark Suite · Powered by Tinybench</p>
+		</footer>
+	</div>
+
+	<script>
+		const allBenchmarks = [{"category":"core","name":"createLuminara() - cold start","result":{"mean":0.006149128362797596,"p75":0.005499999999756255,"p99":0.011299999999891952,"p995":0.016200000000026193,"min":0.004599999999982174,"max":0.6563000000001011,"sd":0.013337726169135793,"hz":162624.67475065717,"sampleCount":162625}},{"category":"core","name":"createLuminara() - warm start","result":{"mean":0.00634449456594111,"p75":0.005599999999958527,"p99":0.012700000000222644,"p995":0.01679999999987558,"min":0.0046999999995023245,"max":7.2611000000001695,"sd":0.024352187156285565,"hz":157616.96847661576,"sampleCount":157617}},{"category":"core","name":"api.use() - register 1 plugin","result":{"mean":0.00015400646008736427,"p75":0.00010000000474974513,"p99":0.00120000000060827,"p995":0.0013000000035390258,"min":0,"max":26.906699999999546,"sd":0.013999848396233626,"hz":6493234.111301067,"sampleCount":6602699}},{"category":"core","name":"api.use() - register 10 plugins","result":{"mean":0.0012428855467031816,"p75":0.0013000000035390258,"p99":0.0031999999991967343,"p995":0.009299999997892883,"min":0.00019999999494757503,"max":62.11239999999816,"sd":0.11004963052466253,"hz":804579.3135599266,"sampleCount":825341}},{"category":"core","name":"api.updateConfig() - simple","result":{"mean":0.0006189691353396415,"p75":0.00020000000949949026,"p99":0.00029999999969732016,"p995":0.00039999998989515007,"min":0.0000999999901978299,"max":9.401400000002468,"sd":0.05766957968019151,"hz":1615589.4420345833,"sampleCount":1618777}},{"category":"core","name":"api.updateConfig() - complex","result":{"mean":0.000784747880193504,"p75":0.00029999999969732016,"p99":0.00039999998989515007,"p995":0.0005000000091968104,"min":0.00019999999494757503,"max":9.838900000002468,"sd":0.059470176725578416,"hz":1274294.6177228524,"sampleCount":1274295}},{"category":"orchestration","name":"PluginPipeline - empty (onRequest)","result":{"mean":0.030352317358196382,"p75":0.02650000000721775,"p99":0.05909999999857973,"p995":0.06780000000435393,"min":0.014500000004773028,"max":17.041400000001886,"sd":0.1872282554296684,"hz":32946.41355382239,"sampleCount":32947}},{"category":"orchestration","name":"PluginPipeline - empty (onResponse)","result":{"mean":0.026342142142100095,"p75":0.025200000003678724,"p99":0.03800000000046566,"p995":0.04589999999734573,"min":0.01780000000144355,"max":12.287299999996321,"sd":0.16133709865545243,"hz":37961.98481526667,"sampleCount":37962}},{"category":"orchestration","name":"PluginPipeline - 1 plugin (onRequest)","result":{"mean":0.03875422415115717,"p75":0.0390999999945052,"p99":0.05049999999755528,"p995":0.05910000001313165,"min":0.0268999999971129,"max":13.30130000000645,"sd":0.1851891224932139,"hz":25803.638749148868,"sampleCount":25804}},{"category":"orchestration","name":"PluginPipeline - 1 plugin (onResponse)","result":{"mean":0.042413644074948326,"p75":0.03949999999895226,"p99":0.052700000000186265,"p995":0.0650000000023283,"min":0.03290000000561122,"max":12.448499999998603,"sd":0.18188560524487515,"hz":23577.318615512486,"sampleCount":23578}},{"category":"orchestration","name":"PluginPipeline - 5 plugins (onRequest L→R)","result":{"mean":0.0723473486218867,"p75":0.0669999999954598,"p99":0.10090000000491273,"p995":0.13079999999899883,"min":0.05199999999604188,"max":12.557100000005448,"sd":0.25714700513248595,"hz":13822.206605336156,"sampleCount":13823}},{"category":"orchestration","name":"PluginPipeline - 5 plugins (onResponse R→L)","result":{"mean":0.06808055687928279,"p75":0.0625,"p99":0.098599999997532,"p995":0.1387000000104308,"min":0.04919999999401625,"max":13.729699999996228,"sd":0.25031365941837663,"hz":14688.48149660633,"sampleCount":14689}},{"category":"orchestration","name":"PluginPipeline - 10 plugins (onRequest)","result":{"mean":0.10900699346408593,"p75":0.10000000000582077,"p99":0.16139999999722932,"p995":0.3962000000028638,"min":0.09059999999590218,"max":12.864100000006147,"sd":0.3091456581995063,"hz":9173.723338488973,"sampleCount":9180}},{"category":"orchestration","name":"PluginPipeline - 10 plugins (onResponse)","result":{"mean":0.10344128051301832,"p75":0.09470000000146683,"p99":0.14470000000437722,"p995":0.37159999999857973,"min":0.08469999999215361,"max":13.9658999999956,"sd":0.3255495490162644,"hz":9667.32038737811,"sampleCount":9668}},{"category":"orchestration","name":"ContextBuilder - simple request","result":{"mean":0.0006280453599364694,"p75":0.0004000000044470653,"p99":0.0008999999990919605,"p995":0.0010000000038417056,"min":0.00019999999494757503,"max":19.115200000000186,"sd":0.04636413119883384,"hz":1592241.68155809,"sampleCount":1592242}},{"category":"orchestration","name":"ContextBuilder - complex request","result":{"mean":0.00099659672219599,"p75":0.0004000000044470653,"p99":0.0008999999990919605,"p995":0.0010000000038417056,"min":0.00029999999969732016,"max":8.523399999990943,"sd":0.06769493642280064,"hz":1003414.8996562129,"sampleCount":1003415}},{"category":"orchestration","name":"SignalManager - create AbortController","result":{"mean":0.00009137861995868978,"p75":0.00010000000474974513,"p99":0.0001999999803956598,"p995":0.00020000000949949026,"min":0,"max":4.69539999999688,"sd":0.0014218658345200592,"hz":10943478.906248285,"sampleCount":10943480}},{"category":"orchestration","name":"SignalManager - merge user signal","result":{"mean":0.0006371411860089152,"p75":0.0004999999946448952,"p99":0.0010999999940395355,"p995":0.0014999999839346856,"min":0.00029999998514540493,"max":9.04729999997653,"sd":0.032283190475758304,"hz":1569510.8430582723,"sampleCount":1569511}},{"category":"orchestration","name":"Full request with __benchmark flag","result":{"mean":2.115930655390939,"p75":1.949800000002142,"p99":7.981399999989662,"p995":8.257299999997485,"min":1.705599999986589,"max":45.15669999999227,"sd":2.1107958179144175,"hz":472.605280070126,"sampleCount":473}},{"category":"orchestration","name":"Full request without __benchmark flag","result":{"mean":2.048104294478262,"p75":1.9679999999934807,"p99":7.809899999992922,"p995":8.060199999978067,"min":1.8264000000199303,"max":8.822299999999814,"sd":0.7279603969373173,"hz":488.2563855249089,"sampleCount":489}},{"category":"driver","name":"Pre-Flight - URL building (simple path)","result":{"mean":0.0015024392076128951,"p75":0.001500000013038516,"p99":0.0023999999975785613,"p995":0.0026000000070780516,"min":0.0012999999744351953,"max":0.25689999997848645,"sd":0.0004444945188680991,"hz":665584.334416312,"sampleCount":665585}},{"category":"driver","name":"Pre-Flight - URL building (10 query params)","result":{"mean":0.0052126050989577824,"p75":0.004300000000512227,"p99":0.006099999998696148,"p995":0.007000000012340024,"min":0.0039000000106170774,"max":4.397099999972852,"sd":0.0577879472303578,"hz":191842.65468334476,"sampleCount":191843}},{"category":"driver","name":"Pre-Flight - Headers preparation","result":{"mean":0.0012787600955356494,"p75":0.0010999999940395355,"p99":0.0017000000225380063,"p995":0.0021000000124331564,"min":0.0008999999845400453,"max":6.374299999995856,"sd":0.0307568830340215,"hz":782007.5114098068,"sampleCount":782028}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 1KB)","result":{"mean":2.0565843942505357,"p75":2.0324000000255182,"p99":7.293699999980163,"p995":8.37489999999525,"min":1.6808000000019092,"max":8.771000000007916,"sd":0.6930290709722415,"hz":486.24311396879085,"sampleCount":487}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 10KB)","result":{"mean":2.170195661605651,"p75":2.113599999982398,"p99":7.507500000006985,"p995":7.761800000007497,"min":1.9213999999919906,"max":8.27379999999539,"sd":0.672200240112719,"hz":460.78794538743824,"sampleCount":461}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 100KB)","result":{"mean":3.2245350482326542,"p75":3.1141000000061467,"p99":7.486199999984819,"p995":7.590500000020256,"min":2.8061999999918044,"max":7.722700000012992,"sd":0.8223898244632473,"hz":310.1222300399846,"sampleCount":311}},{"category":"driver","name":"In-Flight - Request with timeout (no timeout)","result":{"mean":2.2408736017903768,"p75":2.2061000000103377,"p99":6.708000000013271,"p995":8.345799999980954,"min":1.9824999999837019,"max":8.407399999996414,"sd":0.6433041828884657,"hz":446.25453180448744,"sampleCount":447}},{"category":"driver","name":"Post-Flight - JSON parse (1KB)","result":{"mean":0.0013687983870159736,"p75":0.0013999999791849405,"p99":0.0019000000029336661,"p995":0.0022000000171829015,"min":0.0011999999987892807,"max":6.185399999987567,"sd":0.012335546251171448,"hz":730567.780825658,"sampleCount":730568}},{"category":"driver","name":"Post-Flight - JSON parse (100KB)","result":{"mean":0.06363871070343188,"p75":0.04409999999916181,"p99":0.09139999997569248,"p995":2.2648000000044703,"min":0.04089999996358529,"max":4.8004000000073574,"sd":0.21277440458172978,"hz":15713.706153793471,"sampleCount":15714}},{"category":"driver","name":"Post-Flight - Text response (1KB)","result":{"mean":0.00008871141186911203,"p75":0.00010000000474974513,"p99":0.00010000000474974513,"p995":0.00020000000949949026,"min":0,"max":0.04070000001229346,"sd":0.00007988308411017124,"hz":11272506.872908702,"sampleCount":11272508}},{"category":"driver","name":"Typed Request - getJson()","result":{"sampleCount":0}},{"category":"driver","name":"Typed Request - getText()","result":{"mean":2.1483624463516455,"p75":2.106099999975413,"p99":5.1036999999778345,"p995":8.070100000011735,"min":1.9297999999835156,"max":8.761999999987893,"sd":0.6211723948781186,"hz":465.47080624044725,"sampleCount":466}},{"category":"driver","name":"Typed Request - getBlob()","result":{"mean":13.244331578950025,"p75":13.054300000017975,"p99":36.085699999995995,"p995":36.085699999995995,"min":9.926600000006147,"max":36.085699999995995,"sd":5.056819602033618,"hz":75.50399912890714,"sampleCount":76}},{"category":"driver","name":"HTTP Verb - GET","result":{"mean":2.767341988949743,"p75":2.582300000009127,"p99":8.644599999999627,"p995":11.881900000036694,"min":2.211399999971036,"max":13.864499999966938,"sd":1.1336338854851975,"hz":361.35757849701776,"sampleCount":362}},{"category":"driver","name":"HTTP Verb - POST with JSON body","result":{"mean":3.217512861736436,"p75":3.0740000000223517,"p99":9.665700000012293,"p995":10.318700000003446,"min":2.6675999999861233,"max":12.788899999985006,"sd":1.08880831372065,"hz":310.7990684022681,"sampleCount":311}},{"category":"driver","name":"HTTP Verb - PUT with JSON body","result":{"mean":3.5557890070946176,"p75":3.4446999999927357,"p99":11.707999999984168,"p995":13.682200000039302,"min":2.841100000019651,"max":13.79660000000149,"sd":1.359144872352199,"hz":281.23153483088277,"sampleCount":282}},{"category":"driver","name":"HTTP Verb - PATCH with JSON body","result":{"mean":3.3841939189194425,"p75":3.35820000001695,"p99":10.908200000005309,"p995":11.009799999999814,"min":2.85920000000624,"max":12.020099999965169,"sd":0.9913142097570198,"hz":295.4913412052036,"sampleCount":296}},{"category":"driver","name":"HTTP Verb - DELETE","result":{"mean":2.6271640419924274,"p75":2.6005000000004657,"p99":8.625099999946542,"p995":9.307200000039302,"min":2.1881999999750406,"max":9.314699999988079,"sd":0.8002459853355839,"hz":380.6385836651469,"sampleCount":381}},{"category":"driver","name":"Config - Minimal (no options)","result":{"mean":2.574608226221146,"p75":2.5315999999875203,"p99":8.831300000019837,"p995":9.06369999999879,"min":2.2208999999566004,"max":9.324899999948684,"sd":0.8309041958078808,"hz":388.4086090518477,"sampleCount":389}},{"category":"driver","name":"Config - With headers","result":{"mean":2.552301785715307,"p75":2.511400000017602,"p99":8.782999999995809,"p995":9.143700000015087,"min":2.236800000013318,"max":9.554499999969266,"sd":0.7335220417966973,"hz":391.80319725386255,"sampleCount":392}},{"category":"driver","name":"Config - With query params","result":{"sampleCount":0}},{"category":"driver","name":"Config - Complex (all options)","result":{"mean":3.4352931506861615,"p75":3.3711999999941327,"p99":10.728100000007544,"p995":11.311199999996461,"min":3.0218999999924563,"max":11.771699999982957,"sd":1.0337214305106783,"hz":291.09597234817096,"sampleCount":292}},{"category":"features","name":"Retry - Linear backoff (success first try)","result":{"mean":2.243786098655692,"p75":2.223999999987427,"p99":7.330100000021048,"p995":8.3460999999661,"min":1.8918999999877997,"max":9.357699999993201,"sd":0.7138361637696011,"hz":445.6752809900751,"sampleCount":446}},{"category":"features","name":"Retry - Exponential backoff (success first try)","result":{"mean":2.3555282352935962,"p75":2.319100000022445,"p99":8.366199999989476,"p995":8.440900000045076,"min":2.0517000000108965,"max":8.710299999976996,"sd":0.7078001540128149,"hz":424.5332257184167,"sampleCount":425}},{"category":"features","name":"Retry - Fibonacci backoff (success first try)","result":{"mean":2.4510775061128127,"p75":2.4226999999955297,"p99":3.5606999999727122,"p995":8.770599999988917,"min":2.191999999980908,"max":10.488100000016857,"sd":0.6977117414457301,"hz":407.9838346629477,"sampleCount":409}},{"category":"features","name":"Retry - Custom backoff handler (success first try)","result":{"mean":2.4522274509802755,"p75":2.4048999999649823,"p99":3.947399999946356,"p995":8.607099999964703,"min":2.210800000000745,"max":9.59150000003865,"sd":0.6815128258324681,"hz":407.7925151683018,"sampleCount":408}},{"category":"features","name":"Rate Limit - tokens available","result":{"mean":5.059826262627148,"p75":2.977599999983795,"p99":39.35910000000149,"p995":42.69309999997495,"min":2.337200000009034,"max":42.69309999997495,"sd":7.039514613044432,"hz":197.6352443929138,"sampleCount":198}},{"category":"features","name":"Rate Limit - endpoint scoped","result":{"mean":5.084753500001679,"p75":3.0125000000116415,"p99":34.12099999998463,"p995":35.06750000000466,"min":2.3403000000398606,"max":35.572899999970105,"sd":7.171166495705434,"hz":196.66636740594598,"sampleCount":200}},{"category":"features","name":"Stats - collection enabled","result":{"mean":2.5581012787720154,"p75":2.5362000000313856,"p99":8.68580000003567,"p995":9.885799999989104,"min":2.2162000000244007,"max":10.525899999949615,"sd":0.7656836817410576,"hz":390.91493690978393,"sampleCount":391}},{"category":"features","name":"Stats - query simple","result":{"mean":0.057567970772554024,"p75":0.045400000002700835,"p99":0.07699999999022111,"p995":2.2331999999587424,"min":0.04199999995762482,"max":4.268600000010338,"sd":0.171402093935243,"hz":17370.770353377782,"sampleCount":17381}},{"category":"features","name":"Stats - query complex with groupBy","result":{"mean":0.08217662913946418,"p75":0.06280000001424924,"p99":0.16180000000167638,"p995":2.2942000000039116,"min":0.05849999998463318,"max":3.1317999999737367,"sd":0.21094366937201664,"hz":12168.909950089008,"sampleCount":12169}},{"category":"features","name":"Stats - reset all","result":{"mean":0.0012555231072735214,"p75":0.0011999999987892807,"p99":0.0025000000023283064,"p995":0.002999999967869371,"min":0.0009999999892897904,"max":1.7630000000353903,"sd":0.002355460195100221,"hz":796480.7610523297,"sampleCount":796481}},{"category":"features","name":"Deduplication - cache miss (first request)","result":{"sampleCount":0}},{"category":"features","name":"Deduplication - key generation (url)","result":{"mean":0.0000882349084734603,"p75":0.00010000000474974513,"p99":0.00019999995129182935,"p995":0.00020000000949949026,"min":0,"max":0.08379999996395782,"sd":0.00008706014971668744,"hz":11333382.86740315,"sampleCount":11333384}},{"category":"features","name":"Deduplication - key generation (url+method)","result":{"mean":0.00008738898322674885,"p75":0.00010000006295740604,"p99":0.00010000006295740604,"p995":0.00020000000949949026,"min":0,"max":0.08749999990686774,"sd":0.00009056899511198769,"hz":11443089.999174066,"sampleCount":11443090}},{"category":"features","name":"Deduplication - key generation (url+method+body)","result":{"mean":0.0003450571431924663,"p75":0.0004000000189989805,"p99":0.0006000000284984708,"p995":0.000800000037997961,"min":0.00019999989308416843,"max":0.5627000000094995,"sd":0.00040879261976838055,"hz":2898070.710109076,"sampleCount":2898071}},{"category":"features","name":"Debouncing - first request","result":{"sampleCount":0}},{"category":"features","name":"Debouncing - key generation (url)","result":{"mean":0.00008982676102200606,"p75":0.00010000006295740604,"p99":0.00010000006295740604,"p995":0.00020000000949949026,"min":0,"max":0.04709999996703118,"sd":0.00009160853863017648,"hz":11132539.887027837,"sampleCount":11132541}},{"category":"features","name":"Debouncing - key generation (method+url)","result":{"mean":0.000091053029211381,"p75":0.00010000006295740604,"p99":0.00020000000949949026,"p995":0.00020000000949949026,"min":0,"max":0.2972000000299886,"sd":0.0001380176044228292,"hz":10982610.997800903,"sampleCount":10982611}},{"category":"features","name":"All features OFF - baseline","result":{"mean":2.260305417607524,"p75":2.2325999999884516,"p99":8.241399999940768,"p995":9.019100000034086,"min":1.8832999999867752,"max":9.906499999924563,"sd":0.7995912263997053,"hz":442.41808748946625,"sampleCount":443}},{"category":"features","name":"All features ON - full overhead","result":{"mean":5.065316080395951,"p75":2.876499999896623,"p99":30.815000000060536,"p995":33.70310000004247,"min":2.38710000005085,"max":33.70310000004247,"sd":7.013051837849823,"hz":197.42104621471734,"sampleCount":199}},{"category":"integrated","name":"Scenario - Bare minimum GET","result":{"mean":2.3060728110574735,"p75":2.300800000084564,"p99":7.87699999997858,"p995":8.49620000005234,"min":1.9566999999806285,"max":9.206000000005588,"sd":0.7015061738611179,"hz":433.63765237813095,"sampleCount":434}},{"category":"integrated","name":"Scenario - GET with retry (success first attempt)","result":{"mean":2.45730515970781,"p75":2.4117000000551343,"p99":7.573500000056811,"p995":8.633599999942817,"min":2.1907999999821186,"max":9.432400000048801,"sd":0.7228576863927121,"hz":406.9498637763438,"sampleCount":407}},{"category":"integrated","name":"Scenario - GET with stats collection","result":{"mean":2.76784585635062,"p75":2.6817000000737607,"p99":8.920999999972992,"p995":10.148300000000745,"min":2.2611000000033528,"max":16.575599999981932,"sd":1.1470752056710296,"hz":361.29179582221786,"sampleCount":362}},{"category":"integrated","name":"Scenario - GET with 1 plugin","result":{"mean":3.2107612179493,"p75":3.3627000000560656,"p99":8.545099999988452,"p995":17.304999999934807,"min":2.3670999999158084,"max":17.91109999991022,"sd":1.4961255382384318,"hz":311.452622016749,"sampleCount":312}},{"category":"integrated","name":"Scenario - GET with 3 plugins","result":{"mean":2.691987365589387,"p75":2.6751999999396503,"p99":8.810100000002421,"p995":9.319599999929778,"min":2.3589999999385327,"max":10.007699999958277,"sd":0.7513012321836514,"hz":371.4727686996625,"sampleCount":372}},{"category":"integrated","name":"Scenario - ALL features enabled","result":{"mean":2.633318684211209,"p75":2.586200000019744,"p99":8.393100000103004,"p995":8.98969999991823,"min":2.3647999999811873,"max":9.448399999993853,"sd":0.6944658851145467,"hz":379.74894797039826,"sampleCount":380}},{"category":"integrated","name":"Scenario - 10 concurrent requests","result":{"mean":25.45856250000361,"p75":25.337399999960326,"p99":39.104799999971874,"p995":39.104799999971874,"min":22.948800000012852,"max":39.104799999971874,"sd":3.193571633576761,"hz":39.2795154871709,"sampleCount":40}},{"category":"integrated","name":"Scenario - 50 concurrent requests","result":{"mean":128.16664999999338,"p75":129.73869999998715,"p99":159.47500000009313,"p995":159.47500000009313,"min":117.57660000002943,"max":159.47500000009313,"sd":13.327864526261875,"hz":7.802341716819872,"sampleCount":10}},{"category":"integrated","name":"Scenario - 10 sequential requests","result":{"mean":25.6941692307681,"p75":25.533700000029057,"p99":35.660000000032596,"p995":35.660000000032596,"min":23.750700000091456,"max":35.660000000032596,"sd":2.561530557997753,"hz":38.91933578465444,"sampleCount":39}},{"category":"integrated","name":"Scenario - Mixed HTTP methods (GET/POST/PUT)","result":{"mean":9.306825925929136,"p75":9.224300000001676,"p99":15.899300000048243,"p995":18.932900000014342,"min":8.306899999966845,"max":18.932900000014342,"sd":1.6216503256233152,"hz":107.44801804167903,"sampleCount":108}},{"category":"integrated","name":"Scenario - Large payload (100KB)","result":{"mean":3.6634785454563628,"p75":3.4843999999575317,"p99":12.604300000006333,"p995":13.62859999993816,"min":3.0389999999897555,"max":16.583100000047125,"sd":1.4658001959078333,"hz":272.9646120734765,"sampleCount":275}},{"category":"integrated","name":"Scenario - Very large payload (1MB blob)","result":{"mean":11.96562976190277,"p75":11.310800000093877,"p99":32.758799999952316,"p995":32.758799999952316,"min":9.808899999945424,"max":32.758799999952316,"sd":3.7500993360540473,"hz":83.57270113637382,"sampleCount":84}}];
+
+		// Ops/sec chart
+		const opsCtx = document.getElementById('opsChart').getContext('2d');
+		const sortedResults = allBenchmarks.sort((a, b) => b.result.hz - a.result.hz).slice(0, 20);
+		
+		new Chart(opsCtx, {
+			type: 'bar',
+			data: {
+				labels: sortedResults.map(r => r.name.substring(0, 50)),
+				datasets: [{
+					label: 'Operations per Second',
+					data: sortedResults.map(r => Math.round(r.result.hz)),
+					backgroundColor: 'rgba(99, 102, 241, 0.6)',
+					borderColor: 'rgba(99, 102, 241, 1)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				indexAxis: 'y',
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								return context.parsed.x.toLocaleString() + ' ops/s';
+							}
+						}
+					}
+				}
+			}
+		});
+
+		
+		// Trend chart (history tracking)
+		const trendCtx = document.getElementById('trendChart').getContext('2d');
+		const history = [{"meta":{"timestamp":"2025-11-12T11:04:28.161Z","environment":{"runtime":"node","version":"v22.14.0","platform":"win32","arch":"x64"},"luminara":{"version":"0.10.0"},"tinybench":{"version":"2.9.0"}},"benchmarks":[{"category":"core","tasks":[{"name":"createLuminara() - cold start","result":{"mean":0.006149128362797596,"p75":0.005499999999756255,"p99":0.011299999999891952,"p995":0.016200000000026193,"min":0.004599999999982174,"max":0.6563000000001011,"sd":0.013337726169135793,"hz":162624.67475065717,"sampleCount":162625}},{"name":"createLuminara() - warm start","result":{"mean":0.00634449456594111,"p75":0.005599999999958527,"p99":0.012700000000222644,"p995":0.01679999999987558,"min":0.0046999999995023245,"max":7.2611000000001695,"sd":0.024352187156285565,"hz":157616.96847661576,"sampleCount":157617}},{"name":"api.use() - register 1 plugin","result":{"mean":0.00015400646008736427,"p75":0.00010000000474974513,"p99":0.00120000000060827,"p995":0.0013000000035390258,"min":0,"max":26.906699999999546,"sd":0.013999848396233626,"hz":6493234.111301067,"sampleCount":6602699}},{"name":"api.use() - register 10 plugins","result":{"mean":0.0012428855467031816,"p75":0.0013000000035390258,"p99":0.0031999999991967343,"p995":0.009299999997892883,"min":0.00019999999494757503,"max":62.11239999999816,"sd":0.11004963052466253,"hz":804579.3135599266,"sampleCount":825341}},{"name":"api.updateConfig() - simple","result":{"mean":0.0006189691353396415,"p75":0.00020000000949949026,"p99":0.00029999999969732016,"p995":0.00039999998989515007,"min":0.0000999999901978299,"max":9.401400000002468,"sd":0.05766957968019151,"hz":1615589.4420345833,"sampleCount":1618777}},{"name":"api.updateConfig() - complex","result":{"mean":0.000784747880193504,"p75":0.00029999999969732016,"p99":0.00039999998989515007,"p995":0.0005000000091968104,"min":0.00019999999494757503,"max":9.838900000002468,"sd":0.059470176725578416,"hz":1274294.6177228524,"sampleCount":1274295}}]},{"category":"orchestration","tasks":[{"name":"PluginPipeline - empty (onRequest)","result":{"mean":0.030352317358196382,"p75":0.02650000000721775,"p99":0.05909999999857973,"p995":0.06780000000435393,"min":0.014500000004773028,"max":17.041400000001886,"sd":0.1872282554296684,"hz":32946.41355382239,"sampleCount":32947}},{"name":"PluginPipeline - empty (onResponse)","result":{"mean":0.026342142142100095,"p75":0.025200000003678724,"p99":0.03800000000046566,"p995":0.04589999999734573,"min":0.01780000000144355,"max":12.287299999996321,"sd":0.16133709865545243,"hz":37961.98481526667,"sampleCount":37962}},{"name":"PluginPipeline - 1 plugin (onRequest)","result":{"mean":0.03875422415115717,"p75":0.0390999999945052,"p99":0.05049999999755528,"p995":0.05910000001313165,"min":0.0268999999971129,"max":13.30130000000645,"sd":0.1851891224932139,"hz":25803.638749148868,"sampleCount":25804}},{"name":"PluginPipeline - 1 plugin (onResponse)","result":{"mean":0.042413644074948326,"p75":0.03949999999895226,"p99":0.052700000000186265,"p995":0.0650000000023283,"min":0.03290000000561122,"max":12.448499999998603,"sd":0.18188560524487515,"hz":23577.318615512486,"sampleCount":23578}},{"name":"PluginPipeline - 5 plugins (onRequest L→R)","result":{"mean":0.0723473486218867,"p75":0.0669999999954598,"p99":0.10090000000491273,"p995":0.13079999999899883,"min":0.05199999999604188,"max":12.557100000005448,"sd":0.25714700513248595,"hz":13822.206605336156,"sampleCount":13823}},{"name":"PluginPipeline - 5 plugins (onResponse R→L)","result":{"mean":0.06808055687928279,"p75":0.0625,"p99":0.098599999997532,"p995":0.1387000000104308,"min":0.04919999999401625,"max":13.729699999996228,"sd":0.25031365941837663,"hz":14688.48149660633,"sampleCount":14689}},{"name":"PluginPipeline - 10 plugins (onRequest)","result":{"mean":0.10900699346408593,"p75":0.10000000000582077,"p99":0.16139999999722932,"p995":0.3962000000028638,"min":0.09059999999590218,"max":12.864100000006147,"sd":0.3091456581995063,"hz":9173.723338488973,"sampleCount":9180}},{"name":"PluginPipeline - 10 plugins (onResponse)","result":{"mean":0.10344128051301832,"p75":0.09470000000146683,"p99":0.14470000000437722,"p995":0.37159999999857973,"min":0.08469999999215361,"max":13.9658999999956,"sd":0.3255495490162644,"hz":9667.32038737811,"sampleCount":9668}},{"name":"ContextBuilder - simple request","result":{"mean":0.0006280453599364694,"p75":0.0004000000044470653,"p99":0.0008999999990919605,"p995":0.0010000000038417056,"min":0.00019999999494757503,"max":19.115200000000186,"sd":0.04636413119883384,"hz":1592241.68155809,"sampleCount":1592242}},{"name":"ContextBuilder - complex request","result":{"mean":0.00099659672219599,"p75":0.0004000000044470653,"p99":0.0008999999990919605,"p995":0.0010000000038417056,"min":0.00029999999969732016,"max":8.523399999990943,"sd":0.06769493642280064,"hz":1003414.8996562129,"sampleCount":1003415}},{"name":"SignalManager - create AbortController","result":{"mean":0.00009137861995868978,"p75":0.00010000000474974513,"p99":0.0001999999803956598,"p995":0.00020000000949949026,"min":0,"max":4.69539999999688,"sd":0.0014218658345200592,"hz":10943478.906248285,"sampleCount":10943480}},{"name":"SignalManager - merge user signal","result":{"mean":0.0006371411860089152,"p75":0.0004999999946448952,"p99":0.0010999999940395355,"p995":0.0014999999839346856,"min":0.00029999998514540493,"max":9.04729999997653,"sd":0.032283190475758304,"hz":1569510.8430582723,"sampleCount":1569511}},{"name":"Full request with __benchmark flag","result":{"mean":2.115930655390939,"p75":1.949800000002142,"p99":7.981399999989662,"p995":8.257299999997485,"min":1.705599999986589,"max":45.15669999999227,"sd":2.1107958179144175,"hz":472.605280070126,"sampleCount":473}},{"name":"Full request without __benchmark flag","result":{"mean":2.048104294478262,"p75":1.9679999999934807,"p99":7.809899999992922,"p995":8.060199999978067,"min":1.8264000000199303,"max":8.822299999999814,"sd":0.7279603969373173,"hz":488.2563855249089,"sampleCount":489}}]},{"category":"driver","tasks":[{"name":"Pre-Flight - URL building (simple path)","result":{"mean":0.0015024392076128951,"p75":0.001500000013038516,"p99":0.0023999999975785613,"p995":0.0026000000070780516,"min":0.0012999999744351953,"max":0.25689999997848645,"sd":0.0004444945188680991,"hz":665584.334416312,"sampleCount":665585}},{"name":"Pre-Flight - URL building (10 query params)","result":{"mean":0.0052126050989577824,"p75":0.004300000000512227,"p99":0.006099999998696148,"p995":0.007000000012340024,"min":0.0039000000106170774,"max":4.397099999972852,"sd":0.0577879472303578,"hz":191842.65468334476,"sampleCount":191843}},{"name":"Pre-Flight - Headers preparation","result":{"mean":0.0012787600955356494,"p75":0.0010999999940395355,"p99":0.0017000000225380063,"p995":0.0021000000124331564,"min":0.0008999999845400453,"max":6.374299999995856,"sd":0.0307568830340215,"hz":782007.5114098068,"sampleCount":782028}},{"name":"In-Flight - Native fetch (GET JSON 1KB)","result":{"mean":2.0565843942505357,"p75":2.0324000000255182,"p99":7.293699999980163,"p995":8.37489999999525,"min":1.6808000000019092,"max":8.771000000007916,"sd":0.6930290709722415,"hz":486.24311396879085,"sampleCount":487}},{"name":"In-Flight - Native fetch (GET JSON 10KB)","result":{"mean":2.170195661605651,"p75":2.113599999982398,"p99":7.507500000006985,"p995":7.761800000007497,"min":1.9213999999919906,"max":8.27379999999539,"sd":0.672200240112719,"hz":460.78794538743824,"sampleCount":461}},{"name":"In-Flight - Native fetch (GET JSON 100KB)","result":{"mean":3.2245350482326542,"p75":3.1141000000061467,"p99":7.486199999984819,"p995":7.590500000020256,"min":2.8061999999918044,"max":7.722700000012992,"sd":0.8223898244632473,"hz":310.1222300399846,"sampleCount":311}},{"name":"In-Flight - Request with timeout (no timeout)","result":{"mean":2.2408736017903768,"p75":2.2061000000103377,"p99":6.708000000013271,"p995":8.345799999980954,"min":1.9824999999837019,"max":8.407399999996414,"sd":0.6433041828884657,"hz":446.25453180448744,"sampleCount":447}},{"name":"Post-Flight - JSON parse (1KB)","result":{"mean":0.0013687983870159736,"p75":0.0013999999791849405,"p99":0.0019000000029336661,"p995":0.0022000000171829015,"min":0.0011999999987892807,"max":6.185399999987567,"sd":0.012335546251171448,"hz":730567.780825658,"sampleCount":730568}},{"name":"Post-Flight - JSON parse (100KB)","result":{"mean":0.06363871070343188,"p75":0.04409999999916181,"p99":0.09139999997569248,"p995":2.2648000000044703,"min":0.04089999996358529,"max":4.8004000000073574,"sd":0.21277440458172978,"hz":15713.706153793471,"sampleCount":15714}},{"name":"Post-Flight - Text response (1KB)","result":{"mean":0.00008871141186911203,"p75":0.00010000000474974513,"p99":0.00010000000474974513,"p995":0.00020000000949949026,"min":0,"max":0.04070000001229346,"sd":0.00007988308411017124,"hz":11272506.872908702,"sampleCount":11272508}},{"name":"Typed Request - getJson()","result":{"sampleCount":0}},{"name":"Typed Request - getText()","result":{"mean":2.1483624463516455,"p75":2.106099999975413,"p99":5.1036999999778345,"p995":8.070100000011735,"min":1.9297999999835156,"max":8.761999999987893,"sd":0.6211723948781186,"hz":465.47080624044725,"sampleCount":466}},{"name":"Typed Request - getBlob()","result":{"mean":13.244331578950025,"p75":13.054300000017975,"p99":36.085699999995995,"p995":36.085699999995995,"min":9.926600000006147,"max":36.085699999995995,"sd":5.056819602033618,"hz":75.50399912890714,"sampleCount":76}},{"name":"HTTP Verb - GET","result":{"mean":2.767341988949743,"p75":2.582300000009127,"p99":8.644599999999627,"p995":11.881900000036694,"min":2.211399999971036,"max":13.864499999966938,"sd":1.1336338854851975,"hz":361.35757849701776,"sampleCount":362}},{"name":"HTTP Verb - POST with JSON body","result":{"mean":3.217512861736436,"p75":3.0740000000223517,"p99":9.665700000012293,"p995":10.318700000003446,"min":2.6675999999861233,"max":12.788899999985006,"sd":1.08880831372065,"hz":310.7990684022681,"sampleCount":311}},{"name":"HTTP Verb - PUT with JSON body","result":{"mean":3.5557890070946176,"p75":3.4446999999927357,"p99":11.707999999984168,"p995":13.682200000039302,"min":2.841100000019651,"max":13.79660000000149,"sd":1.359144872352199,"hz":281.23153483088277,"sampleCount":282}},{"name":"HTTP Verb - PATCH with JSON body","result":{"mean":3.3841939189194425,"p75":3.35820000001695,"p99":10.908200000005309,"p995":11.009799999999814,"min":2.85920000000624,"max":12.020099999965169,"sd":0.9913142097570198,"hz":295.4913412052036,"sampleCount":296}},{"name":"HTTP Verb - DELETE","result":{"mean":2.6271640419924274,"p75":2.6005000000004657,"p99":8.625099999946542,"p995":9.307200000039302,"min":2.1881999999750406,"max":9.314699999988079,"sd":0.8002459853355839,"hz":380.6385836651469,"sampleCount":381}},{"name":"Config - Minimal (no options)","result":{"mean":2.574608226221146,"p75":2.5315999999875203,"p99":8.831300000019837,"p995":9.06369999999879,"min":2.2208999999566004,"max":9.324899999948684,"sd":0.8309041958078808,"hz":388.4086090518477,"sampleCount":389}},{"name":"Config - With headers","result":{"mean":2.552301785715307,"p75":2.511400000017602,"p99":8.782999999995809,"p995":9.143700000015087,"min":2.236800000013318,"max":9.554499999969266,"sd":0.7335220417966973,"hz":391.80319725386255,"sampleCount":392}},{"name":"Config - With query params","result":{"sampleCount":0}},{"name":"Config - Complex (all options)","result":{"mean":3.4352931506861615,"p75":3.3711999999941327,"p99":10.728100000007544,"p995":11.311199999996461,"min":3.0218999999924563,"max":11.771699999982957,"sd":1.0337214305106783,"hz":291.09597234817096,"sampleCount":292}}]},{"category":"features","tasks":[{"name":"Retry - Linear backoff (success first try)","result":{"mean":2.243786098655692,"p75":2.223999999987427,"p99":7.330100000021048,"p995":8.3460999999661,"min":1.8918999999877997,"max":9.357699999993201,"sd":0.7138361637696011,"hz":445.6752809900751,"sampleCount":446}},{"name":"Retry - Exponential backoff (success first try)","result":{"mean":2.3555282352935962,"p75":2.319100000022445,"p99":8.366199999989476,"p995":8.440900000045076,"min":2.0517000000108965,"max":8.710299999976996,"sd":0.7078001540128149,"hz":424.5332257184167,"sampleCount":425}},{"name":"Retry - Fibonacci backoff (success first try)","result":{"mean":2.4510775061128127,"p75":2.4226999999955297,"p99":3.5606999999727122,"p995":8.770599999988917,"min":2.191999999980908,"max":10.488100000016857,"sd":0.6977117414457301,"hz":407.9838346629477,"sampleCount":409}},{"name":"Retry - Custom backoff handler (success first try)","result":{"mean":2.4522274509802755,"p75":2.4048999999649823,"p99":3.947399999946356,"p995":8.607099999964703,"min":2.210800000000745,"max":9.59150000003865,"sd":0.6815128258324681,"hz":407.7925151683018,"sampleCount":408}},{"name":"Rate Limit - tokens available","result":{"mean":5.059826262627148,"p75":2.977599999983795,"p99":39.35910000000149,"p995":42.69309999997495,"min":2.337200000009034,"max":42.69309999997495,"sd":7.039514613044432,"hz":197.6352443929138,"sampleCount":198}},{"name":"Rate Limit - endpoint scoped","result":{"mean":5.084753500001679,"p75":3.0125000000116415,"p99":34.12099999998463,"p995":35.06750000000466,"min":2.3403000000398606,"max":35.572899999970105,"sd":7.171166495705434,"hz":196.66636740594598,"sampleCount":200}},{"name":"Stats - collection enabled","result":{"mean":2.5581012787720154,"p75":2.5362000000313856,"p99":8.68580000003567,"p995":9.885799999989104,"min":2.2162000000244007,"max":10.525899999949615,"sd":0.7656836817410576,"hz":390.91493690978393,"sampleCount":391}},{"name":"Stats - query simple","result":{"mean":0.057567970772554024,"p75":0.045400000002700835,"p99":0.07699999999022111,"p995":2.2331999999587424,"min":0.04199999995762482,"max":4.268600000010338,"sd":0.171402093935243,"hz":17370.770353377782,"sampleCount":17381}},{"name":"Stats - query complex with groupBy","result":{"mean":0.08217662913946418,"p75":0.06280000001424924,"p99":0.16180000000167638,"p995":2.2942000000039116,"min":0.05849999998463318,"max":3.1317999999737367,"sd":0.21094366937201664,"hz":12168.909950089008,"sampleCount":12169}},{"name":"Stats - reset all","result":{"mean":0.0012555231072735214,"p75":0.0011999999987892807,"p99":0.0025000000023283064,"p995":0.002999999967869371,"min":0.0009999999892897904,"max":1.7630000000353903,"sd":0.002355460195100221,"hz":796480.7610523297,"sampleCount":796481}},{"name":"Deduplication - cache miss (first request)","result":{"sampleCount":0}},{"name":"Deduplication - key generation (url)","result":{"mean":0.0000882349084734603,"p75":0.00010000000474974513,"p99":0.00019999995129182935,"p995":0.00020000000949949026,"min":0,"max":0.08379999996395782,"sd":0.00008706014971668744,"hz":11333382.86740315,"sampleCount":11333384}},{"name":"Deduplication - key generation (url+method)","result":{"mean":0.00008738898322674885,"p75":0.00010000006295740604,"p99":0.00010000006295740604,"p995":0.00020000000949949026,"min":0,"max":0.08749999990686774,"sd":0.00009056899511198769,"hz":11443089.999174066,"sampleCount":11443090}},{"name":"Deduplication - key generation (url+method+body)","result":{"mean":0.0003450571431924663,"p75":0.0004000000189989805,"p99":0.0006000000284984708,"p995":0.000800000037997961,"min":0.00019999989308416843,"max":0.5627000000094995,"sd":0.00040879261976838055,"hz":2898070.710109076,"sampleCount":2898071}},{"name":"Debouncing - first request","result":{"sampleCount":0}},{"name":"Debouncing - key generation (url)","result":{"mean":0.00008982676102200606,"p75":0.00010000006295740604,"p99":0.00010000006295740604,"p995":0.00020000000949949026,"min":0,"max":0.04709999996703118,"sd":0.00009160853863017648,"hz":11132539.887027837,"sampleCount":11132541}},{"name":"Debouncing - key generation (method+url)","result":{"mean":0.000091053029211381,"p75":0.00010000006295740604,"p99":0.00020000000949949026,"p995":0.00020000000949949026,"min":0,"max":0.2972000000299886,"sd":0.0001380176044228292,"hz":10982610.997800903,"sampleCount":10982611}},{"name":"All features OFF - baseline","result":{"mean":2.260305417607524,"p75":2.2325999999884516,"p99":8.241399999940768,"p995":9.019100000034086,"min":1.8832999999867752,"max":9.906499999924563,"sd":0.7995912263997053,"hz":442.41808748946625,"sampleCount":443}},{"name":"All features ON - full overhead","result":{"mean":5.065316080395951,"p75":2.876499999896623,"p99":30.815000000060536,"p995":33.70310000004247,"min":2.38710000005085,"max":33.70310000004247,"sd":7.013051837849823,"hz":197.42104621471734,"sampleCount":199}}]},{"category":"integrated","tasks":[{"name":"Scenario - Bare minimum GET","result":{"mean":2.3060728110574735,"p75":2.300800000084564,"p99":7.87699999997858,"p995":8.49620000005234,"min":1.9566999999806285,"max":9.206000000005588,"sd":0.7015061738611179,"hz":433.63765237813095,"sampleCount":434}},{"name":"Scenario - GET with retry (success first attempt)","result":{"mean":2.45730515970781,"p75":2.4117000000551343,"p99":7.573500000056811,"p995":8.633599999942817,"min":2.1907999999821186,"max":9.432400000048801,"sd":0.7228576863927121,"hz":406.9498637763438,"sampleCount":407}},{"name":"Scenario - GET with stats collection","result":{"mean":2.76784585635062,"p75":2.6817000000737607,"p99":8.920999999972992,"p995":10.148300000000745,"min":2.2611000000033528,"max":16.575599999981932,"sd":1.1470752056710296,"hz":361.29179582221786,"sampleCount":362}},{"name":"Scenario - GET with 1 plugin","result":{"mean":3.2107612179493,"p75":3.3627000000560656,"p99":8.545099999988452,"p995":17.304999999934807,"min":2.3670999999158084,"max":17.91109999991022,"sd":1.4961255382384318,"hz":311.452622016749,"sampleCount":312}},{"name":"Scenario - GET with 3 plugins","result":{"mean":2.691987365589387,"p75":2.6751999999396503,"p99":8.810100000002421,"p995":9.319599999929778,"min":2.3589999999385327,"max":10.007699999958277,"sd":0.7513012321836514,"hz":371.4727686996625,"sampleCount":372}},{"name":"Scenario - ALL features enabled","result":{"mean":2.633318684211209,"p75":2.586200000019744,"p99":8.393100000103004,"p995":8.98969999991823,"min":2.3647999999811873,"max":9.448399999993853,"sd":0.6944658851145467,"hz":379.74894797039826,"sampleCount":380}},{"name":"Scenario - 10 concurrent requests","result":{"mean":25.45856250000361,"p75":25.337399999960326,"p99":39.104799999971874,"p995":39.104799999971874,"min":22.948800000012852,"max":39.104799999971874,"sd":3.193571633576761,"hz":39.2795154871709,"sampleCount":40}},{"name":"Scenario - 50 concurrent requests","result":{"mean":128.16664999999338,"p75":129.73869999998715,"p99":159.47500000009313,"p995":159.47500000009313,"min":117.57660000002943,"max":159.47500000009313,"sd":13.327864526261875,"hz":7.802341716819872,"sampleCount":10}},{"name":"Scenario - 10 sequential requests","result":{"mean":25.6941692307681,"p75":25.533700000029057,"p99":35.660000000032596,"p995":35.660000000032596,"min":23.750700000091456,"max":35.660000000032596,"sd":2.561530557997753,"hz":38.91933578465444,"sampleCount":39}},{"name":"Scenario - Mixed HTTP methods (GET/POST/PUT)","result":{"mean":9.306825925929136,"p75":9.224300000001676,"p99":15.899300000048243,"p995":18.932900000014342,"min":8.306899999966845,"max":18.932900000014342,"sd":1.6216503256233152,"hz":107.44801804167903,"sampleCount":108}},{"name":"Scenario - Large payload (100KB)","result":{"mean":3.6634785454563628,"p75":3.4843999999575317,"p99":12.604300000006333,"p995":13.62859999993816,"min":3.0389999999897555,"max":16.583100000047125,"sd":1.4658001959078333,"hz":272.9646120734765,"sampleCount":275}},{"name":"Scenario - Very large payload (1MB blob)","result":{"mean":11.96562976190277,"p75":11.310800000093877,"p99":32.758799999952316,"p995":32.758799999952316,"min":9.808899999945424,"max":32.758799999952316,"sd":3.7500993360540473,"hz":83.57270113637382,"sampleCount":84}}]}],"memory":[{"category":"core","data":{"before":{"heapUsed":11.946647644042969,"heapTotal":29.78125,"external":4.597467422485352,"rss":61.46484375},"after":{"heapUsed":2491.0307388305664,"heapTotal":2561.27734375,"external":4.52122688293457,"rss":2627.33984375},"delta":2479.0840911865234}},{"category":"orchestration","data":{"before":{"heapUsed":2193.6925201416016,"heapTotal":2281.578125,"external":4.52122688293457,"rss":2405.3359375},"after":{"heapUsed":3087.8810653686523,"heapTotal":3168.5234375,"external":4.587895393371582,"rss":3237.6484375},"delta":894.1885452270508}},{"category":"driver","data":{"before":{"heapUsed":2354.1108016967773,"heapTotal":2463.97265625,"external":4.587895393371582,"rss":2756.5546875},"after":{"heapUsed":2939.7569427490234,"heapTotal":3016.26953125,"external":7.1921586990356445,"rss":3099.50390625},"delta":585.6461410522461}},{"category":"features","data":{"before":{"heapUsed":2508.0701599121094,"heapTotal":2695.30078125,"external":7.1921586990356445,"rss":2931.765625},"after":{"heapUsed":3338.143424987793,"heapTotal":3406.71875,"external":4.8735809326171875,"rss":3550.17578125},"delta":830.0732650756836}},{"category":"integrated","data":{"before":{"heapUsed":2984.31485748291,"heapTotal":3090.1171875,"external":4.8735809326171875,"rss":3388.55859375},"after":{"heapUsed":3085.386619567871,"heapTotal":3173.0703125,"external":5.621949195861816,"rss":3360.2890625},"delta":101.07176208496094}}]},{"timestamp":"2025-11-12T11:09:58.399Z","browsers":{"chromium":[{"name":"createLuminara()","mean":0.004211794030108345,"hz":237428.51451220558,"p99":0.10000002384185791},{"name":"api.use() - 1 plugin","mean":0.0039992321502881675,"hz":250047.99982115175,"p99":0.10000002384185791},{"name":"api.updateConfig()","mean":0.003848758633414291,"hz":259824.03555218145,"p99":0.10000002384185791}],"firefox":[{"name":"createLuminara()","mean":0.024968789013732832,"hz":40050,"p99":1},{"name":"api.use() - 1 plugin","mean":0.030262760495318636,"hz":33043.9121756487,"p99":1},{"name":"api.updateConfig()","mean":0.030023371486786122,"hz":33307.385229540916,"p99":1}],"webkit":[{"name":"createLuminara()","mean":0.006003193699047904,"hz":166577.9999999997,"p99":0},{"name":"api.use() - 1 plugin","mean":0.005434369949344294,"hz":184013.9720558883,"p99":0},{"name":"api.updateConfig()","mean":0.005535688584303001,"hz":180646,"p99":0}]},"summary":{"totalBrowsers":3,"successfulBrowsers":3,"failedBrowsers":0,"totalBenchmarks":3}}];
+		
+		// Track a few key benchmarks over time
+		const keyBenchmarks = ['createLuminara() - cold start', 'api.use() - register 1 plugin'];
+		const datasets = keyBenchmarks.map((benchName, i) => {
+			return {
+				label: benchName,
+				data: history.map(h => {
+					let result = null;
+					for (const cat of h.benchmarks) {
+						result = cat.tasks.find(t => t.name === benchName);
+						if (result) break;
+					}
+					return result ? result.result.hz : 0;
+				}),
+				borderColor: ['rgba(99, 102, 241, 1)', 'rgba(139, 92, 246, 1)'][i],
+				backgroundColor: ['rgba(99, 102, 241, 0.1)', 'rgba(139, 92, 246, 0.1)'][i],
+				tension: 0.4
+			};
+		});
+
+		new Chart(trendCtx, {
+			type: 'line',
+			data: {
+				labels: history.map(h => new Date(h.meta.timestamp).toLocaleTimeString()),
+				datasets
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { position: 'top' }
+				}
+			}
+		});
+		
+	</script>
+</body>
+</html>

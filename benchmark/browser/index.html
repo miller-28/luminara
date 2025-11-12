@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminara Browser Benchmarks</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Luminara Performance Benchmarks</h1>
+      <p class="subtitle">Browser Environment · Real-time Results</p>
+    </header>
+
+    <div class="controls">
+      <select id="categorySelect" class="category-select">
+        <option value="all">All Categories</option>
+        <option value="core">Core Operations</option>
+        <option value="orchestration">Orchestration</option>
+        <option value="driver">Driver Layer</option>
+        <option value="features">Features</option>
+        <option value="integrated">Integrated Scenarios</option>
+      </select>
+      <button id="runAllBtn" class="btn-primary">▶️ Run Benchmarks</button>
+      <button id="clearBtn" class="btn-secondary">🗑️ Clear Results</button>
+    </div>
+
+    <div id="status" class="status hidden"></div>
+
+    <div class="results-container">
+      <div class="results-header">
+        <h2>📊 Benchmark Results</h2>
+        <div id="summary" class="summary hidden"></div>
+      </div>
+      
+      <div id="resultsTable" class="results-table hidden"></div>
+      
+      <div id="charts" class="charts hidden">
+        <div class="chart-container">
+          <h3>⚡ Operations per Second</h3>
+          <canvas id="opsChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>⏱️ Mean Execution Time</h3>
+          <canvas id="meanChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Powered by <a href="https://github.com/tinylibs/tinybench" target="_blank">Tinybench</a></p>
+    </footer>
+  </div>
+
+  <!-- Import Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+  <!-- Import Tinybench and Luminara, then load runner -->
+  <script type="module">
+    // Import dependencies
+    import { Bench } from 'https://esm.sh/tinybench@2.9.0';
+    
+    // Try to import Luminara from dist
+    let createLuminara;
+    try {
+      const luminaraModule = await import('../../dist/index.mjs');
+      createLuminara = luminaraModule.createLuminara;
+    } catch (error) {
+      console.error('Failed to load Luminara:', error);
+      document.body.innerHTML = `
+        <div style="padding: 40px; text-align: center; font-family: system-ui;">
+          <h1 style="color: #ef4444;">⚠️ Build Required</h1>
+          <p style="font-size: 1.2rem; margin: 20px 0;">Luminara needs to be built before running browser benchmarks.</p>
+          <pre style="background: #1e1e1e; color: #10b981; padding: 20px; border-radius: 8px; text-align: left; max-width: 600px; margin: 20px auto;">
+# From project root:
+cd c:\\development\\projects\\react\\luminara
+npm run build
+
+# Or for continuous development:
+npm run dev
+          </pre>
+          <p style="color: #a1a1aa; margin-top: 20px;">Then refresh this page.</p>
+        </div>
+      `;
+      throw error;
+    }
+
+    // Make available globally for benchmark suites
+    window.Bench = Bench;
+    window.createLuminara = createLuminara;
+    window.benchmarkResults = [];
+    
+    console.log('✅ Tinybench loaded');
+    console.log('✅ Luminara loaded');
+    
+    // Now load benchmark suites and runner
+    try {
+      const coreModule = await import('./suites/core.bench.js');
+      const orchestrationModule = await import('./suites/orchestration.bench.js');
+      const driverModule = await import('./suites/driver.bench.js');
+      const featuresModule = await import('./suites/features.bench.js');
+      const integratedModule = await import('./suites/integrated.bench.js');
+      
+      console.log('Core module:', coreModule);
+      console.log('Core benchmarks:', coreModule.coreBenchmarks);
+      console.log('Orchestration module:', orchestrationModule);
+      console.log('Orchestration benchmarks:', orchestrationModule.orchestrationBenchmarks);
+      console.log('Driver module:', driverModule);
+      console.log('Driver benchmarks:', driverModule.driverBenchmarks);
+      console.log('Features module:', featuresModule);
+      console.log('Features benchmarks:', featuresModule.featuresBenchmarks);
+      console.log('Integrated module:', integratedModule);
+      console.log('Integrated benchmarks:', integratedModule.integratedBenchmarks);
+      
+      const { coreBenchmarks } = coreModule;
+      const { orchestrationBenchmarks } = orchestrationModule;
+      const { driverBenchmarks } = driverModule;
+      const { featuresBenchmarks } = featuresModule;
+      const { integratedBenchmarks } = integratedModule;
+      
+      console.log('✅ Benchmark suites loaded');
+      console.log('  - Core benchmarks:', coreBenchmarks ? coreBenchmarks.length : 'undefined');
+      console.log('  - Orchestration benchmarks:', orchestrationBenchmarks ? orchestrationBenchmarks.length : 'undefined');
+      console.log('  - Driver benchmarks:', driverBenchmarks ? driverBenchmarks.length : 'undefined');
+      console.log('  - Features benchmarks:', featuresBenchmarks ? featuresBenchmarks.length : 'undefined');
+      console.log('  - Integrated benchmarks:', integratedBenchmarks ? integratedBenchmarks.length : 'undefined');
+      
+      // Import and initialize runner inline
+      const BrowserBenchmarkRunner = (await import('./runner.js')).default;
+      const runner = new BrowserBenchmarkRunner();
+      
+      console.log('Runner created:', runner);
+      
+      // Register suites
+      runner.registerSuite('core', coreBenchmarks);
+      runner.registerSuite('orchestration', orchestrationBenchmarks);
+      runner.registerSuite('driver', driverBenchmarks);
+      runner.registerSuite('features', featuresBenchmarks);
+      runner.registerSuite('integrated', integratedBenchmarks);
+      
+      console.log('Suites registered:', Array.from(runner.suites.keys()));
+      console.log('Core suite:', runner.suites.get('core'));
+      console.log('Orchestration suite:', runner.suites.get('orchestration'));
+      console.log('Driver suite:', runner.suites.get('driver'));
+      console.log('Features suite:', runner.suites.get('features'));
+      console.log('Integrated suite:', runner.suites.get('integrated'));
+      
+      // Make runner available globally
+      window.benchmarkRunner = runner;
+      
+      console.log('🌟 Luminara Browser Benchmarks Ready');
+      console.log('Available categories:', Array.from(runner.suites.keys()));
+    } catch (error) {
+      console.error('Failed to initialize benchmarks:', error);
+      document.getElementById('status').textContent = `❌ Error: ${error.message}`;
+      document.getElementById('status').className = 'status error';
+      document.getElementById('status').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

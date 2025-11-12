@@ -6,7 +6,10 @@ It provides full lifecycle control over HTTP requests — from orchestration and
 Lightweight by design yet powerful in scope, Luminara enables consistent, predictable network behavior across all environments — browsers (React, Vue, Angular, Svelte, vanilla JS) and Node.js 18+.
 Its domain-driven architecture and type-safe foundation make it ideal for enterprise-grade applications that need transparent debugging, real-time visibility, and extendable control over every request.
 
----
+[![Website](https://img.shields.io/badge/Website-luminara.website-blue?style=flat-square&logo=safari)](https://luminara.website)
+[![GitHub](https://img.shields.io/badge/GitHub-miller--28%2Fluminara-black?style=flat-square&logo=github)](https://github.com/miller-28/luminara)
+[![npm](https://img.shields.io/npm/v/luminara?style=flat-square&logo=npm)](https://www.npmjs.com/package/luminara)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](./LICENSE)
 
 ## ✨ Features
 
@@ -1223,10 +1226,73 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 
 ---
 
+## ⚡ Performance & Benchmarks
+
+Luminara includes a **comprehensive benchmark suite** to measure and track performance across all architectural layers — from micro-operations to full end-to-end request flows.
+
+### Benchmark Suite Features
+
+- **50+ Node.js Benchmarks** - High-precision measurements with memory profiling
+- **30+ Browser Benchmarks** - Interactive browser-based testing with Chart.js visualizations
+- **Cross-Browser Testing** - Automated headless benchmarks across Chromium, Firefox, and WebKit
+- **Historical Tracking** - Performance regression detection and baseline comparison
+- **Beautiful Reports** - HTML reports with charts, trends, and statistical analysis
+
+### Performance Characteristics
+
+| Layer | Mean Performance | Verdict |
+|-------|------------------|---------|
+| Core API | 4-5 µs | ⚡ Ideal (microsecond precision) |
+| Plugin Orchestration | 30-45 µs | ✅ Excellent (linear scaling) |
+| Driver Layer | 1-19 µs | ✅ Excellent (sync operations) |
+| Network I/O | 15-50 ms | ⚙️ Network-bound (expected) |
+| Integrated Scenarios | 16-180 ms | 🪶 Balanced (minimal overhead) |
+
+### Running Benchmarks
+
+```bash
+# Node.js benchmarks (all categories)
+cd benchmark
+npm run benchmark
+
+# Specific categories
+npm run benchmark:core
+npm run benchmark:orchestration
+npm run benchmark:driver
+npm run benchmark:features
+npm run benchmark:integrated
+
+# Browser benchmarks (interactive)
+npm run benchmark:browser
+
+# Headless cross-browser testing
+npm run benchmark:headless        # Full suite (Chromium, Firefox, WebKit)
+npm run benchmark:headless:quick  # Quick test (Chromium only)
+
+# Reports & analysis
+npm run benchmark:report      # Generate HTML report
+npm run benchmark:regression  # Track performance regressions
+npm run benchmark:compare     # Compare against baseline
+```
+
+### Key Findings
+
+✅ **Near-Zero Overhead** - Core operations execute at microsecond precision  
+✅ **Linear Scaling** - Plugin system adds no exponential cost  
+✅ **Network Parity** - HTTP operations match native `fetch` performance  
+✅ **Deterministic Timing** - Retry and backoff strategies execute with scheduler-level accuracy  
+✅ **Production-Ready** - Validated across 30+ real-world scenarios
+
+📊 **[View Detailed Performance Analysis](./docs/performance.md)**
+
+---
+
 ## 📚 Documentation
 
 - **[Sandbox Guide](./sandbox/README.md)** - Interactive examples and usage
 - **[Command Line Tests Guide](./test-cli/README.md)** - Cli test usage
+- **[Benchmark Suite Guide](./benchmark/README.md)** - Benchmark usage and configuration
+- **[Performance Benchmarks](./docs/performance.md)** - Detailed performance analysis
 
 ---
 
@@ -1243,5 +1309,3 @@ MIT © 2025 [Jonathan Miller](mailto:jonathan@miller28.com) • [LinkedIn](https
 Like light traveling through space, Luminara guides your HTTP requests with grace, reliability, and cosmic precision across all JavaScript environments. Built with mindfulness for developers who craft with intention.
 
 **Framework-Agnostic** • **Simple by Design** • **Separation of Concerns** • **Developer-Friendly** • **Extensible**
-
-✨ *May your requests flow like starlight across any framework*

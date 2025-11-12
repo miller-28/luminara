@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "serve-sandbox",
+            "label": "serve",
             "type": "shell",
             "command": "npx serve .",
             "isBackground": true,
