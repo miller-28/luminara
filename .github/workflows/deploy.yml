@@ -1,4 +1,4 @@
-name: Deploy sandbox + docs to EC2
+name: Deploy sandbox + docs to EC2 serving Luminara.website
 
 on:
   push:
@@ -22,9 +22,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # no cache-dependency-path due to none committed package-lock.json in sandbox
 
-      - name: Prepare release from sandbox + docs
+      # Build luminara so that dist/ exists in the clone
+      - name: Install deps & build luminara
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+
+      - name: Prepare release from sandbox + docs + dist
         env:
           RELEASES_DIR: /var/projects/remote_repos/luminara/releases
           CURRENT_LINK: /var/projects/remote_repos/luminara/current
@@ -45,18 +51,11 @@ jobs:
           mkdir -p "$TARGET/docs"
           rsync -a docs/ "$TARGET/docs"/
 
-          cd "$TARGET"
+          echo "Copying built dist/ into release/dist/"
+          mkdir -p "$TARGET/dist"
+          rsync -a dist/ "$TARGET/dist"/
 
-          echo "Installing base dependencies from sandbox/package.json"
-          npm install
-
-          echo "Force-installing latest luminara from npm"
-          npm install luminara@latest --save
-
-          echo "Rewriting import in index.html to use NPM luminara"
-          # from: import * as Luminara from '../dist/index.mjs'
-          # to:   import * as Luminara from 'luminara'
-          sed -i "s|import \* as Luminara from '../dist/index.mjs'|import \* as Luminara from 'luminara'|" index.html
+          # (No npm install here, release is pure static assets)
 
           echo "Pointing 'current' symlink to new release"
           ln -sfn "$TARGET" "$CURRENT_LINK"
