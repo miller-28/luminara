@@ -2,7 +2,7 @@ name: Deploy sandbox + docs to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 concurrency:
   group: luminara-deploy
