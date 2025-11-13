@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, aws_miller_ec2_github_runner]
+    runs-on: [self-hosted, miller_aws_ec2]
 
     steps:
       - name: Checkout repo
