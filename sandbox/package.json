@@ -1,0 +1,16 @@
+{
+  "name": "luminara_sandbox",
+  "version": "1.0.0",
+  "description": "An interactive demo environment for exploring **Luminara**, the powerful yet lightweight HTTP client for modern JavaScript applications. This sandbox provides a comprehensive, feature-rich interface to test and understand all Luminara capabilities with real-time execution and detailed output.",
+  "author": {
+		"name": "Jonathan Miller",
+		"email": "jonathan@miller28.com",
+		"url": "https://www.linkedin.com/in/miller28/"
+	},
+  "main": "index.html",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {},
+  "license": "ISC"
+}

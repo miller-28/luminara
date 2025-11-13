@@ -1,0 +1,74 @@
+name: Deploy sandbox + docs to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: luminara-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, aws_miller_ec2_github_runner]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # no cache-dependency-path due to none committed package-lock.json in sandbox
+
+      - name: Prepare release from sandbox + docs
+        env:
+          RELEASES_DIR: /var/projects/remote_repos/luminara/releases
+          CURRENT_LINK: /var/projects/remote_repos/luminara/current
+          NGINX_ROOT: /var/projects/www/luminara.website/client
+        run: |
+          set -euo pipefail
+
+          TS=$(date +"%Y-%m-%d_%H-%M-%S")
+          TARGET="$RELEASES_DIR/$TS"
+
+          echo "Creating release directory: $TARGET"
+          mkdir -p "$TARGET"
+
+          echo "Copying sandbox/ into release root"
+          rsync -a --delete sandbox/ "$TARGET"/
+
+          echo "Copying docs/ into release/docs/"
+          mkdir -p "$TARGET/docs"
+          rsync -a docs/ "$TARGET/docs"/
+
+          cd "$TARGET"
+
+          echo "Installing base dependencies from sandbox/package.json"
+          npm install
+
+          echo "Force-installing latest luminara from npm"
+          npm install luminara@latest --save
+
+          echo "Rewriting import in index.html to use NPM luminara"
+          # from: import * as Luminara from '../dist/index.mjs'
+          # to:   import * as Luminara from 'luminara'
+          sed -i "s|import \* as Luminara from '../dist/index.mjs'|import \* as Luminara from 'luminara'|" index.html
+
+          echo "Pointing 'current' symlink to new release"
+          ln -sfn "$TARGET" "$CURRENT_LINK"
+
+          echo "Syncing current release to Nginx root: $NGINX_ROOT"
+          mkdir -p "$NGINX_ROOT"
+          rsync -a --delete "$CURRENT_LINK"/ "$NGINX_ROOT"/
+
+          echo "Cleaning old releases (keep last 10)"
+          ls -1dt "$RELEASES_DIR"/* | tail -n +11 | xargs -r rm -rf
+  
+      - name: Test Nginx & reload
+        run: |
+          sudo nginx -t
+          sudo systemctl reload nginx

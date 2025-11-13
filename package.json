@@ -1,6 +1,6 @@
 {
   "name": "luminara",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Lightweight, universal HTTP client with native fetch for browsers and Node.js. Zero dependencies, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Works across React, Vue, Angular, Svelte, vanilla JavaScript, and Node.js 18+.",
   "author": {
 		"name": "Jonathan Miller",
@@ -33,7 +33,6 @@
     "dev": "tsup --watch",
     "prepublishOnly": "npm run build",
     "type-check": "tsc --noEmit --skipLibCheck",
-    "postinstall": "npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:report": "eslint . --output-file eslint-report.txt --no-color"

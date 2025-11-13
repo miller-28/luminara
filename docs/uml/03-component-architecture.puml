@@ -1,5 +1,4 @@
-@startuml
-title Luminara Component Architecture
+@startuml Luminara Component Architecture
 
 skinparam packageStyle rectangle
 skinparam backgroundColor white
