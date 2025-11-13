@@ -1,0 +1,182 @@
+@startuml Luminara Request Flow
+
+autonumber
+
+actor User
+participant "LuminaraClient" as Client
+participant "ConfigManager" as Config
+participant "ContextBuilder" as ContextB
+participant "SignalManager" as SignalM
+participant "RetryOrchestrator" as Retry
+participant "PluginPipeline" as Pipeline
+participant "NativeFetchDriver" as Driver
+participant "RequestDispatcher" as Dispatcher
+participant "Debouncer" as Debounce
+participant "Deduplicator" as Dedupe
+participant "RateLimiter" as RateLimit
+participant "InFlightHandler" as InFlight
+participant "Native Fetch API" as Fetch
+participant "SuccessHandler" as Success
+participant "ErrorHandler" as ErrorH
+participant "StatsEventEmitter" as Stats
+participant "StatsHub" as Hub
+
+User -> Client: request(req)
+
+group Configuration Phase [Merge config and apply rate limiting]
+  Client -> Config: merge(req)
+  Config --> Client: mergedReq
+  Client -> Config: applyRateLimit(mergedReq)
+  Config --> Client: rate limit applied
+end
+
+group Context Building Phase [Create context with metadata]
+  Client -> ContextB: build(mergedReq, driver)
+  ContextB --> Client: context {req, res, error,\nattempt, controller, meta}
+  Client -> SignalM: mergeUserSignal(context,\nsignal, statsEmitter)
+  SignalM --> Client: signals merged
+end
+
+group Stats Tracking [Emit request start event]
+  Client -> Stats: emit('request:start', metadata)
+  Stats -> Hub: update counters/time modules
+end
+
+group Retry Loop [Attempt 1...N]
+  Client -> Retry: execute(context, pluginPipeline)
+  
+  loop For each attempt (1 to maxRetries+1)
+    
+    group Plugin onRequest Phase [L→R execution]
+      Retry -> Pipeline: executeOnRequest(context)
+      loop For each plugin (left to right)
+        Pipeline -> Pipeline: plugin.onRequest(context)
+        note right: Modify context.req\n(headers, tokens, etc.)
+      end
+    end
+    
+    group PHASE 1: Pre-Flight [Request Dispatcher]
+      Retry -> Driver: request(opts, context)
+      Driver -> Dispatcher: dispatchRequest(config, context,\nfeatures, executeFunction)
+      
+      Dispatcher -> Dispatcher: buildFullUrl(url, baseURL, query)
+      
+      alt Deduplication Enabled
+        Dispatcher -> Dedupe: process(preparedRequest,\nexecuteRequest)
+        Dedupe -> Dedupe: check cache for\nidentical request
+        alt Request in cache
+          Dedupe --> Dispatcher: return cached promise
+        else New request
+          Dedupe -> Dedupe: add to cache
+        end
+      end
+      
+      alt Debouncing Enabled
+        Dispatcher -> Debounce: process(preparedRequest,\nexecuteRequest)
+        Debounce -> Debounce: cancel previous pending\nrequest with same key
+        Debounce -> Debounce: start delay timer
+        note right: Wait for debounce delay...
+      end
+      
+      alt Rate Limiting Enabled
+        Dispatcher -> RateLimit: schedule(preparedRequest, context)
+        RateLimit -> RateLimit: check token bucket
+        alt Tokens available
+          RateLimit -> RateLimit: consume token
+        else No tokens
+          RateLimit -> RateLimit: add to queue
+          note right: Wait for token refill...
+        end
+      end
+    end
+    
+    group PHASE 2: In-Flight [Request Execution]
+      Dispatcher -> InFlight: executeRequest(preparedRequest,\ncurrentAttempt)
+      InFlight -> InFlight: createTimeoutHandler(timeout, signal)
+      InFlight -> Fetch: fetch(fullUrl, fetchOptions)
+      
+      alt Success
+        Fetch --> InFlight: Response
+        InFlight -> InFlight: timeoutCleanup()
+        InFlight --> Dispatcher: {response, timeoutCleanup,\npreparedRequest}
+      else Timeout / Abort / Network Error
+        Fetch --> InFlight: throw Error
+        InFlight -> InFlight: timeoutCleanup()
+        InFlight --> Dispatcher: throw Error
+      end
+    end
+    
+    group PHASE 3: Post-Flight [Response Handling]
+      
+      alt Success Path
+        Dispatcher -> Success: handleSuccessResponse(result,\npreparedRequest, attempt)
+        Success -> Success: parseResponseData(response,\nresponseType)
+        
+        alt Response OK (2xx)
+          Success --> Driver: {status, headers, data}
+          Driver --> Retry: response
+          
+          group Plugin onResponse Phase [R→L execution]
+            Retry -> Pipeline: executeOnResponse(context)
+            loop For each plugin (right to left)
+              Pipeline -> Pipeline: plugin.onResponse(context)
+              note right: Transform response
+            end
+          end
+          
+          Retry -> Stats: emit('request:success',\n{id, status, durationMs})
+          Stats -> Hub: update success counters
+          Retry --> Client: response
+          note right: Success - exit retry loop
+          
+        else Response Not OK (non-2xx)
+          Success -> Success: createHttpError(response, context)
+          Success --> Dispatcher: throw HttpError
+        end
+        
+      else Error Path
+        Dispatcher -> ErrorH: handleErrorResponse(error,\npreparedRequest, attempt)
+        ErrorH -> ErrorH: classify error type
+        
+        alt AbortError (Timeout)
+          ErrorH -> ErrorH: createTimeoutError()
+        else AbortError (User)
+          ErrorH -> ErrorH: createAbortError()
+        else TypeError
+          ErrorH -> ErrorH: createNetworkError()
+        else Other
+          ErrorH -> ErrorH: createLuminaraError()
+        end
+        
+        ErrorH --> Driver: throw LuminaraError
+        Driver --> Retry: throw error
+        
+        group Plugin onResponseError Phase [R→L execution]
+          Retry -> Pipeline: executeOnResponseError(context)
+          loop For each plugin (right to left)
+            Pipeline -> Pipeline: plugin.onResponseError(context)
+            note right: Handle error,\npossibly trigger retry
+          end
+        end
+        
+        alt Should Retry
+          Retry -> Driver: shouldRetry(error, context)
+          Driver --> Retry: true
+          Retry -> Driver: calculateRetryDelay(context)
+          Driver --> Retry: delayMs
+          Retry -> Stats: emit('request:retry',\n{id, attempt, delayMs})
+          Stats -> Hub: update retry counters
+          note right: Wait delay, then retry...
+        else No More Retries
+          Retry -> Stats: emit('request:error', {id, error})
+          Stats -> Hub: update error counters
+          Retry --> Client: throw error
+        end
+      end
+    end
+  end
+end
+
+Client --> User: response / throw error
+
+@enduml

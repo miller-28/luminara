@@ -1,0 +1,250 @@
+@startuml Luminara Class Diagram
+
+!define CORE_COLOR #FFF9C4
+!define DRIVER_COLOR #FFEBEE
+!define STATS_COLOR #E8F5E9
+!define API_COLOR #E1F5FF
+
+' Factory and Main Entry Point
+class createLuminara <<factory>> {
+  +{static} createLuminara(config): LuminaraClient
+}
+
+' Core Client
+class LuminaraClient {
+  -driver: NativeFetchDriver
+  -configManager: ConfigManager
+  -statsInstance: StatsHub
+  -statsEmitter: StatsEventEmitter
+  -pluginPipeline: PluginPipeline
+  -retryOrchestrator: RetryOrchestrator
+  -httpVerbs: HttpVerbs
+  -typedRequests: TypedRequests
+  +constructor(driver, plugins, config)
+  +request(req): Promise<Response>
+  +use(plugin): LuminaraClient
+  +stats(): StatsHub
+  +get(url, options): Promise
+  +post(url, body, options): Promise
+  +getJson(url, options): Promise
+  +postJson(url, data, options): Promise
+}
+
+' Orchestration Layer
+class ConfigManager <<orchestration>> CORE_COLOR {
+  -config: Object
+  -rateLimiter: RateLimiter
+  +merge(req): Object
+  +applyRateLimit(req): Promise
+  +update(newConfig): void
+  +getRateLimitStats(): Object
+}
+
+class PluginPipeline <<orchestration>> CORE_COLOR {
+  -plugins: Array<Plugin>
+  +executeOnRequest(context): Promise
+  +executeOnResponse(context): Promise
+  +executeOnResponseError(context): Promise
+  +add(plugin): void
+  +getAll(): Array
+}
+
+class RetryOrchestrator <<orchestration>> CORE_COLOR {
+  -driver: NativeFetchDriver
+  -statsEmitter: StatsEventEmitter
+  +execute(context, pluginPipeline): Promise
+  -shouldRetry(error, context): boolean
+  -calculateRetryDelay(context): Promise<number>
+}
+
+class ContextBuilder <<static>> CORE_COLOR {
+  +{static} build(mergedReq, driver): Context
+  +{static} generateRequestId(): string
+  +{static} resetCounter(): void
+}
+
+class SignalManager <<static>> CORE_COLOR {
+  +{static} mergeUserSignal(context, userSignal, statsEmitter): void
+}
+
+' Stats System
+class StatsHub <<stats>> STATS_COLOR {
+  -modules: Object
+  -queryEngine: QueryEngine
+  -activeRequests: Map
+  -verboseEnabled: boolean
+  +query(options): Object
+  +snapshot(): Object
+  +reset(): void
+  +counters: CountersHelper
+  +time: TimeHelper
+  +rate: RateHelper
+  +retry: RetryHelper
+  +error: ErrorHelper
+}
+
+class StatsEventEmitter <<stats>> STATS_COLOR {
+  -config: Object
+  -statsHub: StatsHub
+  -enabled: boolean
+  +emit(eventName, data): void
+  +enable(): void
+  +disable(): void
+  +isEnabled(): boolean
+}
+
+class QueryEngine <<stats>> STATS_COLOR {
+  -modules: Object
+  +query(options): Object
+  +snapshot(): Object
+  +reset(): void
+}
+
+' Stats Modules
+class CountersModule <<stats>> STATS_COLOR {
+  +recordRequest(metadata): void
+  +recordSuccess(metadata): void
+  +recordError(metadata): void
+  +getMetrics(window, filter): Object
+}
+
+class TimeModule <<stats>> STATS_COLOR {
+  +recordStart(metadata): void
+  +recordEnd(id, duration): void
+  +getMetrics(window, filter): Object
+}
+
+class RetryModule <<stats>> STATS_COLOR {
+  +recordAttempt(metadata): void
+  +getMetrics(window, filter): Object
+}
+
+' Driver Layer
+class NativeFetchDriver <<driver>> DRIVER_COLOR {
+  -globalConfig: Object
+  -debouncer: Debouncer
+  -deduplicator: Deduplicator
+  -rateLimiter: RateLimiter
+  +request(opts, context): Promise<Response>
+  +shouldRetry(error, context): boolean
+  +calculateRetryDelay(context): Promise<number>
+  +getRateLimitStats(): Object
+}
+
+' Driver Handlers
+class RequestDispatcher <<handler>> DRIVER_COLOR {
+  +{static} dispatchRequest(config, context, features, executeFunction): Promise
+}
+
+class InFlightHandler <<handler>> DRIVER_COLOR {
+  +{static} executeRequest(preparedRequest, currentAttempt): Promise<Response>
+}
+
+class SuccessResponseHandler <<handler>> DRIVER_COLOR {
+  +{static} handleSuccessResponse(result, preparedRequest, currentAttempt): Promise<Object>
+}
+
+class ErrorResponseHandler <<handler>> DRIVER_COLOR {
+  +{static} handleErrorResponse(error, preparedRequest, currentAttempt): Error
+}
+
+' Driver Features
+class Debouncer <<feature>> DRIVER_COLOR {
+  -delay: number
+  -pending: Map
+  -statsHub: StatsHub
+  +process(options, executeRequest): Promise
+  +shouldDebounce(method): boolean
+  +cancelPending(key, reason): void
+}
+
+class Deduplicator <<feature>> DRIVER_COLOR {
+  -cache: RequestCache
+  -statsHub: StatsHub
+  +process(preparedRequest, executeRequest, config): Promise
+  +shouldDeduplicate(method): boolean
+}
+
+class RateLimiter <<feature>> DRIVER_COLOR {
+  -buckets: Map
+  -stats: Object
+  +schedule(request, context): Promise
+  +getStats(): Object
+  +reset(): void
+}
+
+' API Helpers
+class HttpVerbs <<helper>> API_COLOR {
+  -client: LuminaraClient
+  +get(url, options): Promise
+  +post(url, body, options): Promise
+  +put(url, body, options): Promise
+  +patch(url, body, options): Promise
+  +del(url, options): Promise
+}
+
+class TypedRequests <<helper>> API_COLOR {
+  -client: LuminaraClient
+  +getJson(url, options): Promise
+  +getText(url, options): Promise
+  +postJson(url, data, options): Promise
+  +postForm(url, data, options): Promise
+}
+
+' Relationships
+createLuminara ..> LuminaraClient : <<creates>>
+createLuminara ..> NativeFetchDriver : <<creates>>
+
+LuminaraClient --> ConfigManager : uses
+LuminaraClient --> StatsHub : uses
+LuminaraClient --> StatsEventEmitter : uses
+LuminaraClient --> PluginPipeline : uses
+LuminaraClient --> RetryOrchestrator : uses
+LuminaraClient --> HttpVerbs : delegates
+LuminaraClient --> TypedRequests : delegates
+LuminaraClient --> NativeFetchDriver : uses
+
+RetryOrchestrator --> PluginPipeline : executes
+RetryOrchestrator --> NativeFetchDriver : requests via
+RetryOrchestrator --> StatsEventEmitter : emits to
+
+PluginPipeline --> ContextBuilder : uses
+
+StatsHub --> QueryEngine : uses
+StatsHub *-- CountersModule : contains
+StatsHub *-- TimeModule : contains
+StatsHub *-- RetryModule : contains
+
+StatsEventEmitter --> StatsHub : updates
+
+NativeFetchDriver --> RequestDispatcher : phase 1
+NativeFetchDriver --> InFlightHandler : phase 2
+NativeFetchDriver --> SuccessResponseHandler : phase 3 success
+NativeFetchDriver --> ErrorResponseHandler : phase 3 error
+NativeFetchDriver o-- Debouncer : uses
+NativeFetchDriver o-- Deduplicator : uses
+NativeFetchDriver o-- RateLimiter : uses
+
+RequestDispatcher --> Debouncer : applies
+RequestDispatcher --> Deduplicator : applies
+RequestDispatcher --> RateLimiter : applies
+
+HttpVerbs ..> LuminaraClient : calls request()
+TypedRequests ..> LuminaraClient : calls request()
+
+note top of LuminaraClient
+  Main API surface with HTTP methods
+  and plugin system
+end note
+
+note top of NativeFetchDriver
+  Zero dependencies - uses native fetch()
+  Three-phase handler architecture
+end note
+
+note top of StatsHub
+  Real-time metrics with flexible
+  query interface
+end note
+
+@enduml

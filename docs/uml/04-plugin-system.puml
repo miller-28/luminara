@@ -1,0 +1,201 @@
+@startuml Plugin System Sequence
+
+autonumber
+
+actor User
+participant "LuminaraClient" as Client
+participant "RetryOrchestrator" as Retry
+participant "PluginPipeline" as Pipeline
+participant "Plugin1\n(Auth)" as P1
+participant "Plugin2\n(Logging)" as P2
+participant "Plugin3\n(Cache)" as P3
+participant "NativeFetchDriver" as Driver
+participant Response
+
+== Plugin Registration ==
+
+User -> Client: use(authPlugin)
+Client -> Pipeline: add(authPlugin)
+
+User -> Client: use(loggingPlugin)
+Client -> Pipeline: add(loggingPlugin)
+
+User -> Client: use(cachePlugin)
+Client -> Pipeline: add(cachePlugin)
+
+note over Pipeline
+  plugins = [Plugin1, Plugin2, Plugin3]
+end note
+
+== Request Execution (Attempt 1) ==
+
+User -> Client: request(req)
+Client -> Retry: execute(context, pluginPipeline)
+
+group Phase 1: onRequest [Left-to-Right execution]
+  Retry -> Pipeline: executeOnRequest(context)
+  
+  Pipeline -> P1: onRequest(context)
+  note right of P1
+    Modify context.req
+    Add auth token
+  end note
+  P1 -> P1: context.req.headers['Authorization']\n= 'Bearer token'
+  P1 --> Pipeline: context
+  
+  Pipeline -> P2: onRequest(context)
+  note right of P2
+    Log outgoing request
+  end note
+  P2 -> P2: console.log('→',\ncontext.req.method,\ncontext.req.url)
+  P2 --> Pipeline: context
+  
+  Pipeline -> P3: onRequest(context)
+  note right of P3
+    Add cache headers
+  end note
+  P3 -> P3: context.req.headers['If-None-Match']\n= etag
+  P3 --> Pipeline: context
+  
+  Pipeline --> Retry: context with modified req
+end
+
+Retry -> Driver: request(context.req, context)
+Driver -> Driver: Execute three-phase pipeline
+
+alt Success Response (2xx)
+  Driver --> Retry: response
+  
+  group Phase 2: onResponse [Right-to-Left execution]
+    Retry -> Pipeline: executeOnResponse(context)
+    note over Pipeline
+      Reverse order for unwinding
+    end note
+    
+    Pipeline -> P3: onResponse(context)
+    note right of P3
+      Cache response
+    end note
+    P3 -> P3: cache.set(context.req.url,\ncontext.res.data)
+    P3 --> Pipeline: context
+    
+    Pipeline -> P2: onResponse(context)
+    note right of P2
+      Log response
+    end note
+    P2 -> P2: console.log('←',\ncontext.res.status,\nduration)
+    P2 --> Pipeline: context
+    
+    Pipeline -> P1: onResponse(context)
+    note right of P1
+      Track auth success
+    end note
+    P1 -> P1: analytics.track('auth_success')
+    P1 --> Pipeline: context
+    
+    Pipeline --> Retry: context with processed response
+  end
+  
+  Retry --> Client: response
+  Client --> User: response
+  
+else Error Response (non-2xx or network error)
+  Driver --> Retry: throw error
+  
+  group Phase 3: onResponseError [Right-to-Left execution]
+    Retry -> Pipeline: executeOnResponseError(context)
+    note over Pipeline
+      Reverse order for error handling
+    end note
+    
+    Pipeline -> P3: onResponseError(context)
+    note right of P3
+      Clear stale cache
+    end note
+    P3 -> P3: cache.delete(context.req.url)
+    P3 --> Pipeline: context
+    
+    Pipeline -> P2: onResponseError(context)
+    note right of P2
+      Log error
+    end note
+    P2 -> P2: console.error('✗',\ncontext.error.status,\ncontext.error.message)
+    P2 --> Pipeline: context
+    
+    Pipeline -> P1: onResponseError(context)
+    alt Error is 401 Unauthorized
+      note right of P1
+        Token expired - refresh
+      end note
+      P1 -> P1: newToken = await refreshToken()
+      P1 -> P1: context.req.headers['Authorization']\n= `Bearer ${newToken}`
+      P1 -> P1: throw error (trigger retry)
+      P1 --> Pipeline: throw error
+    else Other errors
+      note right of P1
+        Track auth failure
+      end note
+      P1 -> P1: analytics.track('auth_failure')
+      P1 --> Pipeline: context
+    end
+    
+    Pipeline --> Retry: context or throw
+  end
+  
+  alt Should Retry (e.g., 401 after token refresh)
+    note over Retry
+      Calculate backoff delay
+    end note
+    Retry -> Retry: wait delay
+    
+    == Retry Attempt 2 ==
+    
+    note over Retry
+      Fresh request copy for retry
+    end note
+    Retry -> Retry: context.req = { ...context.req }
+    
+    group onRequest Again [L→R execution]
+      Retry -> Pipeline: executeOnRequest(context)
+      
+      Pipeline -> P1: onRequest(context)
+      note right of P1
+        Use refreshed token
+      end note
+      P1 -> P1: context.req.headers['Authorization']\n= 'Bearer NEW_token'
+      P1 --> Pipeline: context
+      
+      Pipeline -> P2: onRequest(context)
+      note right of P2
+        Log retry attempt
+      end note
+      P2 -> P2: console.log('↻',\nattempt,\ncontext.req.url)
+      P2 --> Pipeline: context
+      
+      Pipeline -> P3: onRequest(context)
+      P3 --> Pipeline: context
+      
+      Pipeline --> Retry: context
+    end
+    
+    Retry -> Driver: request(context.req, context)
+    Driver --> Retry: response (success)
+    
+    group onResponse [R→L execution]
+      Retry -> Pipeline: executeOnResponse(context)
+      note over P3, P1
+        Process successful retry...
+      end note
+      Pipeline --> Retry: context
+    end
+    
+    Retry --> Client: response
+    Client --> User: response
+    
+  else No Retry
+    Retry --> Client: throw error
+    Client --> User: throw error
+  end
+end
+
+@enduml

@@ -1,0 +1,162 @@
+@startuml
+title Luminara Component Architecture
+
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam component {
+  BackgroundColor<<PUBLIC_API>> #E1F5FF
+  BackgroundColor<<ORCHESTRATION>> #FFF9C4
+  BackgroundColor<<STATS>> #E8F5E9
+  BackgroundColor<<DRIVER>> #FFE0B2
+  BackgroundColor<<FEATURES>> #F3E5F5
+  BackgroundColor<<EXTERNAL>> #FFEBEE
+}
+
+package "User Code" {
+  component "Application Code" as USER
+}
+
+package "Public API Layer" {
+  component "createLuminara Factory" as FACTORY <<PUBLIC_API>>
+  component LuminaraClient as CLIENT <<PUBLIC_API>>
+  component "Stats Query API" as STATS_API <<PUBLIC_API>>
+}
+
+package "Core Orchestration Layer" {
+  package "Configuration and Setup" {
+    component ConfigManager as CONFIG <<ORCHESTRATION>>
+    component ContextBuilder as CONTEXT <<ORCHESTRATION>>
+    component SignalManager as SIGNAL <<ORCHESTRATION>>
+  }
+  
+  package "Request Lifecycle" {
+    component RetryOrchestrator as RETRY <<ORCHESTRATION>>
+    component PluginPipeline as PLUGIN <<ORCHESTRATION>>
+  }
+  
+  package "Stats System" {
+    component StatsHub as STATS_HUB <<STATS>>
+    component StatsEventEmitter as STATS_EMITTER <<STATS>>
+    component QueryEngine as QUERY_ENGINE <<STATS>>
+    
+    package "Stat Modules" {
+      component CountersModule as COUNTER_MOD <<STATS>>
+      component TimeModule as TIME_MOD <<STATS>>
+      component RateModule as RATE_MOD <<STATS>>
+      component RetryModule as RETRY_MOD <<STATS>>
+      component ErrorModule as ERROR_MOD <<STATS>>
+    }
+  }
+}
+
+package "API Helpers Layer" {
+  component HttpVerbs as HTTP_VERBS <<PUBLIC_API>>
+  component TypedRequests as TYPED_REQ <<PUBLIC_API>>
+}
+
+package "Driver Layer - NativeFetchDriver" {
+  component NativeFetchDriver as DRIVER_MAIN <<DRIVER>>
+  
+  package "Three-Phase Handler Architecture" {
+    component RequestDispatcher as PHASE1 <<DRIVER>>
+    component InFlightHandler as PHASE2 <<DRIVER>>
+    component SuccessResponseHandler as PHASE3_SUCCESS <<DRIVER>>
+    component ErrorResponseHandler as PHASE3_ERROR <<DRIVER>>
+  }
+  
+  package "Driver Features" {
+    component "URL Builder" as URL_BUILDER <<FEATURES>>
+    component Debouncer as DEBOUNCE <<FEATURES>>
+    component Deduplicator as DEDUPE <<FEATURES>>
+    component RateLimiter as RATE_LIMIT <<FEATURES>>
+    component TimeoutHandler as TIMEOUT <<FEATURES>>
+    component ResponseParser as RESPONSE_PARSER <<FEATURES>>
+    component ErrorHandler as ERROR_HANDLER <<FEATURES>>
+    component RetryPolicy as RETRY_POLICY <<FEATURES>>
+    component BackoffStrategies as BACKOFF <<FEATURES>>
+  }
+}
+
+package "External Dependencies" {
+  component "Native Fetch API" as FETCH <<EXTERNAL>>
+}
+
+' User interactions
+USER --> FACTORY : creates client
+USER --> CLIENT : makes requests
+USER --> STATS_API : queries metrics
+
+' Factory creates client
+FACTORY ..> CLIENT : creates
+FACTORY ..> DRIVER_MAIN : creates
+
+' Client dependencies
+CLIENT --> CONFIG : uses
+CLIENT --> RETRY : uses
+CLIENT --> PLUGIN : uses
+CLIENT --> STATS_HUB : uses
+CLIENT --> STATS_EMITTER : uses
+CLIENT --> HTTP_VERBS : delegates
+CLIENT --> TYPED_REQ : delegates
+CLIENT --> DRIVER_MAIN : requests via
+
+' API helpers delegate back
+HTTP_VERBS ..> CLIENT : calls request()
+TYPED_REQ ..> CLIENT : calls request()
+
+' Stats system connections
+STATS_API ..> STATS_HUB : exposes
+STATS_HUB --> QUERY_ENGINE : contains
+STATS_HUB *-- COUNTER_MOD : contains
+STATS_HUB *-- TIME_MOD : contains
+STATS_HUB *-- RATE_MOD : contains
+STATS_HUB *-- RETRY_MOD : contains
+STATS_HUB *-- ERROR_MOD : contains
+STATS_EMITTER --> STATS_HUB : updates
+QUERY_ENGINE --> COUNTER_MOD : queries
+QUERY_ENGINE --> TIME_MOD : queries
+QUERY_ENGINE --> RATE_MOD : queries
+QUERY_ENGINE --> RETRY_MOD : queries
+QUERY_ENGINE --> ERROR_MOD : queries
+
+' Orchestration flow
+CLIENT --> CONTEXT : builds
+CLIENT --> SIGNAL : merges signals
+RETRY --> PLUGIN : executes
+RETRY --> DRIVER_MAIN : requests via
+RETRY --> STATS_EMITTER : emits events
+
+' Driver internal flow
+DRIVER_MAIN --> PHASE1 : dispatches to
+PHASE1 --> URL_BUILDER : builds URL
+PHASE1 --> DEDUPE : deduplicates
+PHASE1 --> DEBOUNCE : debounces
+PHASE1 --> RATE_LIMIT : rate limits
+PHASE1 --> PHASE2 : executes
+
+PHASE2 --> TIMEOUT : applies
+PHASE2 --> FETCH : calls
+
+PHASE3_SUCCESS --> RESPONSE_PARSER : parses
+PHASE3_ERROR --> ERROR_HANDLER : transforms
+
+DRIVER_MAIN --> RETRY_POLICY : evaluates
+DRIVER_MAIN --> BACKOFF : calculates
+
+' Phase flow
+PHASE2 --> PHASE3_SUCCESS : success
+PHASE2 --> PHASE3_ERROR : error
+
+note right of STATS_HUB
+  Event-driven stats collection
+  with flexible query interface
+end note
+
+note right of DRIVER_MAIN
+  Three-phase handler architecture:
+  1. Pre-Flight: URL, dedupe, debounce, rate limit
+  2. In-Flight: Timeout, fetch execution
+  3. Post-Flight: Parse or transform error
+end note
+
+@enduml

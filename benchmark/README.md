@@ -31,13 +31,6 @@ npm run benchmark:integrated
 # Run with memory profiling
 npm run benchmark:memory
 
-# Save baseline for comparison
-npm run benchmark -- --save-baseline
-
-# Compare against baseline
-npm run benchmark:compare
-```
-
 ### Browser Benchmarks
 
 1. Start the development server:
@@ -75,27 +68,6 @@ Opens beautiful HTML report with:
 - Interactive charts
 - Performance trends
 - Historical comparisons
-
-### Track Regressions
-
-```powershell
-npm run benchmark:regression
-```
-
-Analyzes last 5 runs and detects:
-- Performance regressions (>15% slower)
-- Performance improvements (>15% faster)
-- Severity levels (MINOR, MAJOR, CRITICAL)
-
-### Compare Against Baseline
-
-```powershell
-# Save current results as baseline
-npm run benchmark -- --save-baseline
-
-# Compare new run against baseline
-npm run benchmark:compare
-```
 
 ## 🎯 Benchmark Categories
 

@@ -1269,10 +1269,8 @@ npm run benchmark:browser
 npm run benchmark:headless        # Full suite (Chromium, Firefox, WebKit)
 npm run benchmark:headless:quick  # Quick test (Chromium only)
 
-# Reports & analysis
+# Reports
 npm run benchmark:report      # Generate HTML report
-npm run benchmark:regression  # Track performance regressions
-npm run benchmark:compare     # Compare against baseline
 ```
 
 ### Key Findings

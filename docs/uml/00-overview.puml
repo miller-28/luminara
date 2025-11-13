@@ -1,0 +1,169 @@
+@startuml
+!define CORE_COLOR #FFF9C4
+!define ORCHESTRATION_COLOR #E8F5E9
+!define DRIVER_COLOR #E1F5FF
+!define STATS_COLOR #FCE4EC
+!define EXTERNAL_COLOR #F5F5F5
+
+title Luminara HTTP Client - Complete Architecture Overview
+
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam shadowing false
+
+package "Public API" <<Rectangle>> CORE_COLOR {
+  [createLuminara()\nFactory] as Factory
+  [LuminaraClient] as Client
+  [HTTP Verbs:\nGET, POST,\nPUT, DELETE] as Verbs
+  [Typed Requests:\ngetJson()\npostForm()\ngetText()] as Typed
+}
+
+package "Core Orchestration" <<Rectangle>> ORCHESTRATION_COLOR {
+  [ConfigManager] as Config
+  [RetryOrchestrator] as Retry
+  [PluginPipeline] as Plugins
+  [ContextBuilder] as Context
+  [SignalManager] as Signals
+}
+
+package "Stats System" <<Rectangle>> STATS_COLOR {
+  [StatsHub] as Stats
+  [QueryEngine] as Query
+  [Event Emitter] as Events
+  package "Stat Modules" {
+    [Counters]
+    [Timing]
+    [Rate Tracking]
+    [Retry Metrics]
+    [Error Tracking]
+  }
+}
+
+package "Driver Layer" <<Rectangle>> DRIVER_COLOR {
+  [NativeFetchDriver] as Driver
+  
+  package "Three-Phase Handlers" {
+    [RequestDispatcher\n(Pre-Flight)] as Dispatcher
+    [InFlightHandler\n(Execution)] as InFlight
+    [ResponseHandlers\n(Post-Flight)] as Response
+  }
+  
+  package "Feature Modules" {
+    [URL Builder] as URL
+    [Deduplicator] as Dedupe
+    [Debouncer] as Debounce
+    [Rate Limiter] as RateLimit
+    [Timeout Handler] as Timeout
+    [Response Parser] as Parser
+    [Error Handler] as ErrorHandler
+  }
+}
+
+package "External Dependencies" <<Rectangle>> EXTERNAL_COLOR {
+  [Native Fetch API] as Fetch
+  [Browser/Node.js Runtime] as Runtime
+}
+
+' Main Flow
+Factory --> Client : creates
+Client --> Config : uses
+Client --> Retry : orchestrates via
+Client --> Stats : collects metrics
+Client --> Verbs : provides
+Client --> Typed : provides
+
+Retry --> Plugins : executes
+Retry --> Driver : delegates to
+Retry --> Context : builds with
+Retry --> Signals : manages with
+
+Plugins --> Context : reads/writes
+Stats --> Events : emits via
+Stats --> Query : queries via
+Stats ..> Counters
+Stats ..> Timing
+Stats ..> [Rate Tracking]
+Stats ..> [Retry Metrics]
+Stats ..> [Error Tracking]
+
+' Driver Flow
+Driver --> Dispatcher : Phase 1
+Driver --> InFlight : Phase 2
+Driver --> Response : Phase 3
+
+Dispatcher --> URL
+Dispatcher --> Dedupe
+Dispatcher --> Debounce
+Dispatcher --> RateLimit
+
+InFlight --> Timeout
+InFlight --> Fetch : uses
+
+Response --> Parser
+Response --> ErrorHandler
+Response --> Stats : emits to
+
+' External Dependencies
+Driver --> Runtime : runs on
+InFlight --> Fetch : native API call
+
+note right of Factory
+  **Entry Point**
+  Zero-config setup with
+  sensible defaults
+end note
+
+note right of Client
+  **Main Client**
+  - HTTP verbs (get, post, put, delete)
+  - Typed requests (getJson, postForm)
+  - Plugin registration (use)
+  - Stats access (stats)
+end note
+
+note bottom of Retry
+  **Orchestration Core**
+  - Retry loop with backoff
+  - Plugin execution (L→R, R→L)
+  - Context management
+  - Signal coordination
+end note
+
+note bottom of Driver
+  **Three-Phase Architecture**
+  Phase 1: Pre-Flight (URL, dedupe, debounce, rate limit)
+  Phase 2: In-Flight (timeout, fetch execution)
+  Phase 3: Post-Flight (parse, error handling, stats)
+end note
+
+note right of Stats
+  **Real-Time Metrics**
+  - Event-driven architecture
+  - Query interface (DSL)
+  - Time windows (rolling60s, sinceStart)
+  - Multiple metric types
+end note
+
+note bottom of Fetch
+  **Zero Dependencies**
+  Uses native browser/Node.js
+  fetch() API only
+end note
+
+legend right
+  |= Color |= Layer |
+  | <back:CORE_COLOR>   </back> | Public API |
+  | <back:ORCHESTRATION_COLOR>   </back> | Core Orchestration |
+  | <back:STATS_COLOR>   </back> | Stats System |
+  | <back:DRIVER_COLOR>   </back> | Driver Layer |
+  | <back:EXTERNAL_COLOR>   </back> | External Dependencies |
+  
+  **Key Principles:**
+  • Separation of Concerns
+  • Zero Dependencies
+  • Driver Abstraction
+  • Event-Driven Stats
+  • Plugin Extensibility
+endlegend
+
+@enduml

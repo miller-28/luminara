@@ -1,0 +1,120 @@
+@startuml
+title Stats System Architecture
+
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam component {
+  BackgroundColor<<STATS>> #E8F5E9
+  BackgroundColor<<EVENT>> #FFF9C4
+  BackgroundColor<<QUERY>> #E1F5FF
+}
+
+package "Stats Collection Event-Driven" {
+  component StatsEventEmitter as EMITTER <<EVENT>>
+  
+  package "Stats Events" {
+    component "request start" as REQ_START <<EVENT>>
+    component "request success" as REQ_SUCCESS <<EVENT>>
+    component "request error" as REQ_ERROR <<EVENT>>
+    component "request retry" as REQ_RETRY <<EVENT>>
+    component "request abort" as REQ_ABORT <<EVENT>>
+  }
+}
+
+package "Stats Storage StatsHub" {
+  component StatsHub as HUB <<STATS>>
+  
+  package "Stat Modules" {
+    component CountersModule as COUNTERS <<STATS>>
+    component TimeModule as TIME <<STATS>>
+    component RateModule as RATE <<STATS>>
+    component RetryModule as RETRY_MOD <<STATS>>
+    component ErrorModule as ERROR_MOD <<STATS>>
+  }
+  
+  package "Time Windows" {
+    component rolling60s as ROLLING <<STATS>>
+    component sinceStart as SINCE_START <<STATS>>
+    component sinceReset as SINCE_RESET <<STATS>>
+  }
+}
+
+package "Query System" {
+  component QueryEngine as QUERY_ENGINE <<QUERY>>
+  
+  package "Query Features" {
+    component "Group By" as GROUP_BY <<QUERY>>
+    component "Where Filters" as WHERE <<QUERY>>
+    component "Metric Selection" as METRICS <<QUERY>>
+    component "Result Limiting" as LIMIT <<QUERY>>
+  }
+  
+  component Selectors as SELECTORS <<QUERY>>
+  component Schemas as SCHEMAS <<QUERY>>
+}
+
+package "Consumer Code" {
+  component "Application Code" as USER
+  component "Stats Dashboard" as DASHBOARD
+  component "Monitoring Tools" as MONITOR
+}
+
+' Event flow
+REQ_START --> EMITTER
+REQ_SUCCESS --> EMITTER
+REQ_ERROR --> EMITTER
+REQ_RETRY --> EMITTER
+REQ_ABORT --> EMITTER
+
+EMITTER --> HUB : emit events
+
+' Stats storage
+HUB --> COUNTERS : updates
+HUB --> TIME : updates
+HUB --> RATE : updates
+HUB --> RETRY_MOD : updates
+HUB --> ERROR_MOD : updates
+
+COUNTERS --> ROLLING : tracks in
+COUNTERS --> SINCE_START : tracks in
+COUNTERS --> SINCE_RESET : tracks in
+
+TIME --> ROLLING : tracks in
+TIME --> SINCE_START : tracks in
+TIME --> SINCE_RESET : tracks in
+
+' Query flow
+HUB --> QUERY_ENGINE : exposes
+
+QUERY_ENGINE --> GROUP_BY : uses
+QUERY_ENGINE --> WHERE : uses
+QUERY_ENGINE --> METRICS : uses
+QUERY_ENGINE --> LIMIT : uses
+QUERY_ENGINE --> SELECTORS : uses
+QUERY_ENGINE --> SCHEMAS : uses
+
+QUERY_ENGINE --> COUNTERS : queries
+QUERY_ENGINE --> TIME : queries
+QUERY_ENGINE --> RATE : queries
+QUERY_ENGINE --> RETRY_MOD : queries
+QUERY_ENGINE --> ERROR_MOD : queries
+
+' Consumer access
+USER --> QUERY_ENGINE : stats query
+USER --> HUB : stats counters
+USER --> HUB : stats time
+
+DASHBOARD --> QUERY_ENGINE : poll stats
+MONITOR --> EMITTER : subscribe to events
+
+note right of HUB
+  Event-driven stats collection
+  with flexible query interface
+end note
+
+note right of QUERY_ENGINE
+  Supports grouping, filtering,
+  and multiple time windows
+end note
+
+@enduml

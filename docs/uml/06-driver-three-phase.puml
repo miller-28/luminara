@@ -1,0 +1,249 @@
+@startuml
+title Driver Three-Phase Architecture
+
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam component {
+  BackgroundColor<<PHASE1>> #FFF9C4
+  BackgroundColor<<PHASE2>> #E1F5FF
+  BackgroundColor<<PHASE3A>> #E8F5E9
+  BackgroundColor<<PHASE3B>> #FFEBEE
+}
+
+package "Entry Point" {
+  component "NativeFetchDriver request" as DRIVER_REQ
+}
+
+package "PHASE 1 Pre-Flight RequestDispatcher" {
+  component "RequestDispatcher" as DISPATCHER <<PHASE1>>
+  
+  package "URL Construction" {
+    component buildFullUrl as URL_BUILD
+    component "baseURL + url + query" as URL_COMPONENTS
+  }
+  
+  package "Deduplication Feature" {
+    component "Check RequestCache" as DEDUPE_CHECK
+    component "Generate request key" as DEDUPE_KEY
+    component "Cache identical requests" as DEDUPE_CACHE
+    component "Return cached promise" as DEDUPE_RETURN
+  }
+  
+  package "Debounce Feature" {
+    component "Check pending map" as DEBOUNCE_CHECK
+    component "Cancel previous request" as DEBOUNCE_CANCEL
+    component "Start delay timer" as DEBOUNCE_TIMER
+    component "Wait for delay" as DEBOUNCE_WAIT
+  }
+  
+  package "Rate Limit Feature" {
+    component "Generate scope key" as RATE_KEY
+    component "Get/create token bucket" as RATE_BUCKET
+    component "Check token availability" as RATE_TOKENS
+    component "Consume token" as RATE_CONSUME
+    component "Add to FIFO queue" as RATE_QUEUE
+    component "Wait for token refill" as RATE_WAIT
+  }
+}
+
+package "PHASE 2 In-Flight InFlightHandler" {
+  component "InFlightHandler" as IN_FLIGHT <<PHASE2>>
+  
+  package "Timeout Feature" {
+    component "Create AbortController" as TIMEOUT_CREATE
+    component "Set timeout timer" as TIMEOUT_TIMER
+    component "Combine signals" as TIMEOUT_SIGNAL
+    component "Clear timeout" as TIMEOUT_CLEANUP
+  }
+  
+  package "Native Fetch Execution" {
+    component "Prepare fetch options" as FETCH_OPTS
+    component "Handle body serialization" as FETCH_BODY
+    component "Call native fetch()" as FETCH_CALL
+    component "Receive response" as FETCH_RESPONSE
+  }
+}
+
+package "PHASE 3a Success SuccessResponseHandler" {
+  component SuccessResponseHandler as SUCCESS_HANDLER <<PHASE3A>>
+  
+  package "Response Parsing Feature" {
+    component "Determine response type" as PARSE_TYPE
+    component "Auto-detect from headers" as PARSE_AUTO
+    component "Parse JSON" as PARSE_JSON
+    component "Parse text" as PARSE_TEXT
+    component "Parse blob" as PARSE_BLOB
+    component "Parse XML" as PARSE_XML
+    component "Parse FormData" as PARSE_FORM
+  }
+  
+  package "Status Validation" {
+    component "Check response.ok" as CHECK_OK
+    component "2xx Success" as STATUS_2XX
+    component "Non-2xx Error" as STATUS_NON_2XX
+    component "Check ignoreResponseError" as IGNORE_CHECK
+  }
+  
+  component "Return response object" as SUCCESS_RETURN
+}
+
+package "PHASE 3b Error ErrorResponseHandler" {
+  component ErrorResponseHandler as ERROR_HANDLER <<PHASE3B>>
+  
+  package "Error Classification Feature" {
+    component "Classify error type" as ERROR_TYPE
+    component "AbortError?" as ABORT_CHECK
+    component "Timeout abort?" as TIMEOUT_CHECK
+    component "TypeError?" as NETWORK_CHECK
+    component "HTTP error?" as HTTP_CHECK
+    component "Parse error?" as PARSE_ERR
+  }
+  
+  package "Error Transformation Feature" {
+    component createTimeoutError as CREATE_TIMEOUT
+    component createAbortError as CREATE_ABORT
+    component createNetworkError as CREATE_NETWORK
+    component createHttpError as CREATE_HTTP
+    component createParseError as CREATE_PARSE
+    component createLuminaraError as CREATE_GENERIC
+  }
+  
+  component "Enrich with context" as ERROR_ENRICH
+  component "Throw LuminaraError" as ERROR_RETURN
+}
+
+package "Retry Decision Loop" {
+  component "shouldRetry Policy" as SHOULD_RETRY
+  component calculateRetryDelay as CALC_DELAY
+  
+  package "Retry Policy Feature" {
+    component "Check status codes" as CHECK_STATUS
+    component "Check idempotency" as CHECK_METHOD
+    component "Custom policy" as CHECK_CUSTOM
+    component "Return true/false" as RETRY_DECISION
+  }
+  
+  package "Backoff Feature" {
+    component "Backoff strategy" as BACKOFF_TYPE
+    component "Linear: baseDelay * attempt" as LINEAR
+    component "Exponential: baseDelay * 2^attempt" as EXPONENTIAL
+    component "Decorrelated jitter" as DECORRELATED
+    component "Apply max delay cap" as BACKOFF_MAX
+  }
+}
+
+' Phase 1 Flow
+DRIVER_REQ --> DISPATCHER
+DISPATCHER --> URL_BUILD
+URL_BUILD --> URL_COMPONENTS
+
+URL_COMPONENTS --> DEDUPE_CHECK
+DEDUPE_CHECK --> DEDUPE_KEY : Enabled
+DEDUPE_KEY --> DEDUPE_CACHE
+DEDUPE_CACHE --> DEDUPE_RETURN : Found
+DEDUPE_CACHE --> DEBOUNCE_CHECK : Not found
+DEDUPE_CHECK --> DEBOUNCE_CHECK : Disabled
+
+DEBOUNCE_CHECK --> DEBOUNCE_CANCEL : Enabled
+DEBOUNCE_CANCEL --> DEBOUNCE_TIMER
+DEBOUNCE_TIMER --> DEBOUNCE_WAIT
+DEBOUNCE_WAIT --> RATE_KEY
+DEBOUNCE_CHECK --> RATE_KEY : Disabled
+
+RATE_KEY --> RATE_BUCKET
+RATE_BUCKET --> RATE_TOKENS
+RATE_TOKENS --> RATE_CONSUME : Available
+RATE_TOKENS --> RATE_QUEUE : Unavailable
+RATE_QUEUE --> RATE_WAIT
+RATE_WAIT --> RATE_CONSUME
+
+' Phase 1 to Phase 2
+RATE_CONSUME --> IN_FLIGHT
+DEDUPE_RETURN ..> DRIVER_REQ : Return early
+
+' Phase 2 Flow
+IN_FLIGHT --> TIMEOUT_CREATE
+TIMEOUT_CREATE --> TIMEOUT_TIMER
+TIMEOUT_TIMER --> TIMEOUT_SIGNAL
+TIMEOUT_SIGNAL --> FETCH_OPTS
+FETCH_OPTS --> FETCH_BODY
+FETCH_BODY --> FETCH_CALL
+FETCH_CALL --> FETCH_RESPONSE
+FETCH_RESPONSE --> TIMEOUT_CLEANUP
+
+' Phase 2 to Phase 3
+TIMEOUT_CLEANUP --> SUCCESS_HANDLER : Success
+TIMEOUT_CLEANUP --> ERROR_HANDLER : Error
+
+' Phase 3a Flow (Success)
+SUCCESS_HANDLER --> PARSE_TYPE
+PARSE_TYPE --> PARSE_AUTO
+PARSE_AUTO --> PARSE_JSON
+PARSE_AUTO --> PARSE_TEXT
+PARSE_AUTO --> PARSE_BLOB
+PARSE_AUTO --> PARSE_XML
+PARSE_AUTO --> PARSE_FORM
+
+PARSE_JSON --> CHECK_OK
+PARSE_TEXT --> CHECK_OK
+PARSE_BLOB --> CHECK_OK
+
+CHECK_OK --> STATUS_2XX : 2xx
+CHECK_OK --> STATUS_NON_2XX : Non-2xx
+STATUS_NON_2XX --> IGNORE_CHECK
+IGNORE_CHECK --> SUCCESS_RETURN : Ignore
+IGNORE_CHECK --> ERROR_HANDLER : Do not ignore
+STATUS_2XX --> SUCCESS_RETURN
+
+SUCCESS_RETURN --> DRIVER_REQ
+
+' Phase 3b Flow (Error)
+ERROR_HANDLER --> ERROR_TYPE
+ERROR_TYPE --> ABORT_CHECK
+ABORT_CHECK --> TIMEOUT_CHECK : Yes
+ABORT_CHECK --> NETWORK_CHECK : No
+
+TIMEOUT_CHECK --> CREATE_TIMEOUT : Yes
+TIMEOUT_CHECK --> CREATE_ABORT : No
+
+NETWORK_CHECK --> CREATE_NETWORK : Yes
+NETWORK_CHECK --> HTTP_CHECK : No
+
+HTTP_CHECK --> CREATE_HTTP : Yes
+HTTP_CHECK --> PARSE_ERR : No
+
+PARSE_ERR --> CREATE_PARSE : Yes
+PARSE_ERR --> CREATE_GENERIC : No
+
+CREATE_TIMEOUT --> ERROR_ENRICH
+CREATE_ABORT --> ERROR_ENRICH
+CREATE_NETWORK --> ERROR_ENRICH
+CREATE_HTTP --> ERROR_ENRICH
+CREATE_PARSE --> ERROR_ENRICH
+CREATE_GENERIC --> ERROR_ENRICH
+
+ERROR_ENRICH --> ERROR_RETURN
+ERROR_RETURN --> SHOULD_RETRY
+
+' Retry Decision
+SHOULD_RETRY --> CHECK_STATUS
+SHOULD_RETRY --> CHECK_METHOD
+SHOULD_RETRY --> CHECK_CUSTOM
+CHECK_STATUS --> RETRY_DECISION
+CHECK_METHOD --> RETRY_DECISION
+CHECK_CUSTOM --> RETRY_DECISION
+
+RETRY_DECISION --> CALC_DELAY : Retry
+RETRY_DECISION --> DRIVER_REQ : No retry
+
+CALC_DELAY --> BACKOFF_TYPE
+BACKOFF_TYPE --> LINEAR
+BACKOFF_TYPE --> EXPONENTIAL
+BACKOFF_TYPE --> DECORRELATED
+LINEAR --> BACKOFF_MAX
+EXPONENTIAL --> BACKOFF_MAX
+DECORRELATED --> BACKOFF_MAX
+
+BACKOFF_MAX ..> DISPATCHER : Wait and Retry
+
+@enduml

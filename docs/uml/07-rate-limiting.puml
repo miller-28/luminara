@@ -1,0 +1,129 @@
+@startuml Rate Limiting State Machine
+
+[*] --> Request_Arrives
+
+Request_Arrives --> Generate_Scope_Key : Rate limit enabled
+Request_Arrives --> Execute_Immediately : Rate limit disabled
+
+state "Generate Scope Key" as Generate_Scope_Key {
+  [*] --> Check_Scope_Type
+  Check_Scope_Type --> Global_Key : scope: 'global'
+  Check_Scope_Type --> Domain_Key : scope: 'domain'
+  Check_Scope_Type --> Endpoint_Key : scope: 'endpoint'
+  Global_Key --> [*] : key = 'global'
+  Domain_Key --> [*] : key = 'example.com'
+  Endpoint_Key --> [*] : key = 'GET:/api/users'
+}
+
+Generate_Scope_Key --> Get_Or_Create_Bucket
+
+state "Token Bucket" as Get_Or_Create_Bucket {
+  [*] --> Bucket_Exists
+  Bucket_Exists --> Use_Existing : Found
+  Bucket_Exists --> Create_New : Not found
+  Create_New --> Initialize_Bucket
+  Initialize_Bucket --> [*] : {tokens: burst,\nlastRefill: now,\nqueue: [],\ninFlight: 0}
+  Use_Existing --> [*]
+}
+
+Get_Or_Create_Bucket --> Refill_Tokens
+
+state "Refill Tokens" as Refill_Tokens {
+  [*] --> Calculate_Elapsed
+  Calculate_Elapsed --> Calculate_New_Tokens
+  Calculate_New_Tokens --> Add_Tokens : tokens += elapsed * ratePerMs
+  Add_Tokens --> Cap_At_Burst : min(tokens, burst)
+  Cap_At_Burst --> Update_Last_Refill
+  Update_Last_Refill --> [*]
+}
+
+Refill_Tokens --> Check_Tokens
+
+state "Token Decision" as Check_Tokens {
+  [*] --> Evaluate
+  Evaluate --> Tokens_Available : tokens >= 1
+  Evaluate --> No_Tokens : tokens < 1
+  Tokens_Available --> Check_Concurrent
+  No_Tokens --> [*] : Queue request
+  
+  state "Check Concurrent Limit" as Check_Concurrent {
+    [*] --> Compare_InFlight
+    Compare_InFlight --> Below_Limit : inFlight < maxConcurrent
+    Compare_InFlight --> At_Limit : inFlight >= maxConcurrent
+    Below_Limit --> [*] : Allow
+    At_Limit --> [*] : Queue
+  }
+  
+  Check_Concurrent --> [*]
+}
+
+Check_Tokens --> Consume_Token : Tokens available &\nbelow concurrent limit
+Check_Tokens --> Add_To_Queue : No tokens or\nat concurrent limit
+
+state "Consume Token & Execute" as Consume_Token {
+  [*] --> Decrement_Tokens : tokens -= 1
+  Decrement_Tokens --> Increment_InFlight : inFlight++
+  Increment_InFlight --> Execute_Request
+  Execute_Request --> Await_Response
+  Await_Response --> Decrement_InFlight : inFlight--
+  Decrement_InFlight --> [*] : Return response
+}
+
+Consume_Token --> Execute_Immediately
+
+state "Queue Management" as Add_To_Queue {
+  [*] --> Check_Queue_Limit
+  Check_Queue_Limit --> Under_Limit : queue.length < queueLimit
+  Check_Queue_Limit --> Over_Limit : queue.length >= queueLimit
+  Under_Limit --> Add_To_End : queue.push(request)
+  Over_Limit --> [*] : Throw error\n(queue full)
+  Add_To_End --> Wait_In_Queue
+  Wait_In_Queue --> [*] : Pending...
+}
+
+Add_To_Queue --> Scheduler_Tick
+
+state "Scheduler (Background Timer)" as Scheduler_Tick {
+  [*] --> Tick_Every_25ms
+  Tick_Every_25ms --> Iterate_Buckets
+  Iterate_Buckets --> Process_Bucket
+  
+  state "Process Each Bucket" as Process_Bucket {
+    [*] --> Refill_Bucket_Tokens
+    Refill_Bucket_Tokens --> Check_Queue_Empty
+    Check_Queue_Empty --> Skip : queue.length === 0
+    Check_Queue_Empty --> Try_Dispatch : queue.length > 0
+    
+    state "Try Dispatch Queued Request" as Try_Dispatch {
+      [*] --> Check_Tokens_Again
+      Check_Tokens_Again --> Tokens_Now : tokens >= 1
+      Check_Tokens_Again --> Still_No_Tokens : tokens < 1
+      Tokens_Now --> Dequeue : request = queue.shift()
+      Still_No_Tokens --> [*] : Wait next tick
+      Dequeue --> Consume_And_Execute
+      Consume_And_Execute --> [*] : Resolve promise
+    }
+    
+    Try_Dispatch --> [*]
+    Skip --> [*]
+  }
+  
+  Process_Bucket --> Tick_Every_25ms
+}
+
+Scheduler_Tick --> Consume_Token : Request dispatched\nfrom queue
+
+Execute_Immediately --> [*] : Response
+Consume_Token --> [*] : Response
+
+note top of Check_Tokens
+  Token bucket algorithm ensures
+  rate limiting with burst capacity
+end note
+
+note bottom of Scheduler_Tick
+  Background scheduler runs every 25ms
+  to refill tokens and dispatch queued requests
+end note
+
+@enduml

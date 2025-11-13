@@ -36,12 +36,32 @@ Server must be accessible at `http://localhost:2880`
 
 ## 🚀 Usage
 
-### Quick Start
+### Option 1: VS Code Debug (Recommended)
+
+Press `F5` in VS Code and select:
+```
+Luminara - Run Headless Benchmarks
+```
+
+This will:
+1. Start the development server on port 2880
+2. Run Playwright benchmarks across all browsers (Chromium, Firefox, WebKit)
+3. Display cross-browser comparison table
+4. Save results to `benchmark/reports/headless-latest.json`
+
+> **Note**: The VS Code launch configuration automatically starts the server and runs the full benchmark suite with proper debugging support.
+
+### Option 2: Command Line
 
 ```powershell
 # From project root
 cd benchmark
 npm run benchmark:headless
+```
+
+**Important**: Ensure the development server is running first:
+```powershell
+npm run serve
 ```
 
 ### What It Does
@@ -155,17 +175,7 @@ Edit `headless/index.js` to:
     npm run benchmark:headless
 ```
 
-### Baseline Comparison
-
-Use with `scripts/track-regression.js`:
-
-```powershell
-npm run benchmark:headless
-npm run benchmark:regression
-```
-
 ## 📚 Related
 
 - **Browser UI**: `npm run benchmark:browser` - Interactive browser interface
 - **Node.js**: `npm run benchmark` - Full Node.js benchmark suite
-- **Comparison**: `npm run benchmark:compare` - Compare saved results
