@@ -1,4 +1,5 @@
 # Ignore local development artifacts (keep sandbox committed to repo)
+.github/copilot-instructions.md
 .env.local
 .DS_Store
 node_modules/
@@ -7,7 +8,6 @@ coverage
 .env.local
 .DS_Store
 .git
-.github
 *.log
 .vscode/chrome-debug-profile/
 .vite
