@@ -61,15 +61,23 @@ export async function integratedBenchmarks(bench, mockServer, config) {
 	with3Plugins
 		.use({
 			name: 'auth',
-			onRequest(ctx) { ctx.req.headers = ctx.req.headers || {}; ctx.req.headers['Authorization'] = 'Bearer token'; }
+			onRequest(ctx) {
+				ctx.req.headers = ctx.req.headers || {}; ctx.req.headers['Authorization'] = 'Bearer token'; 
+			}
 		})
 		.use({
 			name: 'logging',
-			onRequest(ctx) { ctx.req.headers['X-Request-ID'] = 'req-123'; }
+			onRequest(ctx) {
+				ctx.req.headers['X-Request-ID'] = 'req-123'; 
+			}
 		})
 		.use({
 			name: 'transform',
-			onResponse(ctx) { if (ctx.res) ctx.res.transformed = true; }
+			onResponse(ctx) {
+				if (ctx.res) {
+					ctx.res.transformed = true;
+				} 
+			}
 		});
 	
 	bench.add('Scenario - GET with 3 plugins', async () => {

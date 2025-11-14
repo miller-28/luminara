@@ -267,6 +267,24 @@ suite.test('Retry disabled with retry: 0', async () => {
 	}
 });
 
+suite.test('Retry disabled with retry: false', async () => {
+	mockServer.resetCounts();
+	
+	const api = createLuminara({
+		baseURL: BASE_URL,
+		retry: false, // Disable retries with boolean
+		retryDelay: 100
+	});
+	
+	try {
+		await api.getJson('/json?status=500');
+		assert(false, 'Should fail without retries');
+	} catch (error) {
+		const requestCount = mockServer.getRequestCount('GET', '/json');
+		assert(requestCount === 1, `Should make only 1 request when retry: false, made ${requestCount}`);
+	}
+});
+
 suite.test('Retry with network errors simulation', async () => {
 
 	// Create a separate client that points to non-existent server

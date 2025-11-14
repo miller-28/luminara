@@ -29,7 +29,7 @@ try {
 	console.log('⏳ Waiting for dependencies...');
 	await page.waitForFunction(() => window.Bench && window.createLuminara, { timeout: 10000 });
 
-	console.log('⚡ Running 3 quick benchmarks...\n');
+	console.log('⚡ Running quick benchmarks (core + hedging)...\n');
 	const results = await page.evaluate(async () => {
 		const { Bench, createLuminara } = window;
 		const benchmarkResults = [];
@@ -48,6 +48,24 @@ try {
 		bench.add('api.updateConfig()', () => {
 			const api = createLuminara();
 			api.updateConfig({ retry: 3 });
+		});
+
+		// Add hedging benchmark
+		const hedgingApi = createLuminara({
+			baseURL: 'https://jsonplaceholder.typicode.com',
+			hedging: {
+				policy: 'race',
+				hedgeDelay: 100,
+				maxHedges: 1
+			}
+		});
+		
+		bench.add('Hedging - Race policy', async () => {
+			try {
+				await hedgingApi.get('/posts/1');
+			} catch (error) {
+				// Ignore errors in benchmark
+			}
 		});
 
 		await bench.run();

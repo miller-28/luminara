@@ -1,5 +1,4 @@
-@startuml
-title Driver Three-Phase Architecture
+@startuml Driver Three-Phase Architecture
 
 skinparam packageStyle rectangle
 skinparam backgroundColor white
@@ -48,6 +47,15 @@ package "PHASE 1 Pre-Flight RequestDispatcher" {
 
 package "PHASE 2 In-Flight InFlightHandler" {
   component "InFlightHandler" as IN_FLIGHT <<PHASE2>>
+  
+  package "Hedging Feature" {
+    component "Check shouldUseHedging" as HEDGE_CHECK
+    component "Race Policy" as HEDGE_RACE
+    component "Cancel-and-Retry Policy" as HEDGE_CANCEL
+    component "Calculate hedge delays" as HEDGE_DELAY
+    component "Execute concurrent requests" as HEDGE_CONCURRENT
+    component "Cancel slow requests" as HEDGE_CANCEL_SLOW
+  }
   
   package "Timeout Feature" {
     component "Create AbortController" as TIMEOUT_CREATE
@@ -162,7 +170,19 @@ RATE_CONSUME --> IN_FLIGHT
 DEDUPE_RETURN ..> DRIVER_REQ : Return early
 
 ' Phase 2 Flow
-IN_FLIGHT --> TIMEOUT_CREATE
+IN_FLIGHT --> HEDGE_CHECK
+HEDGE_CHECK --> HEDGE_RACE : Race policy
+HEDGE_CHECK --> HEDGE_CANCEL : Cancel-and-retry
+HEDGE_CHECK --> TIMEOUT_CREATE : Hedging disabled
+
+HEDGE_RACE --> HEDGE_DELAY
+HEDGE_CANCEL --> HEDGE_DELAY
+HEDGE_DELAY --> HEDGE_CONCURRENT : Race
+HEDGE_DELAY --> HEDGE_CANCEL_SLOW : Cancel-and-retry
+
+HEDGE_CONCURRENT --> TIMEOUT_CREATE
+HEDGE_CANCEL_SLOW --> TIMEOUT_CREATE
+
 TIMEOUT_CREATE --> TIMEOUT_TIMER
 TIMEOUT_TIMER --> TIMEOUT_SIGNAL
 TIMEOUT_SIGNAL --> FETCH_OPTS

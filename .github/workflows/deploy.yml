@@ -55,6 +55,10 @@ jobs:
           mkdir -p "$TARGET/dist"
           rsync -a dist/ "$TARGET/dist"/
 
+          echo "Copying benchmark/browser/ into release/benchmark/"
+          mkdir -p "$TARGET/benchmark"
+          rsync -a benchmark/browser/ "$TARGET/benchmark"/
+
           # (No npm install here, release is pure static assets)
 
           echo "Pointing 'current' symlink to new release"

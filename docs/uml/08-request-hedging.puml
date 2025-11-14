@@ -1,0 +1,223 @@
+@startuml Request Hedging System
+
+!define PRIMARY_COLOR #E3F2FD
+!define HEDGE_COLOR #FFF3E0
+!define COORDINATOR_COLOR #F3E5F5
+!define SUCCESS_COLOR #E8F5E9
+!define ERROR_COLOR #FFEBEE
+
+title Luminara - Request Hedging Architecture
+
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam shadowing false
+
+participant "InFlightHandler" as InFlight <<Driver>>
+participant "HedgingCoordinator" as Coordinator <<Hedging>>
+participant "Primary Request" as Primary <<Request>>
+participant "Hedge Request 1" as Hedge1 <<Request>>
+participant "Hedge Request 2" as Hedge2 <<Request>>
+participant "Native Fetch" as Fetch <<External>>
+participant "StatsHub" as Stats <<Stats>>
+
+== Request Initiation ==
+
+InFlight -> InFlight: shouldUseHedging(req)
+activate InFlight
+
+note right of InFlight
+  **Hedging Enabled If:**
+  • hedging config present
+  • enabled !== false
+  • HTTP method in whitelist
+  • Valid configuration
+end note
+
+alt Hedging Disabled
+  InFlight -> Fetch: Standard request
+  Fetch --> InFlight: Response
+else Hedging Enabled
+  InFlight -> Coordinator: executeWithHedging(req, context)
+  activate Coordinator
+  
+  == Race Policy ==
+  
+  alt Policy: race
+    Coordinator -> Primary: Start primary request
+    activate Primary
+    Primary -> Fetch: fetch()
+    
+    note right of Coordinator
+      **Race Policy:**
+      • All requests run concurrently
+      • First successful response wins
+      • Failed requests are ignored
+      • Other requests cancelled on success
+    end note
+    
+    Coordinator -> Coordinator: Wait hedgeDelay ms
+    
+    alt Primary completes before hedgeDelay
+      Primary --> Coordinator: Success (fast path)
+      Coordinator -> Coordinator: Cancel pending hedges
+      Coordinator -> Stats: hedging_success_rate
+      Coordinator --> InFlight: Response
+    else Primary slow
+      Coordinator -> Hedge1: Start hedge #1 (concurrent)
+      activate Hedge1
+      Hedge1 -> Fetch: fetch()
+      
+      Coordinator -> Coordinator: Wait hedgeDelay * backoff
+      
+      alt Hedge1 completes first
+        Hedge1 --> Coordinator: Success (hedge wins)
+        Coordinator -> Primary: Cancel primary
+        deactivate Primary
+        Coordinator -> Stats: hedging_triggered + winner=hedge-1
+        Coordinator --> InFlight: Response from hedge
+        deactivate Hedge1
+      else Still no success
+        Coordinator -> Hedge2: Start hedge #2 (concurrent)
+        activate Hedge2
+        Hedge2 -> Fetch: fetch()
+        
+        alt Primary completes
+          Primary --> Coordinator: Success
+          Coordinator -> Hedge1: Cancel
+          Coordinator -> Hedge2: Cancel
+          deactivate Hedge1
+          deactivate Hedge2
+          Coordinator -> Stats: hedging_success_rate
+          Coordinator --> InFlight: Response
+          deactivate Primary
+        else Hedge2 completes first
+          Hedge2 --> Coordinator: Success
+          Coordinator -> Primary: Cancel
+          Coordinator -> Hedge1: Cancel
+          deactivate Primary
+          deactivate Hedge1
+          Coordinator -> Stats: hedging_triggered + winner=hedge-2
+          Coordinator --> InFlight: Response
+          deactivate Hedge2
+        end
+      end
+    end
+  
+  == Cancel-and-Retry Policy ==
+  
+  else Policy: cancel-and-retry
+    
+    note right of Coordinator
+      **Cancel-and-Retry Policy:**
+      • One active request at a time
+      • Cancel slow request before starting next
+      • Sequential with cancellation
+      • More conservative than race
+    end note
+    
+    Coordinator -> Primary: Start primary request
+    activate Primary
+    Primary -> Fetch: fetch()
+    
+    Coordinator -> Coordinator: Wait hedgeDelay ms
+    
+    alt Primary completes before hedgeDelay
+      Primary --> Coordinator: Success
+      Coordinator -> Stats: hedging_success_rate
+      Coordinator --> InFlight: Response
+      deactivate Primary
+    else Primary timeout
+      Coordinator -> Primary: **Cancel primary**
+      deactivate Primary
+      
+      Coordinator -> Hedge1: Start hedge #1 (new attempt)
+      activate Hedge1
+      Hedge1 -> Fetch: fetch()
+      
+      Coordinator -> Coordinator: Wait hedgeDelay * backoff
+      
+      alt Hedge1 completes
+        Hedge1 --> Coordinator: Success
+        Coordinator -> Stats: hedging_triggered + winner=hedge-1
+        Coordinator --> InFlight: Response
+        deactivate Hedge1
+      else Hedge1 timeout
+        Coordinator -> Hedge1: **Cancel hedge #1**
+        deactivate Hedge1
+        
+        Coordinator -> Hedge2: Start hedge #2 (new attempt)
+        activate Hedge2
+        Hedge2 -> Fetch: fetch()
+        
+        alt Hedge2 completes
+          Hedge2 --> Coordinator: Success
+          Coordinator -> Stats: hedging_triggered + winner=hedge-2
+          Coordinator --> InFlight: Response
+          deactivate Hedge2
+        else All attempts failed
+          Coordinator -> Stats: hedging_all_failed
+          Coordinator --> InFlight: Error
+        end
+      end
+    end
+  end
+  
+  == Exponential Backoff & Jitter ==
+  
+  note over Coordinator
+    **Backoff Calculation:**
+    baseDelay = hedgeDelay
+    attempt = hedgeIndex (0, 1, 2, ...)
+    
+    if (exponentialBackoff):
+      delay = baseDelay * (backoffMultiplier ^ attempt)
+    else:
+      delay = baseDelay
+    
+    if (jitter):
+      jitterAmount = delay * jitterRange
+      delay = delay + random(-jitterAmount, +jitterAmount)
+    
+    **Example (exponential + jitter):**
+    hedgeDelay: 1000ms, backoffMultiplier: 2, jitterRange: 0.3
+    • Primary: 0ms
+    • Hedge 1: ~1000ms (±300ms)
+    • Hedge 2: ~2000ms (±600ms)
+    • Hedge 3: ~4000ms (±1200ms)
+  end note
+  
+  deactivate Coordinator
+end
+
+deactivate InFlight
+
+== Stats Integration ==
+
+note over Stats
+  **Hedging Metrics:**
+  • hedging_triggered: Count of hedges
+  • hedging_success_rate: Success/total ratio
+  • hedging_winner: Which request won (primary, hedge-1, hedge-2)
+  • hedging_latency_saved: Time saved vs slowest
+  • hedging_all_failed: All attempts failed
+end note
+
+== Configuration Options ==
+
+note right of Coordinator
+  **Hedging Configuration:**
+  {
+    enabled: true,              // Implicit if config present
+    policy: 'race',             // 'race' | 'cancel-and-retry'
+    hedgeDelay: 1000,           // Base delay (ms)
+    maxHedges: 2,               // Max concurrent/sequential hedges
+    exponentialBackoff: false,  // Increase delay exponentially
+    backoffMultiplier: 2,       // Multiplier for backoff
+    jitter: false,              // Add randomness
+    jitterRange: 0.3,           // ±30%
+    includeHttpMethods: ['GET', 'HEAD', 'OPTIONS'],
+    servers: []                 // Server rotation (optional)
+  }
+end note
+
+@enduml

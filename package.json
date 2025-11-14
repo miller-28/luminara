@@ -1,7 +1,7 @@
 {
   "name": "luminara",
-  "version": "0.13.0",
-  "description": "Lightweight, universal HTTP client with native fetch for browsers and Node.js. Zero dependencies, comprehensive stats system, retry strategies, backoff algorithms, and enhanced interceptors. Works across React, Vue, Angular, Svelte, vanilla JavaScript, and Node.js 18+.",
+  "version": "1.0.0",
+  "description": "Zero-dependency, high-efficiency HTTP client built on native fetch with a microsecond-scale core. Features a deterministic plugin pipeline, advanced retry/backoff, hedging, rate limiting, deduplication, and a real-time stats engine — all built-in, with no external plugins required. Lightweight, universal, and designed for browsers and Node.js 18+.",
   "author": {
 		"name": "Jonathan Miller",
 		"email": "jonathan@miller28.com",
@@ -72,6 +72,11 @@
     "jitter-backoff",
     "linear-backoff",
     "backoff-strategies",
+    "request-hedging",
+    "hedging",
+    "latency-optimization",
+    "concurrent-requests",
+    "tail-latency",
     "middleware",
     "timeout",
     "abort",

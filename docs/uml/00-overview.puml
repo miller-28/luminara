@@ -54,6 +54,7 @@ package "Driver Layer" <<Rectangle>> DRIVER_COLOR {
     [Deduplicator] as Dedupe
     [Debouncer] as Debounce
     [Rate Limiter] as RateLimit
+    [Hedging Coordinator] as Hedging
     [Timeout Handler] as Timeout
     [Response Parser] as Parser
     [Error Handler] as ErrorHandler
@@ -98,6 +99,7 @@ Dispatcher --> Debounce
 Dispatcher --> RateLimit
 
 InFlight --> Timeout
+InFlight --> Hedging
 InFlight --> Fetch : uses
 
 Response --> Parser
@@ -133,7 +135,7 @@ end note
 note bottom of Driver
   **Three-Phase Architecture**
   Phase 1: Pre-Flight (URL, dedupe, debounce, rate limit)
-  Phase 2: In-Flight (timeout, fetch execution)
+  Phase 2: In-Flight (hedging, timeout, fetch execution)
   Phase 3: Post-Flight (parse, error handling, stats)
 end note
 

@@ -68,6 +68,7 @@ package "Driver Layer - NativeFetchDriver" {
     component Debouncer as DEBOUNCE <<FEATURES>>
     component Deduplicator as DEDUPE <<FEATURES>>
     component RateLimiter as RATE_LIMIT <<FEATURES>>
+    component HedgingCoordinator as HEDGING <<FEATURES>>
     component TimeoutHandler as TIMEOUT <<FEATURES>>
     component ResponseParser as RESPONSE_PARSER <<FEATURES>>
     component ErrorHandler as ERROR_HANDLER <<FEATURES>>
@@ -133,6 +134,7 @@ PHASE1 --> DEBOUNCE : debounces
 PHASE1 --> RATE_LIMIT : rate limits
 PHASE1 --> PHASE2 : executes
 
+PHASE2 --> HEDGING : hedges
 PHASE2 --> TIMEOUT : applies
 PHASE2 --> FETCH : calls
 
@@ -154,7 +156,7 @@ end note
 note right of DRIVER_MAIN
   Three-phase handler architecture:
   1. Pre-Flight: URL, dedupe, debounce, rate limit
-  2. In-Flight: Timeout, fetch execution
+  2. In-Flight: Hedging, timeout, fetch execution
   3. Post-Flight: Parse or transform error
 end note
 

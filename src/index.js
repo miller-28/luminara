@@ -25,6 +25,9 @@ export {
 export { StatsHub } from './core/stats/StatsHub.js';
 export { METRIC_TYPES, GROUP_BY_DIMENSIONS, TIME_WINDOWS } from './core/stats/query/schemas.js';
 
+// Export hedging utilities
+export { isHedgingError, hasHedgingMetadata } from './drivers/native/features/hedging/index.js';
+
 // Export orchestration components (for benchmarking and advanced usage)
 export { PluginPipeline } from './core/orchestration/PluginPipeline.js';
 export { RetryOrchestrator } from './core/orchestration/RetryOrchestrator.js';

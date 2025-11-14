@@ -44,7 +44,9 @@ export function sleep(ms) {
  * Calculate percentage change
  */
 export function calculatePercentageChange(current, baseline) {
-	if (!baseline) return 0;
+	if (!baseline) {
+		return 0;
+	}
 	return ((current - baseline) / baseline) * 100;
 }
 

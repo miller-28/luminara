@@ -94,6 +94,7 @@ Opens beautiful HTML report with:
 - Stats system queries
 - Request deduplication
 - Debouncing
+- Request hedging (race policy, cancel-and-retry, exponential backoff, overhead)
 
 ### Integrated Scenarios
 - Bare minimum GET request

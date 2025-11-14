@@ -29,7 +29,7 @@ export async function dispatchRequest(config, context, features = {}, executeFun
 		signal, timeout, retry = 0, retryDelay = 1000,
 		retryStatusCodes, backoffType, backoffMaxDelay, shouldRetry,
 		responseType, ignoreResponseError, parseResponse, verbose,
-		debounce, rateLimit, deduplicate
+		debounce, rateLimit, deduplicate, hedging
 	} = config;
 	
 	const { debouncer, rateLimiter, deduplicator, globalDebounce, globalRateLimit, globalDeduplicate } = features;
@@ -70,6 +70,7 @@ export async function dispatchRequest(config, context, features = {}, executeFun
 		ignoreResponseError,
 		parseResponse,
 		verbose,
+		hedging,
 		context
 	};
 	

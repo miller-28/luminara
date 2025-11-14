@@ -5,7 +5,7 @@
  * 1. Setup timeout handling
  * 2. Prepare fetch options (method, headers, body)
  * 3. Execute native fetch request
- * 4. Request hedging for latency optimization (future)
+ * 4. Request hedging for latency optimization
  * 
  * This handler manages the request while it's actively being executed.
  */
@@ -13,15 +13,33 @@
 import { createTimeoutHandler } from '../features/timeout/index.js';
 import { timeoutLogger } from '../features/timeout/verboseLogger.js';
 import { verboseLog } from '../../../core/verbose/verboseLogger.js';
+import { shouldUseHedging, executeWithHedging } from '../features/hedging/index.js';
 
 /**
- * Execute request with timeout handling
+ * Execute request with timeout and optional hedging
  * 
  * @param {object} preparedRequest - Prepared request from RequestDispatcher
  * @param {number} currentAttempt - Current attempt number
  * @returns {Promise<Response>} Fetch Response object
  */
 export async function executeRequest(preparedRequest, currentAttempt) {
+	// Check if hedging should be used
+	if (shouldUseHedging(preparedRequest)) {
+		return await executeWithHedging(preparedRequest, currentAttempt, executeSingleRequest);
+	}
+	
+	// Standard single request execution
+	return await executeSingleRequest(preparedRequest, currentAttempt);
+}
+
+/**
+ * Execute a single request (used by both hedging and standard flow)
+ * 
+ * @param {object} preparedRequest - Prepared request from RequestDispatcher
+ * @param {number} currentAttempt - Current attempt number
+ * @returns {Promise<Response>} Fetch Response object
+ */
+export async function executeSingleRequest(preparedRequest, currentAttempt) {
 	const {
 		fullUrl, method, headers, body, signal, timeout, verbose, context
 	} = preparedRequest;
@@ -52,11 +70,6 @@ export async function executeRequest(preparedRequest, currentAttempt) {
 		}
 	}
 	
-	// TODO: Request Hedging - Send multiple redundant requests (FUTURE FEATURE)
-	// if (preparedRequest.hedging?.enabled) {
-	//   return await executeWithHedging(fullUrl, fetchOptions, preparedRequest);
-	// }
-	
 	// Log request execution start if verbose
 	if (verbose) {
 		verboseLog(context, 'REQUEST', `Executing native fetch: ${method.toUpperCase()} ${fullUrl}`, {
@@ -69,7 +82,6 @@ export async function executeRequest(preparedRequest, currentAttempt) {
 	}
 	
 	try {
-
 		// Execute native fetch
 		const response = await fetch(fullUrl, fetchOptions);
 		
@@ -86,7 +98,6 @@ export async function executeRequest(preparedRequest, currentAttempt) {
 			}
 		};
 	} catch (error) {
-
 		// Clear timeout on error
 		timeoutCleanup();
 		
@@ -96,49 +107,4 @@ export async function executeRequest(preparedRequest, currentAttempt) {
 		// Re-throw the error to be handled by ErrorResponseHandler
 		throw error;
 	}
-}
-
-/**
- * Execute request with hedging (FUTURE FEATURE - Placeholder)
- * 
- * Request hedging: Send multiple identical requests to different servers
- * Return first successful response, cancel others
- * 
- * Implementation plan:
- * 1. Start primary request
- * 2. After hedge.delay ms, start hedge request(s) to different servers
- * 3. Use Promise.race() to get first response
- * 4. Cancel remaining requests with AbortController
- * 5. Return winning response
- * 6. Track stats for hedge effectiveness
- */
-async function executeWithHedging(url, fetchOptions, preparedRequest) {
-
-	// const { hedging } = preparedRequest;
-	// const controllers = [];
-	// const requests = [];
-	// 
-	// // Primary request
-	// const primaryController = new AbortController();
-	// controllers.push(primaryController);
-	// requests.push(fetch(url, { ...fetchOptions, signal: primaryController.signal }));
-	// 
-	// // Hedge requests after delay
-	// setTimeout(() => {
-	//   for (let i = 0; i < hedging.maxHedges; i++) {
-	//     const hedgeController = new AbortController();
-	//     controllers.push(hedgeController);
-	//     
-	//     const hedgeUrl = hedging.servers?.[i] ? `${hedging.servers[i]}${new URL(url).pathname}` : url;
-	//     requests.push(fetch(hedgeUrl, { ...fetchOptions, signal: hedgeController.signal }));
-	//   }
-	// }, hedging.delay || 100);
-	// 
-	// // Race and cancel losers
-	// const winner = await Promise.race(requests);
-	// controllers.forEach(ctrl => ctrl.abort());
-	// 
-	// return winner;
-	
-	throw new Error('Request hedging not yet implemented');
 }

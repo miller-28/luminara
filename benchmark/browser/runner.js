@@ -80,7 +80,7 @@ class BrowserBenchmarkRunner {
 
 				for (const benchmark of benchmarks) {
 					if (!benchmark || !benchmark.fn) {
-						console.warn(`Skipping benchmark: invalid structure`, benchmark);
+						console.warn('Skipping benchmark: invalid structure', benchmark);
 						continue;
 					}
 					bench.add(benchmark.name, benchmark.fn);
@@ -147,7 +147,9 @@ class BrowserBenchmarkRunner {
 		const tableContainer = document.getElementById('resultsTable');
 		const summaryContainer = document.getElementById('summary');
 		
-		if (this.results.length === 0) return;
+		if (this.results.length === 0) {
+			return;
+		}
 
 		// Show summary
 		summaryContainer.innerHTML = `
@@ -278,15 +280,25 @@ class BrowserBenchmarkRunner {
 	}
 
 	formatTime(ms) {
-		if (ms < 0.001) return `${(ms * 1000000).toFixed(2)} ns`;
-		if (ms < 1) return `${(ms * 1000).toFixed(2)} μs`;
-		if (ms < 1000) return `${ms.toFixed(2)} ms`;
+		if (ms < 0.001) {
+			return `${(ms * 1000000).toFixed(2)} ns`;
+		}
+		if (ms < 1) {
+			return `${(ms * 1000).toFixed(2)} μs`;
+		}
+		if (ms < 1000) {
+			return `${ms.toFixed(2)} ms`;
+		}
 		return `${(ms / 1000).toFixed(2)} s`;
 	}
 
 	formatOps(ops) {
-		if (ops >= 1000000) return `${(ops / 1000000).toFixed(2)}M ops/s`;
-		if (ops >= 1000) return `${(ops / 1000).toFixed(2)}K ops/s`;
+		if (ops >= 1000000) {
+			return `${(ops / 1000000).toFixed(2)}M ops/s`;
+		}
+		if (ops >= 1000) {
+			return `${(ops / 1000).toFixed(2)}K ops/s`;
+		}
 		return `${ops.toFixed(0)} ops/s`;
 	}
 }

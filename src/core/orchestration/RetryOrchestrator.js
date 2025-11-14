@@ -17,7 +17,10 @@ export class RetryOrchestrator {
 	 * Execute request with retry logic
 	 */
 	async execute(context, pluginPipeline) {
-		const maxAttempts = context.req.retry ? context.req.retry + 1 : 1;
+		// Support retry: false, retry: 0, or retry: undefined (all disable retries)
+		// Only retry if explicitly set to a positive number
+		const retryCount = (typeof context.req.retry === 'number' && context.req.retry > 0) ? context.req.retry : 0;
+		const maxAttempts = retryCount + 1;
 		const timings = context.__timings;
 		
 		// Log initial request start
@@ -39,19 +42,31 @@ export class RetryOrchestrator {
 				}
 				
 				// 1) onRequest interceptors
-				if (timings) timings.pluginOnRequestStart = performance.now();
+				if (timings) {
+					timings.pluginOnRequestStart = performance.now();
+				}
 				await pluginPipeline.executeOnRequest(context);
-				if (timings) timings.pluginOnRequest = performance.now() - timings.pluginOnRequestStart;
+				if (timings) {
+					timings.pluginOnRequest = performance.now() - timings.pluginOnRequestStart;
+				}
 				
 				// 2) Execute driver request
-				if (timings) timings.driverRequestStart = performance.now();
+				if (timings) {
+					timings.driverRequestStart = performance.now();
+				}
 				context.res = await this.driver.request(context.req);
-				if (timings) timings.driverRequest = performance.now() - timings.driverRequestStart;
+				if (timings) {
+					timings.driverRequest = performance.now() - timings.driverRequestStart;
+				}
 				
 				// 3) onResponse interceptors
-				if (timings) timings.pluginOnResponseStart = performance.now();
+				if (timings) {
+					timings.pluginOnResponseStart = performance.now();
+				}
 				await pluginPipeline.executeOnResponse(context);
-				if (timings) timings.pluginOnResponse = performance.now() - timings.pluginOnResponseStart;
+				if (timings) {
+					timings.pluginOnResponse = performance.now() - timings.pluginOnResponseStart;
+				}
 				
 				// Success - log completion and emit stats event
 				const duration = Date.now() - context.meta.requestStartTime;

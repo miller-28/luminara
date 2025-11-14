@@ -100,12 +100,18 @@ export class LuminaraClient {
 
 		// Initialize benchmark timings if enabled
 		const timings = req.__benchmark ? {} : null;
-		if (timings) timings.start = performance.now();
+		if (timings) {
+			timings.start = performance.now();
+		}
 
 		// Merge global config with per-request options (per-request takes priority)
-		if (timings) timings.configMergeStart = performance.now();
+		if (timings) {
+			timings.configMergeStart = performance.now();
+		}
 		const mergedReq = this.configManager.merge(req);
-		if (timings) timings.configMerge = performance.now() - timings.configMergeStart;
+		if (timings) {
+			timings.configMerge = performance.now() - timings.configMergeStart;
+		}
 		
 		// Log driver selection if verbose is enabled
 		if (mergedReq.verbose) {
@@ -117,12 +123,18 @@ export class LuminaraClient {
 		}
 		
 		// Build request context
-		if (timings) timings.contextBuildStart = performance.now();
+		if (timings) {
+			timings.contextBuildStart = performance.now();
+		}
 		const context = ContextBuilder.build(mergedReq, this.driver);
-		if (timings) timings.contextBuild = performance.now() - timings.contextBuildStart;
+		if (timings) {
+			timings.contextBuild = performance.now() - timings.contextBuildStart;
+		}
 		
 		// Emit stats event for request start
-		if (timings) timings.statsEmitStart = performance.now();
+		if (timings) {
+			timings.statsEmitStart = performance.now();
+		}
 		this.statsEmitter.emit('request:start', {
 			id: context.meta.requestId,
 			time: context.meta.requestStartTime,
@@ -131,21 +143,31 @@ export class LuminaraClient {
 			endpoint: StatsUtils.normalizeEndpoint(mergedReq.method || 'GET', mergedReq.url),
 			tags: mergedReq.tags || []
 		});
-		if (timings) timings.statsEmit = performance.now() - timings.statsEmitStart;
+		if (timings) {
+			timings.statsEmit = performance.now() - timings.statsEmitStart;
+		}
 
 		// Merge user's AbortController signal if provided
-		if (timings) timings.signalMergeStart = performance.now();
+		if (timings) {
+			timings.signalMergeStart = performance.now();
+		}
 		SignalManager.mergeUserSignal(context, mergedReq.signal, this.statsEmitter);
-		if (timings) timings.signalMerge = performance.now() - timings.signalMergeStart;
+		if (timings) {
+			timings.signalMerge = performance.now() - timings.signalMergeStart;
+		}
 		
 		// Set the internal signal on the request
 		context.req.signal = context.controller.signal;
 
 		// Pass timings to context for deeper instrumentation
-		if (timings) context.__timings = timings;
+		if (timings) {
+			context.__timings = timings;
+		}
 
 		// Execute with retry orchestration
-		if (timings) timings.orchestrationStart = performance.now();
+		if (timings) {
+			timings.orchestrationStart = performance.now();
+		}
 		const result = await this.retryOrchestrator.execute(context, this.pluginPipeline);
 		if (timings) {
 			timings.orchestration = performance.now() - timings.orchestrationStart;

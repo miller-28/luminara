@@ -92,6 +92,18 @@ group Retry Loop [Attempt 1...N]
     
     group PHASE 2: In-Flight [Request Execution]
       Dispatcher -> InFlight: executeRequest(preparedRequest,\ncurrentAttempt)
+      
+      alt Hedging Enabled
+        InFlight -> InFlight: shouldUseHedging(config, method)
+        alt Race Policy
+          InFlight -> InFlight: executeRacePolicy()
+          note right: Send multiple concurrent\nrequests, first wins
+        else Cancel-and-Retry Policy
+          InFlight -> InFlight: executeCancelAndRetry()
+          note right: Cancel slow request,\nretry sequentially
+        end
+      end
+      
       InFlight -> InFlight: createTimeoutHandler(timeout, signal)
       InFlight -> Fetch: fetch(fullUrl, fetchOptions)
       

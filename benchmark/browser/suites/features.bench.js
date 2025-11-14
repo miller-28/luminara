@@ -99,6 +99,54 @@ export const featuresBenchmarks = [
 		}
 	},
 	{
+		name: 'Hedging - Race policy (success first try)',
+		fn: async () => {
+			const { createLuminara } = window;
+			const api = createLuminara({
+				baseURL: 'https://jsonplaceholder.typicode.com',
+				hedging: {
+					policy: 'race',
+					hedgeDelay: 1000,
+					maxHedges: 2
+				}
+			});
+			await api.get('/todos/1');
+		}
+	},
+	{
+		name: 'Hedging - Cancel-and-retry policy',
+		fn: async () => {
+			const { createLuminara } = window;
+			const api = createLuminara({
+				baseURL: 'https://jsonplaceholder.typicode.com',
+				hedging: {
+					policy: 'cancel-and-retry',
+					hedgeDelay: 1000,
+					maxHedges: 2
+				}
+			});
+			await api.get('/todos/1');
+		}
+	},
+	{
+		name: 'Hedging - Exponential backoff with jitter',
+		fn: async () => {
+			const { createLuminara } = window;
+			const api = createLuminara({
+				baseURL: 'https://jsonplaceholder.typicode.com',
+				hedging: {
+					policy: 'race',
+					hedgeDelay: 500,
+					maxHedges: 3,
+					exponentialBackoff: true,
+					backoffMultiplier: 2,
+					jitter: true
+				}
+			});
+			await api.get('/todos/1');
+		}
+	},
+	{
 		name: 'Rate Limiting - With tokens',
 		fn: async () => {
 			const { createLuminara } = window;

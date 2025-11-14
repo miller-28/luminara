@@ -182,6 +182,74 @@ export async function featureBenchmarks(bench, mockServer, config) {
 		await debounceApi.get(`/json-small?t=${Date.now()}`);
 	});
 	
+	// ========== Request Hedging Benchmarks ==========
+	
+	// Benchmark: Hedging - Race policy (success first try)
+	const hedgingRaceApi = createLuminara({
+		baseURL: `http://localhost:${mockServer.port}`,
+		hedging: {
+			policy: 'race',
+			hedgeDelay: 100,
+			maxHedges: 2
+		}
+	});
+	
+	bench.add('Hedging - Race policy (success first try)', async () => {
+		try {
+			await hedgingRaceApi.get('/json-small');
+		} catch (e) {}
+	});
+	
+	// Benchmark: Hedging - Cancel-and-retry policy
+	const hedgingCancelApi = createLuminara({
+		baseURL: `http://localhost:${mockServer.port}`,
+		hedging: {
+			policy: 'cancel-and-retry',
+			hedgeDelay: 100,
+			maxHedges: 2
+		}
+	});
+	
+	bench.add('Hedging - Cancel-and-retry policy (success first try)', async () => {
+		try {
+			await hedgingCancelApi.get('/json-small');
+		} catch (e) {}
+	});
+	
+	// Benchmark: Hedging with exponential backoff
+	const hedgingBackoffApi = createLuminara({
+		baseURL: `http://localhost:${mockServer.port}`,
+		hedging: {
+			policy: 'race',
+			hedgeDelay: 50,
+			maxHedges: 3,
+			exponentialBackoff: true,
+			backoffMultiplier: 2
+		}
+	});
+	
+	bench.add('Hedging - Exponential backoff with jitter', async () => {
+		try {
+			await hedgingBackoffApi.get('/json-small');
+		} catch (e) {}
+	});
+	
+	// Benchmark: Hedging overhead (hedging enabled but not triggered)
+	const hedgingNoTriggerApi = createLuminara({
+		baseURL: `http://localhost:${mockServer.port}`,
+		hedging: {
+			policy: 'race',
+			hedgeDelay: 10000, // Very long - won't trigger
+			maxHedges: 2
+		}
+	});
+	
+	bench.add('Hedging - Overhead when not triggered', async () => {
+		try {
+			await hedgingNoTriggerApi.get('/json-small');
+		} catch (e) {}
+	});
+	
 	// Benchmark: Debounce key generation
 	bench.add('Debouncing - key generation (url)', () => {
 		const key = `${dedupeContext.req.url}`;
@@ -202,7 +270,7 @@ export async function featureBenchmarks(bench, mockServer, config) {
 		await baselineApi.get('/json-small');
 	});
 	
-	// Benchmark: All features enabled
+	// Benchmark: All features enabled (including hedging)
 	const allFeaturesApi = createLuminara({
 		baseURL: `http://localhost:${mockServer.port}`,
 		retry: 3,
@@ -211,6 +279,11 @@ export async function featureBenchmarks(bench, mockServer, config) {
 		rateLimit: {
 			limit: 100,
 			windowMs: 1000
+		},
+		hedging: {
+			policy: 'race',
+			hedgeDelay: 5000, // Won't trigger in normal requests
+			maxHedges: 1
 		}
 	});
 	allFeaturesApi.enableStats();

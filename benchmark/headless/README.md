@@ -97,9 +97,28 @@ Benchmark                               chromium            firefox             
 createLuminara()                        1.2M ops/s          980K ops/s          1.1M ops/s
 api.use() - 1 plugin                    850K ops/s          720K ops/s          800K ops/s
 api.updateConfig()                      1.5M ops/s          1.3M ops/s          1.4M ops/s
+Hedging - Race policy                   45 ops/s            42 ops/s            44 ops/s
+Hedging - Cancel-and-retry              48 ops/s            45 ops/s            47 ops/s
+Hedging - Exponential backoff           40 ops/s            38 ops/s            41 ops/s
 
 📁 Report saved: benchmark/reports/headless-latest.json
 ```
+
+## 🎯 Benchmarks Included
+
+The headless suite runs the following benchmarks across all browsers:
+
+### Core Benchmarks (Synchronous)
+- `createLuminara()` - Client instantiation
+- `api.use() - 1 plugin` - Plugin registration
+- `api.updateConfig()` - Configuration updates
+
+### Hedging Benchmarks (Asynchronous with Network)
+- **Race Policy** - Concurrent requests, first wins
+- **Cancel-and-Retry** - Sequential with cancellation
+- **Exponential Backoff** - Race policy with backoff + jitter
+
+> **Note**: Hedging benchmarks use real network requests to `jsonplaceholder.typicode.com`, so ops/sec will be significantly lower than sync operations.
 
 ## 🔧 Troubleshooting
 

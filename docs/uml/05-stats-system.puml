@@ -1,5 +1,4 @@
-@startuml
-title Stats System Architecture
+@startuml Stats System Architecture
 
 skinparam packageStyle rectangle
 skinparam backgroundColor white

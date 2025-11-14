@@ -14,9 +14,10 @@ This directory contains comprehensive UML diagrams documenting Luminara's archit
 5. **05-stats-system.puml** - Real-time metrics and query architecture
 6. **06-driver-three-phase.puml** - Three-phase handler pipeline
 7. **07-rate-limiting.puml** - Token bucket algorithm and queuing
+8. **08-request-hedging.puml** - Request hedging policies and flow
 
 ### Overview
-8. **00-overview.puml** - Complete architecture overview
+9. **00-overview.puml** - Complete architecture overview
 
 ## 🎯 How to View PlantUML Diagrams
 

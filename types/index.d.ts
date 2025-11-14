@@ -61,10 +61,60 @@ export interface DeduplicateConfig {
 	disabled?: boolean;
 }
 
+export type HedgingPolicy = 'cancel-and-retry' | 'race';
+
+export interface HedgingConfig {
+	enabled?: boolean;
+	policy?: HedgingPolicy;
+	hedgeDelay?: number;
+	maxHedges?: number;
+	cancelOnSuccess?: boolean;
+	includeHttpMethods?: string[] | string;
+	serverRotation?: string | string[] | null;
+	timeout?: number | null;
+	exponentialBackoff?: boolean;
+	backoffMultiplier?: number;
+	jitter?: boolean;
+	jitterRange?: number;
+	trackStats?: boolean;
+	retryHedgedRequests?: boolean;
+}
+
+export interface HedgingMetadata {
+	winner: 'primary' | `hedge-${number}`;
+	totalAttempts: number;
+	latencySaved: number;
+	policy: HedgingPolicy;
+	type?: 'primary' | 'hedge';
+}
+
+export interface HedgingStats {
+	totalHedgedRequests: number;
+	hedgeSuccessRate: number;
+	avgLatencyImprovement: number;
+	totalHedgesSent: number;
+	cancelledRequests: number;
+	hedgesByPolicy: {
+		'cancel-and-retry': number;
+		race: number;
+	};
+}
+
+export interface HedgingError extends Error {
+	name: 'HedgingError';
+	message: string;
+	attempts: Array<{
+		type: 'primary' | `hedge-${number}`;
+		error: string;
+	}>;
+	policy: HedgingPolicy;
+	totalAttempts: number;
+}
+
 export interface LuminaraConfig {
 	baseURL?: string;
 	timeout?: number;
-	retry?: number;
+	retry?: number | false;
 	retryDelay?: number | ((retryCount: number, error: Error, context: any) => number | Promise<number>);
 	retryStatusCodes?: number[];
 	backoffType?: 'linear' | 'exponential' | 'exponentialCapped' | 'fibonacci' | 'jitter' | 'exponentialJitter';
@@ -80,6 +130,7 @@ export interface LuminaraConfig {
 	rateLimit?: RateLimitConfig;
 	debounce?: DebounceConfig;
 	deduplicate?: DeduplicateConfig;
+	hedging?: HedgingConfig;
 	query?: Record<string, any>;
 	shouldRetry?: (error: Error, context: any) => boolean;
 	[key: string]: any;
@@ -90,12 +141,13 @@ export interface LuminaraResponse<T = any> {
 	status: number;
 	statusText: string;
 	headers: Headers;
+	hedgingMetadata?: HedgingMetadata;
 }
 
 export interface LuminaraContext {
-	req: any;
-	res?: any;
-	error?: Error;
+	req: any & { hedging?: HedgingConfig };
+	res?: any & { hedgingMetadata?: HedgingMetadata };
+	error?: Error | HedgingError;
 	meta: {
 		requestId: string;
 		requestStartTime: number;
@@ -122,8 +174,6 @@ export interface StatsInterface {
 }
 
 export interface LuminaraClient {
-	
-	constructor(driver: LuminaraDriver, plugins: LuminaraPlugin[], config: LuminaraConfig);
 	
 	use(plugin: LuminaraPlugin): this;
 	
@@ -220,3 +270,41 @@ export const METRIC_TYPES: {
 
 export const GROUP_BY_DIMENSIONS: string[];
 export const TIME_WINDOWS: string[];
+
+// Hedging type guards
+export function isHedgingError(error: any): error is HedgingError;
+export function hasHedgingMetadata<T>(response: LuminaraResponse<T>): response is LuminaraResponse<T> & { hedgingMetadata: HedgingMetadata };
+
+// Orchestration components (for benchmarking and advanced usage)
+export class PluginPipeline {
+	constructor(plugins?: LuminaraPlugin[]);
+	add(plugin: LuminaraPlugin): void;
+	getAll(): LuminaraPlugin[];
+	executeOnRequest(context: LuminaraContext): Promise<void>;
+	executeOnResponse(context: LuminaraContext): Promise<void>;
+	executeOnResponseError(context: LuminaraContext): Promise<void>;
+}
+
+export class RetryOrchestrator {
+	constructor(driver: LuminaraDriver, statsEmitter: any);
+	execute(context: LuminaraContext, pluginPipeline: PluginPipeline): Promise<any>;
+}
+
+export class ContextBuilder {
+	static build(mergedReq: any, driver: LuminaraDriver): LuminaraContext;
+	static generateRequestId(): string;
+	static resetCounter(): void;
+}
+
+export class SignalManager {
+	static mergeUserSignal(context: LuminaraContext, userSignal?: AbortSignal, statsEmitter?: any): void;
+}
+
+export class ConfigManager {
+	constructor(initialConfig?: LuminaraConfig);
+	merge(req: any): any;
+	applyRateLimit(req: any): Promise<void>;
+	update(newConfig: Partial<LuminaraConfig>): void;
+	getRateLimitStats(): RateLimitStats | null;
+	resetRateLimitStats(): void;
+}

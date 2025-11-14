@@ -68,6 +68,38 @@ body {
 	margin-bottom: 0.75rem;
 }
 
+.philosophy .links {
+	display: flex;
+	gap: 1rem;
+	margin-top: 1.5rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.link-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	text-decoration: none;
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 0.95rem;
+	transition: transform 0.2s, box-shadow 0.2s;
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.link-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+}
+
+.link-btn:active {
+	transform: translateY(0);
+}
+
 .content {
 	padding: 2rem;
 }

@@ -74,7 +74,9 @@ export const integratedBenchmarks = [
 				.use({
 					name: 'transform',
 					onResponse(ctx) {
-						if (ctx.res) ctx.res.transformed = true;
+						if (ctx.res) {
+							ctx.res.transformed = true;
+						}
 					}
 				});
 			await api.get('/todos/1');

@@ -4,6 +4,7 @@ import { baseUrlAndQuery } from './examples/baseUrlAndQuery.js';
 import { timeout } from './examples/timeout.js';
 import { retry } from './examples/retry.js';
 import { backoffStrategies } from './examples/backoffStrategies.js';
+import { requestHedging } from './examples/requestHedging.js';
 import { debouncer } from './examples/debouncer.js';
 import { interceptors } from './examples/interceptors.js';
 import { customDriver } from './examples/customDriver.js';
@@ -21,6 +22,7 @@ export const examples = {
 	timeout,
 	retry,
 	backoffStrategies,
+	requestHedging,
 	debouncer,
 	interceptors,
 	responseTypes,

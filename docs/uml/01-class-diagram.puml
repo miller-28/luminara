@@ -173,6 +173,16 @@ class RateLimiter <<feature>> DRIVER_COLOR {
   +reset(): void
 }
 
+class HedgingCoordinator <<feature>> DRIVER_COLOR {
+  -statsHub: StatsHub
+  -activeHedges: Map
+  +shouldUseHedging(config, method): boolean
+  +executeRacePolicy(config, executeRequest): Promise
+  +executeCancelAndRetry(config, executeRequest): Promise
+  +calculateHedgeDelay(attemptIndex, config): number
+  +getStats(): Object
+}
+
 ' API Helpers
 class HttpVerbs <<helper>> API_COLOR {
   -client: LuminaraClient
@@ -224,6 +234,7 @@ NativeFetchDriver --> ErrorResponseHandler : phase 3 error
 NativeFetchDriver o-- Debouncer : uses
 NativeFetchDriver o-- Deduplicator : uses
 NativeFetchDriver o-- RateLimiter : uses
+NativeFetchDriver o-- HedgingCoordinator : uses
 
 RequestDispatcher --> Debouncer : applies
 RequestDispatcher --> Deduplicator : applies

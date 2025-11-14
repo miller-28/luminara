@@ -61,7 +61,9 @@ export class ConsoleReporter {
 		});
 		
 		bench.tasks.forEach(task => {
-			if (!task.result) return;
+			if (!task.result) {
+				return;
+			}
 			
 			const result = task.result;
 			const baselineResult = baseline?.find(b => b.name === task.name);

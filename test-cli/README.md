@@ -77,6 +77,18 @@ npm run test:watch
 - Custom retry handlers
 - Status code filtering
 
+### Request Hedging
+- Race policy (concurrent requests)
+- Cancel-and-retry policy (sequential with cancellation)
+- HTTP method whitelist validation (GET/HEAD/OPTIONS)
+- Exponential backoff timing for hedges
+- Jitter randomization for hedge delays
+- Per-request override (bidirectional)
+- Server rotation support
+- Integration with retry and timeout
+- Stats tracking for hedging metrics
+- Edge cases (errors, short delays, maxHedges limits)
+
 ### Rate Limiting
 - Token bucket algorithm validation
 - Burst capacity enforcement

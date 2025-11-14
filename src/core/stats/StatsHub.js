@@ -8,6 +8,7 @@ import { TimeModule } from './modules/time.js';
 import { RateModule } from './modules/rate.js';
 import { RetryModule } from './modules/retry.js';
 import { ErrorModule } from './modules/error.js';
+import { HedgingModule } from './modules/hedging.js';
 import { QueryEngine } from './query/queryEngine.js';
 import { extractRequestMetadata } from './query/selectors.js';
 import { statsLogger } from './verboseLogger.js';
@@ -22,7 +23,8 @@ export class StatsHub {
 			time: new TimeModule(),
 			rate: new RateModule(),
 			retry: new RetryModule(),
-			error: new ErrorModule()
+			error: new ErrorModule(),
+			hedging: new HedgingModule()
 		};
 
 		// Initialize query engine
@@ -247,6 +249,36 @@ export class StatsHub {
 				// Log module reset if verbose is enabled
 				if (this.verboseEnabled) {
 					logModuleActivity(this._createVerboseContext(), 'error', 'reset', {
+						timestamp: Date.now()
+					});
+				}
+			}
+		};
+	}
+
+	/**
+	 * Namespaced helper: hedging
+	 */
+	get hedging() {
+		return {
+			get: (options = {}) => {
+				const { window = 'since-reset' } = options;
+				
+				// Hedging module has a simpler API - just get stats for a window
+				const stats = this.modules.hedging.get(window);
+				
+				// Return in format compatible with other modules
+				return {
+					[window]: stats
+				};
+			},
+			reset: () => {
+				this.modules.hedging.reset();
+				this._notifyUpdateListeners('hedging.reset');
+				
+				// Log module reset if verbose is enabled
+				if (this.verboseEnabled) {
+					logModuleActivity(this._createVerboseContext(), 'hedging', 'reset', {
 						timestamp: Date.now()
 					});
 				}

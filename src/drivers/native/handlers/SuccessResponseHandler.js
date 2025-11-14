@@ -24,7 +24,16 @@ import { errorLogger } from '../features/error/verboseLogger.js';
  */
 export async function handleSuccessResponse(result, preparedRequest, currentAttempt) {
 	const { response } = result;
-	const { responseType, parseResponse, ignoreResponseError, verbose, context } = preparedRequest;
+	const { responseType, parseResponse, ignoreResponseError, verbose, context, signal } = preparedRequest;
+	
+	// Check if request was aborted before processing response
+	// This can happen in hedging race scenarios where the winner completes
+	// and cancels the losers before they finish parsing
+	if (signal?.aborted) {
+		const abortError = new Error('The operation was aborted');
+		abortError.name = 'AbortError';
+		throw abortError;
+	}
 	
 	// Log response received if verbose
 	if (verbose) {
@@ -35,9 +44,7 @@ export async function handleSuccessResponse(result, preparedRequest, currentAtte
 	// Parse response data based on parseResponse and responseType options
 	let data;
 	try {
-		data = await parseResponseData(response, responseType, parseResponse, context);
-		
-		// Log successful parsing if verbose
+		data = await parseResponseData(response, responseType, parseResponse, context);		// Log successful parsing if verbose
 		if (verbose) {
 			responseLogger.logResponseParsingSuccess(context, responseType || 'auto', typeof data, JSON.stringify(data).length);
 		}

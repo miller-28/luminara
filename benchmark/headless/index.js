@@ -46,7 +46,7 @@ class HeadlessBenchmarkRunner {
 
 		console.log('📋 Configuration:');
 		console.log(`   Browsers: ${this.browsers.join(', ')}`);
-		console.log(`   Server: http://localhost:2880/benchmark/browser/index.html\n`);
+		console.log('   Server: http://localhost:2880/benchmark/browser/index.html\n');
 
 		for (const browserName of this.browsers) {
 			console.log(`\n🌐 Running benchmarks in ${browserName}...`);
@@ -56,8 +56,7 @@ class HeadlessBenchmarkRunner {
 				await Promise.race([
 					this.runBrowser(browserName),
 					new Promise((_, reject) => 
-						setTimeout(() => reject(new Error('Timeout: Browser took too long')), this.timeout)
-					)
+						setTimeout(() => reject(new Error('Timeout: Browser took too long')), this.timeout))
 				]);
 				const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 				console.log(`✅ ${browserName} completed in ${duration}s`);
@@ -100,12 +99,12 @@ class HeadlessBenchmarkRunner {
 					break;
 			}
 
-			console.log(`   🌐 Creating browser context...`);
+			console.log('   🌐 Creating browser context...');
 			const context = await browser.newContext();
 			const page = await context.newPage();
 
 			// Serve benchmark page (assumes server is running)
-			console.log(`   📄 Loading benchmark page...`);
+			console.log('   📄 Loading benchmark page...');
 			const benchmarkUrl = 'http://localhost:2880/benchmark/browser/index.html';
 			
 			try {
@@ -115,7 +114,7 @@ class HeadlessBenchmarkRunner {
 			}
 
 			// Wait for Luminara and Bench to be available
-			console.log(`   ⏳ Waiting for Luminara to load...`);
+			console.log('   ⏳ Waiting for Luminara to load...');
 			try {
 				await page.waitForFunction(() => {
 					return window.Bench && window.createLuminara;
@@ -125,7 +124,7 @@ class HeadlessBenchmarkRunner {
 			}
 
 			// Run benchmarks in browser context
-			console.log(`   ⚡ Running benchmarks (this may take 10-20 seconds)...`);
+			console.log('   ⚡ Running benchmarks (this may take 10-20 seconds)...');
 			const results = await page.evaluate(async () => {
 				const { Bench, createLuminara } = window;
 				const benchmarkResults = [];
@@ -150,6 +149,77 @@ class HeadlessBenchmarkRunner {
 				await coreBench.run();
 
 				coreBench.tasks.forEach(task => {
+					benchmarkResults.push({
+						name: task.name,
+						mean: task.result.mean,
+						hz: task.result.hz,
+						p99: task.result.p99
+					});
+				});
+
+				// Hedging benchmarks
+				const hedgingBench = new Bench({ time: 500, warmupTime: 50 });
+				
+				// Race policy benchmark
+				const hedgingRaceApi = createLuminara({
+					baseURL: 'https://jsonplaceholder.typicode.com',
+					hedging: {
+						policy: 'race',
+						hedgeDelay: 100,
+						maxHedges: 1
+					}
+				});
+				
+				hedgingBench.add('Hedging - Race policy', async () => {
+					try {
+						await hedgingRaceApi.get('/posts/1');
+					} catch (error) {
+						// Ignore errors in benchmark
+					}
+				});
+
+				// Cancel-and-retry policy benchmark
+				const hedgingCancelApi = createLuminara({
+					baseURL: 'https://jsonplaceholder.typicode.com',
+					hedging: {
+						policy: 'cancel-and-retry',
+						hedgeDelay: 100,
+						maxHedges: 1
+					}
+				});
+				
+				hedgingBench.add('Hedging - Cancel-and-retry', async () => {
+					try {
+						await hedgingCancelApi.get('/posts/1');
+					} catch (error) {
+						// Ignore errors in benchmark
+					}
+				});
+
+				// Hedging with exponential backoff
+				const hedgingBackoffApi = createLuminara({
+					baseURL: 'https://jsonplaceholder.typicode.com',
+					hedging: {
+						policy: 'race',
+						hedgeDelay: 50,
+						maxHedges: 2,
+						exponentialBackoff: true,
+						backoffMultiplier: 2,
+						jitter: true
+					}
+				});
+				
+				hedgingBench.add('Hedging - Exponential backoff', async () => {
+					try {
+						await hedgingBackoffApi.get('/posts/1');
+					} catch (error) {
+						// Ignore errors in benchmark
+					}
+				});
+
+				await hedgingBench.run();
+
+				hedgingBench.tasks.forEach(task => {
 					benchmarkResults.push({
 						name: task.name,
 						mean: task.result.mean,
@@ -260,8 +330,12 @@ class HeadlessBenchmarkRunner {
 	}
 
 	formatOps(ops) {
-		if (ops >= 1000000) return `${(ops / 1000000).toFixed(2)}M ops/s`;
-		if (ops >= 1000) return `${(ops / 1000).toFixed(2)}K ops/s`;
+		if (ops >= 1000000) {
+			return `${(ops / 1000000).toFixed(2)}M ops/s`;
+		}
+		if (ops >= 1000) {
+			return `${(ops / 1000).toFixed(2)}K ops/s`;
+		}
 		return `${ops.toFixed(0)} ops/s`;
 	}
 }

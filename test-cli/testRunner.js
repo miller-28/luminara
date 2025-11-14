@@ -18,6 +18,7 @@ import { suite as statsSuite, mockServer as statsServer } from './tests/stats.te
 import { suite as rateLimitSuite, mockServer as rateLimitServer } from './tests/rateLimit.test.js';
 import { suite as edgeCasesSuite, mockServer as edgeCasesServer } from './tests/edgeCases.test.js';
 import { suite as deduplicatorSuite, mockServer as deduplicatorServer } from './tests/deduplicator.test.js';
+import { suite as hedgingSuite, mockServer as hedgingServer } from './tests/hedging.test.js';
 
 // Test suite registry
 const TEST_SUITES = [
@@ -35,7 +36,8 @@ const TEST_SUITES = [
 	{ name: 'parseResponse Option', suite: parseResponseSuite, server: parseResponseServer },
 	{ name: 'Stats', suite: statsSuite, server: statsServer },
 	{ name: 'Edge Cases', suite: edgeCasesSuite, server: edgeCasesServer },
-	{ name: 'Request Deduplicator', suite: deduplicatorSuite, server: deduplicatorServer }
+	{ name: 'Request Deduplicator', suite: deduplicatorSuite, server: deduplicatorServer },
+	{ name: 'Request Hedging', suite: hedgingSuite, server: hedgingServer }
 ];
 
 // Standalone tests (no mock server needed)
