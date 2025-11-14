@@ -3,7 +3,27 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>Luminara Sandbox - Interactive Demo</title>
+		<title>Luminara - Modern HTTP Client | Zero Dependencies | Framework-Agnostic</title>
+		<meta name="description" content="Luminara is a lightweight, zero-dependency HTTP client built on native fetch. Features request hedging, retry with 6 backoff strategies, rate limiting, interceptors, stats, and more. Works with React, Vue, Angular, Svelte, and vanilla JavaScript." />
+		<meta name="keywords" content="http client, fetch wrapper, javascript http, typescript http, axios alternative, request hedging, retry logic, backoff strategies, rate limiting, request deduplication, request debouncing, interceptors, http interceptors, zero dependencies, framework-agnostic, react http, vue http, angular http, native fetch, promise-based http, browser http client, nodejs http client, exponential backoff, fibonacci backoff, jitter backoff, token bucket, request stats, http analytics, timeout handling, abort controller, custom drivers, luminara, web requests, api client, rest client, http library, fetch api, concurrent requests, latency optimization, tail latency, p99 latency, cancel-and-retry, race policy, domain-driven architecture, enterprise http client, production-ready http, battle-tested http, comprehensive testing, performance benchmarks, universal compatibility, esm cjs dual export" />
+		<meta name="author" content="Jonathan Miller" />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href="https://luminara.website/" />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://luminara.website/" />
+		<meta property="og:title" content="Luminara - Modern HTTP Client | Zero Dependencies" />
+		<meta property="og:description" content="Lightweight, zero-dependency HTTP client with request hedging, retry strategies, rate limiting, and interceptors. Framework-agnostic. Production-ready." />
+		<meta property="og:image" content="https://luminara.website/og-image.png" />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://luminara.website/" />
+		<meta property="twitter:title" content="Luminara - Modern HTTP Client | Zero Dependencies" />
+		<meta property="twitter:description" content="Lightweight HTTP client with request hedging, retry strategies, rate limiting, and interceptors. Works everywhere." />
+		<meta property="twitter:image" content="https://luminara.website/og-image.png" />
+		
 		<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌌</text></svg>">
 		<link rel="stylesheet" href="styles.css">
 		
@@ -40,16 +60,96 @@
 			<p><strong>Simplicity First.</strong> Built on native <code>fetch</code>, extended by modular drivers and graceful extensions. Minimal by design, powerful by intention.</p>
 			<p><strong>Made for Builders.</strong> Readable APIs, intuitive flow, self-documenting code. Everything designed to help you focus on what truly matters — the craft.</p>
 			<p><strong>Illuminate Your Path.</strong> From retries and interceptors to rate-limits and custom drivers, every feature shines together in perfect balance — one spectrum, one light. ✨</p>
-			<div class="links">
-				<a href="https://www.npmjs.com/package/luminara" target="_blank" rel="noopener noreferrer" class="link-btn">
-					📦 npm Package
-				</a>
-				<a href="https://github.com/miller-28/luminara" target="_blank" rel="noopener noreferrer" class="link-btn">
-					🐙 GitHub Repository
-				</a>
-				<a href="./benchmark/" class="link-btn">
-					⚡ Performance Benchmarks
-				</a>
+		</div>
+
+		<div class="links">
+			<a href="https://www.npmjs.com/package/luminara" target="_blank" rel="noopener noreferrer" class="link-btn">
+				📦 npm Package
+			</a>
+			<a href="https://github.com/miller-28/luminara" target="_blank" rel="noopener noreferrer" class="link-btn">
+				🐙 GitHub Repository
+			</a>
+			<a href="https://github.com/miller-28/luminara/blob/master/README.md" target="_blank" rel="noopener noreferrer" class="link-btn">
+				📖 Documentation
+			</a>
+			<a href="./benchmark/" target="_blank" rel="noopener noreferrer" class="link-btn">
+				⚡ Performance Benchmarks
+			</a>
+		</div>
+
+		<div class="features-list">
+			<h2>✨ Features</h2>
+			
+			<div class="feature-category">
+				<h3>⚡ Core Architecture</h3>
+				<ul>
+					<li>Built on modern native <code>fetch</code> - Zero external dependencies</li>
+					<li><strong>Universal compatibility</strong> - Browsers + Node.js 18+ with native fetch</li>
+					<li><strong>Framework-agnostic</strong> - Works with React, Vue, Angular, Svelte, vanilla JS, and Node.js</li>
+					<li><strong>Domain-driven architecture</strong> - Feature-based modular structure</li>
+					<li><strong>Dual export support</strong> - ESM/CJS compatibility with auto-detection</li>
+					<li><strong>Extensible driver architecture</strong> - Custom drivers via forking</li>
+					<li><strong>Ultra-compact footprint</strong></li>
+					<li><strong>Zero dependencies</strong> - Truly standalone</li>
+					<li><strong>Same API everywhere</strong> - Identical behavior in all environments</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>🔄 Request Lifecycle (Orchestration Layer)</h3>
+				<ul>
+					<li><strong>Enhanced interceptor architecture</strong> - Deterministic order, mutable context, retry-aware</li>
+					<li><strong>Comprehensive stats system</strong> - Real-time metrics, analytics, and query interface</li>
+					<li><strong>Verbose logging system</strong> - Detailed debugging and request tracing</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>🚀 Pre-Flight Features (Request Dispatcher - Phase 1)</h3>
+				<ul>
+					<li><strong>Request deduplication</strong> - Automatic in-flight duplicate request prevention</li>
+					<li><strong>Request debouncing</strong> - Intelligent request delay with automatic cancellation</li>
+					<li><strong>Advanced rate limiting</strong> - Token bucket algorithm with global, domain, and endpoint scoping</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>⚡ In-Flight Features (Request Execution - Phase 2)</h3>
+				<ul>
+					<li><strong>Configurable timeouts</strong> - Request timeouts and abort controller support</li>
+					<li><strong>Comprehensive retry system</strong> - 6 backoff strategies (exponential, fibonacci, jitter, etc.)</li>
+					<li><strong>Request hedging</strong> - Race and cancel-and-retry policies for latency optimization</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>🎯 Post-Flight Features (Response Handlers - Phase 3)</h3>
+				<ul>
+					<li><strong>Response type handling</strong> - JSON, text, form data, binary support</li>
+					<li><strong>Robust error handling</strong> - Comprehensive error categorization and handling</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>🧪 Battle-Tested Reliability</h3>
+				<ul>
+					<li><strong>234 tests</strong> across <strong>16 test suites</strong> (100% passing)</li>
+					<li><strong>Programmatic validation</strong> - Tests actual behavior, not just API contracts</li>
+					<li><strong>Framework simulation</strong> - React, Vue, Angular usage patterns</li>
+					<li><strong>Timing accuracy</strong> - Backoff strategies validated to millisecond precision</li>
+					<li><strong>Integration testing</strong> - Feature combinations (retry + timeout + hedging)</li>
+				</ul>
+			</div>
+
+			<div class="feature-category">
+				<h3>⚡ Performance & Benchmarks</h3>
+				<ul>
+					<li><strong>68 Node.js benchmarks</strong> - High-precision measurements with memory profiling</li>
+					<li><strong>18 browser benchmarks</strong> - Automated headless testing across Chromium, Firefox, and WebKit</li>
+					<li><strong>Microsecond-scale core</strong> - Client creation ~7.5µs, plugin registration ~0.16µs</li>
+					<li><strong>Sub-millisecond orchestration</strong> - Full pipeline execution stays under 0.2ms</li>
+					<li><strong>Network parity</strong> - Single request ~2.35ms (bare), ~2.67ms (all features) = 0.32ms overhead</li>
+				</ul>
 			</div>
 		</div>
 

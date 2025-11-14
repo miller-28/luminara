@@ -68,12 +68,71 @@ body {
 	margin-bottom: 0.75rem;
 }
 
-.philosophy .links {
+.features-list {
+	background: #f7fafc;
+	padding: 2rem;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.features-list h2 {
+	color: #667eea;
+	font-size: 1.8rem;
+	margin-bottom: 1.5rem;
+	text-align: center;
+}
+
+.feature-category {
+	margin-bottom: 2rem;
+}
+
+.feature-category:last-child {
+	margin-bottom: 0;
+}
+
+.feature-category h3 {
+	color: #4a5568;
+	font-size: 1.2rem;
+	margin-bottom: 0.75rem;
+	font-weight: 600;
+}
+
+.feature-category ul {
+	list-style: none;
+	padding-left: 0;
+}
+
+.feature-category ul li {
+	color: #4a5568;
+	line-height: 1.8;
+	margin-bottom: 0.5rem;
+	padding-left: 1.5rem;
+	position: relative;
+}
+
+.feature-category ul li:before {
+	content: "→";
+	position: absolute;
+	left: 0;
+	color: #667eea;
+	font-weight: bold;
+}
+
+.feature-category ul li code {
+	background: #edf2f7;
+	padding: 0.2rem 0.4rem;
+	border-radius: 3px;
+	font-size: 0.9em;
+	color: #667eea;
+}
+
+.links {
 	display: flex;
 	gap: 1rem;
-	margin-top: 1.5rem;
+	padding: 2rem;
 	flex-wrap: wrap;
 	justify-content: center;
+	background: white;
+	border-bottom: 1px solid #e2e8f0;
 }
 
 .link-btn {
