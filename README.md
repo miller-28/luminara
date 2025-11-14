@@ -1466,58 +1466,63 @@ Luminara is designed to be **completely framework-agnostic** and works seamlessl
 
 ## ⚡ Performance & Benchmarks
 
-Luminara includes a **comprehensive benchmark suite** to measure and track performance across all architectural layers — from micro-operations to full end-to-end request flows.
+Luminara includes a **comprehensive benchmark suite** validated across Node.js and browsers — from micro-operations to full end-to-end request flows.
 
 ### Benchmark Suite Features
 
-- **50+ Node.js Benchmarks** - High-precision measurements with memory profiling
-- **30+ Browser Benchmarks** - Interactive browser-based testing with Chart.js visualizations
-- **Cross-Browser Testing** - Automated headless benchmarks across Chromium, Firefox, and WebKit
+- **68 Node.js Benchmarks** - High-precision measurements with memory profiling (Tinybench 2.9.0)
+- **18 Browser Benchmarks** - Automated headless testing across Chromium, Firefox, and WebKit
+- **Interactive Browser UI** - Real-time testing with Chart.js visualizations
 - **Historical Tracking** - Performance regression detection and baseline comparison
 - **Beautiful Reports** - HTML reports with charts, trends, and statistical analysis
 
-### Performance Characteristics
+### Performance Characteristics (Latest Results)
 
-| Layer | Mean Performance | Verdict |
-|-------|------------------|---------|
-| Core API | 4-5 µs | ⚡ Ideal (microsecond precision) |
-| Plugin Orchestration | 30-45 µs | ✅ Excellent (linear scaling) |
-| Driver Layer | 1-19 µs | ✅ Excellent (sync operations) |
-| Network I/O | 15-50 ms | ⚙️ Network-bound (expected) |
-| Integrated Scenarios | 16-180 ms | 🪶 Balanced (minimal overhead) |
+| Layer | Node.js (Mean) | Browser (Typical) | Verdict |
+|-------|----------------|-------------------|---------|
+| Core API | 0.15–7.5 µs | 5–30 µs | ⚡ Ideal (microsecond precision) |
+| Plugin Orchestration | 26–120 µs | same magnitude | ✅ Excellent (linear scaling) |
+| Driver Layer | 0.09–60 µs | same magnitude | ✅ Excellent (minimal overhead) |
+| Fetch Roundtrip (local mock) | 2–4 ms | 3–25 ms | ⚙️ I/O-bound (network dominates) |
+| Feature Utilities | 2–6 ms | 10–25 ms | ✅ Expected (sub-ms overhead) |
+| Integrated Scenarios | 2.3–27 ms | similar envelope | 🪶 Balanced (near-zero architectural tax) |
 
 ### Running Benchmarks
 
 ```bash
 # Node.js benchmarks (all categories)
-cd benchmark
-npm run benchmark
+cd benchmark/node
+npm run benchmark               # Full suite (68 benchmarks)
 
 # Specific categories
-npm run benchmark:core
-npm run benchmark:orchestration
-npm run benchmark:driver
-npm run benchmark:features
-npm run benchmark:integrated
+npm run benchmark:core          # Core API (createLuminara, use, updateConfig)
+npm run benchmark:orchestration # Plugin pipeline, context, signals
+npm run benchmark:driver        # Pre-flight, in-flight, post-flight
+npm run benchmark:features      # Retry, stats, rate-limit, hedging
+npm run benchmark:integrated    # End-to-end scenarios
 
 # Browser benchmarks (interactive)
-npm run benchmark:browser
+cd benchmark/browser
+npm run dev                     # Interactive UI with Chart.js
 
 # Headless cross-browser testing
-npm run benchmark:headless        # Full suite (Chromium, Firefox, WebKit)
-npm run benchmark:headless:quick  # Quick test (Chromium only)
+cd benchmark/headless
+npm run benchmark               # Full suite (Chromium, Firefox, WebKit)
+npm run benchmark:quick         # Quick test (Chromium only)
 
-# Reports
-npm run benchmark:report      # Generate HTML report
+# Generate reports
+cd benchmark
+npm run benchmark:report        # HTML report with charts
 ```
 
-### Key Findings
+### Key Findings (Node.js v22.14.0)
 
-✅ **Near-Zero Overhead** - Core operations execute at microsecond precision  
-✅ **Linear Scaling** - Plugin system adds no exponential cost  
-✅ **Network Parity** - HTTP operations match native `fetch` performance  
-✅ **Deterministic Timing** - Retry and backoff strategies execute with scheduler-level accuracy  
-✅ **Production-Ready** - Validated across 30+ real-world scenarios
+✅ **Microsecond-Scale Core** - Client creation ~7.5µs, plugin registration ~0.16µs, config updates ~0.74µs  
+✅ **Linear Plugin Scaling** - 10 plugins add only ~120µs overhead (vs ~30µs for empty pipeline)  
+✅ **Sub-Millisecond Orchestration** - Full pipeline execution stays under 0.2ms even with 10 plugins  
+✅ **Network Parity** - Single request ~2.35ms (bare), ~2.67ms (all features ON) — **0.32ms overhead**  
+✅ **Predictable Concurrency** - 10 concurrent requests: 25ms / 50 concurrent: 130ms (event-loop bound)  
+✅ **Production Validated** - 68 benchmarks, millions of iterations, tight percentiles (P99 ≤ 4× mean)
 
 📊 **[View Detailed Performance Analysis](./docs/performance.md)**
 
