@@ -98,42 +98,42 @@
 			<div class="feature-category">
 				<h3>🔄 Request Lifecycle (Orchestration Layer)</h3>
 				<ul>
-					<li><strong>Enhanced interceptor architecture</strong> - Deterministic order, mutable context, retry-aware</li>
-					<li><strong>Comprehensive stats system</strong> - Real-time metrics, analytics, and query interface</li>
-					<li><strong>Verbose logging system</strong> - Detailed debugging and request tracing</li>
+					<li><a href="#interceptor-request" class="feature-link"><strong>Enhanced interceptor architecture</strong></a> - Deterministic order, mutable context, retry-aware</li>
+					<li><a href="#stats-enabled-default" class="feature-link"><strong>Comprehensive stats system</strong></a> - Real-time metrics, analytics, and query interface</li>
+					<li><a href="#verbose-comprehensive" class="feature-link"><strong>Verbose logging system</strong></a> - Detailed debugging and request tracing</li>
 				</ul>
 			</div>
 
 			<div class="feature-category">
 				<h3>🚀 Pre-Flight Features (Request Dispatcher - Phase 1)</h3>
 				<ul>
-					<li><strong>Request deduplication</strong> - Automatic in-flight duplicate request prevention</li>
-					<li><strong>Request debouncing</strong> - Intelligent request delay with automatic cancellation</li>
-					<li><strong>Advanced rate limiting</strong> - Token bucket algorithm with global, domain, and endpoint scoping</li>
+					<li><a href="#deduplicator-disabled-default" class="feature-link"><strong>Request deduplication</strong></a> - Automatic in-flight duplicate request prevention</li>
+					<li><a href="#debouncer-search" class="feature-link"><strong>Request debouncing</strong></a> - Intelligent request delay with automatic cancellation</li>
+					<li><a href="#rate-limit-test-simple" class="feature-link"><strong>Advanced rate limiting</strong></a> - Token bucket algorithm with global, domain, and endpoint scoping</li>
 				</ul>
 			</div>
 
 			<div class="feature-category">
 				<h3>⚡ In-Flight Features (Request Execution - Phase 2)</h3>
 				<ul>
-					<li><strong>Configurable timeouts</strong> - Request timeouts and abort controller support</li>
-					<li><strong>Comprehensive retry system</strong> - 6 backoff strategies (exponential, fibonacci, jitter, etc.)</li>
-					<li><strong>Request hedging</strong> - Race and cancel-and-retry policies for latency optimization</li>
+					<li><a href="#timeout-success" class="feature-link"><strong>Configurable timeouts</strong></a> - Request timeouts and abort controller support</li>
+					<li><a href="#retry-basic" class="feature-link"><strong>Comprehensive retry system</strong></a> - 6 backoff strategies (exponential, fibonacci, jitter, etc.)</li>
+					<li><a href="#hedging-basic-race" class="feature-link"><strong>Request hedging</strong></a> - Race and cancel-and-retry policies for latency optimization</li>
 				</ul>
 			</div>
 
 			<div class="feature-category">
 				<h3>🎯 Post-Flight Features (Response Handlers - Phase 3)</h3>
 				<ul>
-					<li><strong>Response type handling</strong> - JSON, text, form data, binary support</li>
-					<li><strong>Robust error handling</strong> - Comprehensive error categorization and handling</li>
+					<li><a href="#response-type-text" class="feature-link"><strong>Response type handling</strong></a> - JSON, text, form data, binary support</li>
+					<li><a href="#http-error-json" class="feature-link"><strong>Robust error handling</strong></a> - Comprehensive error categorization and handling</li>
 				</ul>
 			</div>
 
 			<div class="feature-category">
 				<h3>🧪 Battle-Tested Reliability</h3>
 				<ul>
-					<li><strong>234 tests</strong> across <strong>16 test suites</strong> (100% passing)</li>
+					<li><a href="https://github.com/miller-28/luminara/tree/master/test-cli" class="link" target="_blank"><strong>234 tests</strong></a> across <strong>16 test suites</strong> (100% passing)</li>
 					<li><strong>Programmatic validation</strong> - Tests actual behavior, not just API contracts</li>
 					<li><strong>Framework simulation</strong> - React, Vue, Angular usage patterns</li>
 					<li><strong>Timing accuracy</strong> - Backoff strategies validated to millisecond precision</li>
@@ -144,12 +144,22 @@
 			<div class="feature-category">
 				<h3>⚡ Performance & Benchmarks</h3>
 				<ul>
-					<li><strong>68 Node.js benchmarks</strong> - High-precision measurements with memory profiling</li>
-					<li><strong>18 browser benchmarks</strong> - Automated headless testing across Chromium, Firefox, and WebKit</li>
+					<li><a href="https://github.com/miller-28/luminara/tree/master/benchmark/node" class="link" target="_blank"><strong>68 Node.js benchmarks</strong></a> - High-precision measurements with memory profiling</li>
+					<li><a href="https://github.com/miller-28/luminara/tree/master/benchmark/browser" class="link" target="_blank"><strong>18 browser benchmarks</strong></a> - Automated headless testing across Chromium, Firefox, and WebKit</li>
 					<li><strong>Microsecond-scale core</strong> - Client creation ~7.5µs, plugin registration ~0.16µs</li>
 					<li><strong>Sub-millisecond orchestration</strong> - Full pipeline execution stays under 0.2ms</li>
 					<li><strong>Network parity</strong> - Single request ~2.35ms (bare), ~2.67ms (all features) = 0.32ms overhead</li>
 				</ul>
+			</div>
+		</div>
+
+		<!-- Sticky Navigation Dropdown -->
+		<div class="sticky-nav" id="sticky-nav">
+			<div class="sticky-nav-container">
+				<span class="sticky-nav-label">📋 Jump to Example:</span>
+				<select class="sticky-nav-dropdown" id="sticky-nav-dropdown">
+					<option value="">Select an example...</option>
+				</select>
 			</div>
 		</div>
 

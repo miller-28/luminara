@@ -91,6 +91,8 @@ class SandboxUI {
 		this.renderExamples();
 		this.attachEventListeners();
 		this.loadVerboseState();
+		this.setupFeatureLinks(); // Add feature link handlers after examples are rendered
+		this.setupStickyNav(); // Setup sticky navigation
 	}
 
 	// Load verbose state from localStorage
@@ -114,6 +116,110 @@ class SandboxUI {
 		} catch (error) {
 			console.warn('Failed to save verbose state to localStorage:', error);
 		}
+	}
+
+	setupFeatureLinks() {
+		const featureLinks = document.querySelectorAll('.feature-link');
+		
+		featureLinks.forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				
+				const targetId = link.getAttribute('href').substring(1); // Remove '#'
+				const targetElement = document.getElementById(`example-${targetId}`);
+				
+				if (targetElement) {
+					// Calculate offset for smooth scroll (account for header/padding)
+					const offset = 100; // Adjust this value as needed
+					const elementPosition = targetElement.getBoundingClientRect().top;
+					const offsetPosition = elementPosition + window.pageYOffset - offset;
+					
+					window.scrollTo({
+						top: offsetPosition,
+						behavior: 'smooth'
+					});
+					
+					// Add a highlight effect
+					targetElement.style.transition = 'all 0.3s ease';
+					targetElement.style.transform = 'scale(1.02)';
+					targetElement.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.4)';
+					
+					setTimeout(() => {
+						targetElement.style.transform = '';
+						targetElement.style.boxShadow = '';
+					}, 600);
+				} else {
+					console.warn(`Target element not found: example-${targetId}`);
+				}
+			});
+		});
+	}
+
+	setupStickyNav() {
+		const stickyNav = document.getElementById('sticky-nav');
+		const dropdown = document.getElementById('sticky-nav-dropdown');
+		const featuresSection = document.querySelector('.features-list');
+		
+		// Populate dropdown with all examples
+		for (const [featureKey, feature] of Object.entries(examples)) {
+			const optgroup = document.createElement('optgroup');
+			optgroup.label = feature.title;
+			
+			for (const example of feature.examples) {
+				const option = document.createElement('option');
+				option.value = example.id;
+				option.textContent = example.title;
+				optgroup.appendChild(option);
+			}
+			
+			dropdown.appendChild(optgroup);
+		}
+		
+		// Handle dropdown selection
+		dropdown.addEventListener('change', (e) => {
+			const exampleId = e.target.value;
+			if (exampleId) {
+				const targetElement = document.getElementById(`example-${exampleId}`);
+				if (targetElement) {
+					const offset = 120; // Account for sticky nav height
+					const elementPosition = targetElement.getBoundingClientRect().top;
+					const offsetPosition = elementPosition + window.pageYOffset - offset;
+					
+					window.scrollTo({
+						top: offsetPosition,
+						behavior: 'smooth'
+					});
+					
+					// Add highlight effect
+					targetElement.style.transition = 'all 0.3s ease';
+					targetElement.style.transform = 'scale(1.02)';
+					targetElement.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.4)';
+					
+					setTimeout(() => {
+						targetElement.style.transform = '';
+						targetElement.style.boxShadow = '';
+					}, 600);
+				}
+				
+				// Reset dropdown
+				dropdown.value = '';
+			}
+		});
+		
+		// Show/hide sticky nav based on scroll position
+		const toggleStickyNav = () => {
+			if (featuresSection) {
+				const featuresBottom = featuresSection.getBoundingClientRect().bottom;
+				if (featuresBottom < 0) {
+					stickyNav.classList.add('visible');
+				} else {
+					stickyNav.classList.remove('visible');
+				}
+			}
+		};
+		
+		window.addEventListener('scroll', toggleStickyNav);
+		toggleStickyNav(); // Check initial position
 	}
 
 	renderExamples() {
@@ -147,7 +253,7 @@ class SandboxUI {
 		grid.className = 'examples-grid';
 
 		for (const example of feature.examples) {
-			const card = this.createExampleCard(example);
+			const card = this.createExampleCard(example, featureKey);
 			grid.appendChild(card);
 		}
 
@@ -157,10 +263,31 @@ class SandboxUI {
 		return section;
 	}
 
-	createExampleCard(example) {
+	createExampleCard(example, featureKey) {
 		const card = document.createElement('div');
 		card.className = 'example-card';
 		card.id = `example-${example.id}`;
+		
+		// Map feature keys to documentation filenames
+		const featureDocMap = {
+			'basicUsage': 'basic-usage',
+			'baseUrlAndQuery': 'base-url-query',
+			'timeout': 'timeout',
+			'retry': 'retry',
+			'backoffStrategies': 'backoff-strategies',
+			'requestHedging': 'request-hedging',
+			'debouncer': 'debouncing',
+			'deduplicator': 'deduplication',
+			'interceptors': 'interceptors',
+			'responseTypes': 'response-types',
+			'errorHandling': 'error-handling',
+			'customDriver': 'custom-drivers',
+			'verboseLogging': 'verbose-logging',
+			'stats': 'stats',
+			'rateLimiting': 'rate-limiting'
+		};
+		
+		const docFilename = featureDocMap[featureKey] || featureKey;
 
 		const cardHeader = document.createElement('div');
 		cardHeader.className = 'example-header';
@@ -171,7 +298,19 @@ class SandboxUI {
 
 		const buttonContainer = document.createElement('div');
 		buttonContainer.style.display = 'flex';
-		buttonContainer.style.gap = '8px';
+		buttonContainer.style.gap = '6px';
+		buttonContainer.style.flexWrap = 'wrap';
+
+		// Full Documentation button
+		const docsBtn = document.createElement('button');
+		docsBtn.className = 'example-docs-btn';
+		docsBtn.innerHTML = '📖 Docs';
+		docsBtn.title = 'View full documentation on GitHub';
+		docsBtn.onclick = () => {
+			const docUrl = `https://github.com/miller-28/luminara/tree/master/docs/features/${docFilename}.md`;
+			window.open(docUrl, '_blank', 'noopener,noreferrer');
+		};
+		buttonContainer.appendChild(docsBtn);
 
 		// Code button (if example has code)
 		if (example.code) {
