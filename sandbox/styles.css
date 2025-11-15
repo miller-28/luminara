@@ -217,6 +217,32 @@ body {
 	font-size: 0.875rem;
 }
 
+.btn-docs {
+	background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+	color: white;
+	border: none;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition: all 0.2s;
+	box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.btn-docs:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(72, 187, 120, 0.6);
+	background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+}
+
+.btn-docs:active {
+	transform: translateY(0);
+}
+
 .btn:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
@@ -536,23 +562,25 @@ body {
 
 /* Code button in example card */
 .example-code-btn {
-	background: #f7fafc;
-	color: #4a5568;
-	border: 1px solid #e2e8f0;
+	background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+	color: white;
+	border: none;
 	padding: 0.25rem 0.5rem;
 	border-radius: 4px;
 	cursor: pointer;
 	font-size: 0.75rem;
+	font-weight: 600;
 	transition: all 0.2s;
 	display: inline-flex;
 	align-items: center;
 	gap: 0.25rem;
+	box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
 }
 
 .example-code-btn:hover {
-	background: #edf2f7;
-	border-color: #cbd5e0;
+	background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
 	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
 }
 
 .example-docs-btn {

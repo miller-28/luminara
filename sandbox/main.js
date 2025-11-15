@@ -241,33 +241,13 @@ class SandboxUI {
 		title.className = 'feature-title';
 		title.textContent = feature.title;
 
-		const runFeatureBtn = document.createElement('button');
-		runFeatureBtn.className = 'btn btn-small';
-		runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
-		runFeatureBtn.onclick = () => this.handleRunFeature(featureKey);
+		// Button container for header buttons
+		const headerButtonContainer = document.createElement('div');
+		headerButtonContainer.style.display = 'flex';
+		headerButtonContainer.style.gap = '0.75rem';
+		headerButtonContainer.style.alignItems = 'center';
+		headerButtonContainer.style.flexWrap = 'wrap';
 
-		header.appendChild(title);
-		header.appendChild(runFeatureBtn);
-
-		const grid = document.createElement('div');
-		grid.className = 'examples-grid';
-
-		for (const example of feature.examples) {
-			const card = this.createExampleCard(example, featureKey);
-			grid.appendChild(card);
-		}
-
-		section.appendChild(header);
-		section.appendChild(grid);
-
-		return section;
-	}
-
-	createExampleCard(example, featureKey) {
-		const card = document.createElement('div');
-		card.className = 'example-card';
-		card.id = `example-${example.id}`;
-		
 		// Map feature keys to documentation filenames
 		const featureDocMap = {
 			'basicUsage': 'basic-usage',
@@ -289,6 +269,45 @@ class SandboxUI {
 		
 		const docFilename = featureDocMap[featureKey] || featureKey;
 
+		// Full Documentation button
+		const docsBtn = document.createElement('button');
+		docsBtn.className = 'btn btn-docs';
+		docsBtn.innerHTML = '📖 Full Documentation';
+		docsBtn.title = 'View full documentation on GitHub';
+		docsBtn.onclick = () => {
+			const docUrl = `https://github.com/miller-28/luminara/tree/master/docs/features/${docFilename}.md`;
+			window.open(docUrl, '_blank', 'noopener,noreferrer');
+		};
+		headerButtonContainer.appendChild(docsBtn);
+
+		const runFeatureBtn = document.createElement('button');
+		runFeatureBtn.className = 'btn btn-small';
+		runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
+		runFeatureBtn.onclick = () => this.handleRunFeature(featureKey);
+		headerButtonContainer.appendChild(runFeatureBtn);
+
+		header.appendChild(title);
+		header.appendChild(headerButtonContainer);
+
+		const grid = document.createElement('div');
+		grid.className = 'examples-grid';
+
+		for (const example of feature.examples) {
+			const card = this.createExampleCard(example, featureKey);
+			grid.appendChild(card);
+		}
+
+		section.appendChild(header);
+		section.appendChild(grid);
+
+		return section;
+	}
+
+	createExampleCard(example, featureKey) {
+		const card = document.createElement('div');
+		card.className = 'example-card';
+		card.id = `example-${example.id}`;
+
 		const cardHeader = document.createElement('div');
 		cardHeader.className = 'example-header';
 
@@ -300,26 +319,6 @@ class SandboxUI {
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '6px';
 		buttonContainer.style.flexWrap = 'wrap';
-
-		// Full Documentation button
-		const docsBtn = document.createElement('button');
-		docsBtn.className = 'example-docs-btn';
-		docsBtn.innerHTML = '📖 Docs';
-		docsBtn.title = 'View full documentation on GitHub';
-		docsBtn.onclick = () => {
-			const docUrl = `https://github.com/miller-28/luminara/tree/master/docs/features/${docFilename}.md`;
-			window.open(docUrl, '_blank', 'noopener,noreferrer');
-		};
-		buttonContainer.appendChild(docsBtn);
-
-		// Code button (if example has code)
-		if (example.code) {
-			const codeBtn = document.createElement('button');
-			codeBtn.className = 'example-code-btn';
-			codeBtn.innerHTML = '📄 Code';
-			codeBtn.onclick = () => this.handleShowCode(example.title, example.code);
-			buttonContainer.appendChild(codeBtn);
-		}
 
 		const runBtn = document.createElement('button');
 		runBtn.className = 'btn btn-small';
@@ -336,6 +335,18 @@ class SandboxUI {
 
 		buttonContainer.appendChild(runBtn);
 		buttonContainer.appendChild(stopBtn);
+
+		// Code button (if example has code)
+		if (example.code) {
+			const codeBtn = document.createElement('button');
+			codeBtn.className = 'example-code-btn';
+			codeBtn.innerHTML = '📄 Code';
+			codeBtn.onclick = () => this.handleShowCode(example.title, example.code);
+			buttonContainer.appendChild(codeBtn);
+		}
+		stopBtn.style.display = 'none';
+		stopBtn.onclick = () => this.handleStopTest(example.id);
+		this.stopButtonElements.set(example.id, stopBtn);
 
 		cardHeader.appendChild(titleDiv);
 		cardHeader.appendChild(buttonContainer);
