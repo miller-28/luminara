@@ -224,8 +224,14 @@ Ideal for:
 
 ## 🧩 Integration
 
-Tests import Luminara as an external package, ensuring:
-- Real-world usage validation
-- Import/export correctness
-- Bundle integrity
-- Cross-environment compatibility
+Tests import directly from source (`../../src/index.js`), ensuring:
+- Fast development iteration (no build step)
+- Testing actual source code
+- No package recursion issues
+- Immediate feedback on changes
+
+**Note**: Tests use source imports, not the built package. This means:
+- ✅ No `luminara` dependency needed in `package.json`
+- ✅ Changes to `src/` are immediately testable
+- ✅ No risk of recursive folder structure (20GB+ issue)
+- ⚠️ Tests validate source behavior, not the built bundle

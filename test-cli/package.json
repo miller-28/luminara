@@ -31,7 +31,6 @@
 		"test:watch": "nodemon testRunner.js"
 	},
 	"dependencies": {
-		"luminara": "file:../",
 		"chalk": "^5.3.0",
 		"node-fetch": "^3.3.2",
 		"luminara-cookie-jar": "^1.0.2"
