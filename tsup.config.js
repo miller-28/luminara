@@ -5,7 +5,7 @@ export default defineConfig({
 	format: ['esm', 'cjs'],
 	outDir: 'dist',
 	clean: true,
-	sourcemap: true,
+	sourcemap: false, // Disabled since source maps are excluded from npm package
 	dts: false, // We'll handle types differently since we're using pure JS
 	minify: true, // Enable minification for smaller bundle size
 	splitting: false,
