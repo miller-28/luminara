@@ -1,6 +1,9 @@
 import { LuminaraClient } from './core/luminara.js';
 import { NativeFetchDriver } from './drivers/native/index.js';
 
+// Export version from package.json
+export const VERSION = '1.2.4';
+
 // Simple factory that creates a default client (uses NativeFetchDriver)
 export function createLuminara(config = {}) {
 	const driver = NativeFetchDriver(config);

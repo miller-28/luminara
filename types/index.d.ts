@@ -222,6 +222,9 @@ export interface LuminaraClient {
 	postSoap<T = any>(url: string, xmlString: string, options?: LuminaraConfig & { signal?: AbortSignal }): Promise<LuminaraResponse<T>>;
 }
 
+// Version export
+export const VERSION: string;
+
 // Factory function
 export function createLuminara(config?: LuminaraConfig): LuminaraClient;
 
