@@ -106,7 +106,7 @@
   "bugs": {
     "url": "https://github.com/miller-28/luminara/issues"
   },
-  "homepage": "https://github.com/miller-28/luminara#readme",
+  "homepage": "https://luminara.website",
   "files": [
     "dist/*.cjs",
     "dist/*.mjs",
