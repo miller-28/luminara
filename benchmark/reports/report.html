@@ -7,33 +7,53 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 	<style>
 		:root {
-			--primary: #6366f1;
-			--secondary: #8b5cf6;
-			--success: #10b981;
-			--warning: #f59e0b;
-			--bg-dark: #1e1e1e;
-			--bg-light: #2d2d2d;
-			--text: #e4e4e7;
-			--text-dim: #a1a1aa;
-			--border: #3f3f46;
+			--violet: #7c3aed;
+			--blue: #2563eb;
+			--cyan: #06b6d4;
+			--green: #10b981;
+			--amber: #f59e0b;
+			--rose: #fb7185;
+			--ink: #101114;
+			--panel: #181a20;
+			--panel-soft: #20232b;
+			--text: #f4f7fb;
+			--text-dim: #aab2c0;
+			--border: #343946;
+			--luminara: #c4b5fd;
 		}
 
 		* { margin: 0; padding: 0; box-sizing: border-box; }
 
 		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-			background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background:
+				radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.24), transparent 34%),
+				radial-gradient(circle at 82% 12%, rgba(6, 182, 212, 0.16), transparent 30%),
+				linear-gradient(135deg, #0f1117 0%, #171922 48%, #101114 100%);
 			color: var(--text);
-			padding: 40px;
+			padding: 36px;
 			line-height: 1.6;
 		}
 
 		.container { max-width: 1400px; margin: 0 auto; }
-		header { text-align: center; margin-bottom: 40px; }
+		header {
+			position: relative;
+			overflow: hidden;
+			margin-bottom: 28px;
+			padding: 44px;
+			border: 1px solid rgba(196, 181, 253, 0.28);
+			border-radius: 18px;
+			background:
+				linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(37, 99, 235, 0.10)),
+				rgba(16, 17, 20, 0.82);
+			box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+		}
 
 		h1 {
-			font-size: 3rem;
-			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			font-size: clamp(2.3rem, 5vw, 4.6rem);
+			line-height: 1;
+			letter-spacing: 0;
+			background: linear-gradient(135deg, #ffffff, var(--luminara) 48%, #67e8f9);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			margin-bottom: 10px;
@@ -41,6 +61,15 @@
 
 		.subtitle, .note, footer { color: var(--text-dim); }
 		.subtitle { font-size: 1.1rem; }
+		.kicker {
+			display: inline-flex;
+			margin-bottom: 14px;
+			color: #67e8f9;
+			font-size: 0.78rem;
+			font-weight: 800;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+		}
 
 		.summary-grid, .highlight-grid {
 			display: grid;
@@ -50,15 +79,16 @@
 		}
 
 		.summary-card, .highlight-card, .section {
-			background: var(--bg-light);
+			background: rgba(24, 26, 32, 0.88);
 			border: 1px solid var(--border);
-			border-radius: 10px;
+			border-radius: 12px;
+			box-shadow: 0 12px 34px rgba(0, 0, 0, 0.20);
 		}
 
 		.summary-card, .highlight-card { padding: 24px; }
 		.summary-label, .highlight-label { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 8px; }
-		.summary-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
-		.highlight-value { font-size: 1.5rem; font-weight: 700; color: var(--success); }
+		.summary-value { font-size: 2rem; font-weight: 800; color: var(--luminara); }
+		.highlight-value { font-size: 1.5rem; font-weight: 800; color: var(--green); }
 		.highlight-name { margin-top: 8px; color: var(--text-dim); font-size: 0.9rem; }
 
 		.section { padding: 30px; margin-bottom: 30px; }
@@ -66,7 +96,7 @@
 		.note { margin-bottom: 18px; }
 
 		table { width: 100%; border-collapse: collapse; }
-		thead { background: var(--bg-dark); }
+		thead { background: #11131a; }
 		th {
 			padding: 14px;
 			text-align: left;
@@ -78,15 +108,28 @@
 		td { padding: 14px; border-bottom: 1px solid var(--border); }
 		tbody tr:hover { background: rgba(99, 102, 241, 0.1); }
 
-		.metric-highlight { color: var(--success); font-weight: 600; }
-		.warning { color: var(--warning); font-weight: 600; }
+		.metric-highlight { color: var(--green); font-weight: 700; }
+		.warning { color: var(--amber); font-weight: 700; }
+		.luminara-row {
+			background: linear-gradient(90deg, rgba(124, 58, 237, 0.22), rgba(6, 182, 212, 0.08));
+			box-shadow: inset 4px 0 0 var(--luminara);
+		}
+		.client-mark {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			border-radius: 999px;
+			background: rgba(196, 181, 253, 0.16);
+			color: #ddd6fe;
+			font-weight: 800;
+		}
 
 		.category-badge {
 			display: inline-block;
 			padding: 4px 12px;
 			border-radius: 20px;
-			background: rgba(99, 102, 241, 0.2);
-			color: var(--primary);
+			background: rgba(124, 58, 237, 0.20);
+			color: var(--luminara);
 			font-size: 0.85rem;
 			font-weight: 600;
 		}
@@ -101,27 +144,63 @@
 		.env-value { text-align: right; }
 		.chart-container { height: 420px; margin-top: 20px; }
 		footer { text-align: center; margin-top: 50px; font-size: 0.9rem; }
+		.lens {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+			gap: 16px;
+			margin-bottom: 30px;
+		}
+		.lens-card {
+			padding: 18px 20px;
+			border: 1px solid rgba(196, 181, 253, 0.24);
+			border-radius: 12px;
+			background: rgba(16, 17, 20, 0.58);
+		}
+		.lens-card strong { display: block; margin-bottom: 6px; color: #ffffff; }
+		.lens-card span { color: var(--text-dim); }
+		@media (max-width: 720px) {
+			body { padding: 18px; }
+			header { padding: 28px 22px; }
+			.section { padding: 20px; overflow-x: auto; }
+			table { min-width: 760px; }
+		}
 	</style>
 </head>
 <body>
 	<div class="container">
 		<header>
+			<span class="kicker">Luminara performance lab</span>
 			<h1>Luminara Benchmark Report</h1>
-			<p class="subtitle">Report published Aug 25, 2026, 05:38:56 PM GMT+3 from benchmark data captured Nov 14, 2025, 04:00:05 PM GMT+2</p>
+			<p class="subtitle">Report published Aug 25, 2026, 05:55:19 PM GMT+3 from benchmark data captured Aug 25, 2026, 05:48:23 PM GMT+3</p>
 		</header>
+
+		<div class="lens">
+			<div class="lens-card">
+				<strong>Built for the fetch era</strong>
+				<span>Luminara is compared against native fetch, Ky, and ofetch as its closest browser-style peers.</span>
+			</div>
+			<div class="lens-card">
+				<strong>Distinctive feature surface</strong>
+				<span>Retries, hedging, rate limits, deduplication, stats, and plugins are part of the benchmark story.</span>
+			</div>
+			<div class="lens-card">
+				<strong>Honest measurement</strong>
+				<span>Failed tasks are marked separately and network-style tests are framed as end-to-end local scenarios.</span>
+			</div>
+		</div>
 
 		<div class="summary-grid">
 			<div class="summary-card">
 				<div class="summary-label">Completed Benchmarks</div>
-				<div class="summary-value">72</div>
+				<div class="summary-value">17</div>
 			</div>
 			<div class="summary-card">
 				<div class="summary-label">Marked Failed</div>
-				<div class="summary-value">5</div>
+				<div class="summary-value">1</div>
 			</div>
 			<div class="summary-card">
 				<div class="summary-label">Micro Operations</div>
-				<div class="summary-value">13</div>
+				<div class="summary-value">0</div>
 			</div>
 			<div class="summary-card">
 				<div class="summary-label">Luminara</div>
@@ -135,27 +214,27 @@
 			<div class="highlight-grid">
 				
 				<div class="highlight-card">
-					<div class="highlight-label">orchestration</div>
-					<div class="highlight-value">11,193,953 ops/sec</div>
-					<div class="highlight-name">SignalManager - create AbortController · mean 89 ns</div>
+					<div class="highlight-label">comparison</div>
+					<div class="highlight-value">4,216 ops/sec</div>
+					<div class="highlight-name">Compare - axios GET text · mean 237.17 us</div>
 				</div>
 				<div class="highlight-card">
-					<div class="highlight-label">driver</div>
-					<div class="highlight-value">11,067,801 ops/sec</div>
-					<div class="highlight-name">Post-Flight - Text response (1KB) · mean 90 ns</div>
+					<div class="highlight-label">comparison</div>
+					<div class="highlight-value">3,620 ops/sec</div>
+					<div class="highlight-name">Compare - got POST JSON · mean 276.27 us</div>
 				</div>
 				<div class="highlight-card">
-					<div class="highlight-label">features</div>
-					<div class="highlight-value">11,056,737 ops/sec</div>
-					<div class="highlight-name">Debouncing - key generation (method+url) · mean 90 ns</div>
+					<div class="highlight-label">comparison</div>
+					<div class="highlight-value">3,416 ops/sec</div>
+					<div class="highlight-name">Compare - got GET JSON · mean 292.70 us</div>
 				</div>
 				<div class="highlight-card">
-					<div class="highlight-label">features</div>
-					<div class="highlight-value">10,952,723 ops/sec</div>
-					<div class="highlight-name">Debouncing - key generation (url) · mean 91 ns</div>
+					<div class="highlight-label">comparison</div>
+					<div class="highlight-value">3,349 ops/sec</div>
+					<div class="highlight-name">Compare - axios POST JSON · mean 298.58 us</div>
 				</div>
 			</div>
-			<p class="note">31 completed benchmarks are network-style or request scenarios; use them for relative overhead, not as raw network latency claims.</p>
+			<p class="note">6 completed benchmarks are network-style or request scenarios; use them for relative overhead, not as raw network latency claims.</p>
 		</div>
 
 		<div class="section">
@@ -168,11 +247,11 @@
 				</div>
 				<div class="env-row">
 					<span class="env-key">Node.js</span>
-					<span class="env-value">v22.14.0</span>
+					<span class="env-value">v24.19.0</span>
 				</div>
 				<div class="env-row">
 					<span class="env-key">Platform</span>
-					<span class="env-value">win32 x64</span>
+					<span class="env-value">linux x64</span>
 				</div>
 				<div class="env-row">
 					<span class="env-key">CPU</span>
@@ -197,6 +276,163 @@
 			</div>
 		</div>
 
+		
+		<div class="section">
+			<h2>Client Comparison</h2>
+			<p class="note">These scenarios compare Luminara with native fetch, Axios, Ky, ofetch, and Got against the same local mock server. Retries are disabled where libraries enable them by default, so this measures simple request overhead plus parsing.</p>
+			<table>
+				<thead>
+					<tr>
+						<th>Scenario</th>
+						<th>Client</th>
+						<th>Mean</th>
+						<th>Ops/sec</th>
+						<th>vs native fetch</th>
+						<th>P99</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+					<tr class="">
+						<td>GET JSON</td>
+						<td>native fetch</td>
+						<td>1.535 ms</td>
+						<td class="metric-highlight">652</td>
+						<td>100.0%</td>
+						<td>2.383 ms</td>
+					</tr>
+					<tr class="luminara-row">
+						<td>GET JSON</td>
+						<td><span class="client-mark">Luminara</span></td>
+						<td>1.416 ms</td>
+						<td class="metric-highlight">706</td>
+						<td>108.4%</td>
+						<td>2.167 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET JSON</td>
+						<td>axios</td>
+						<td>310.41 us</td>
+						<td class="metric-highlight">3,222</td>
+						<td>494.5%</td>
+						<td>1.036 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET JSON</td>
+						<td>ky</td>
+						<td>1.370 ms</td>
+						<td class="metric-highlight">730</td>
+						<td>112.0%</td>
+						<td>2.443 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET JSON</td>
+						<td>ofetch</td>
+						<td>1.306 ms</td>
+						<td class="metric-highlight">766</td>
+						<td>117.5%</td>
+						<td>2.405 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET JSON</td>
+						<td>got</td>
+						<td>292.70 us</td>
+						<td class="metric-highlight">3,416</td>
+						<td>524.4%</td>
+						<td>653.41 us</td>
+					</tr>
+					<tr class="">
+						<td>POST JSON</td>
+						<td>native fetch</td>
+						<td>1.450 ms</td>
+						<td class="metric-highlight">690</td>
+						<td>100.0%</td>
+						<td>2.513 ms</td>
+					</tr>
+					<tr class="luminara-row">
+						<td>POST JSON</td>
+						<td><span class="client-mark">Luminara</span></td>
+						<td>1.411 ms</td>
+						<td class="metric-highlight">709</td>
+						<td>102.7%</td>
+						<td>2.452 ms</td>
+					</tr>
+					<tr class="">
+						<td>POST JSON</td>
+						<td>axios</td>
+						<td>298.58 us</td>
+						<td class="metric-highlight">3,349</td>
+						<td>485.6%</td>
+						<td>470.57 us</td>
+					</tr>
+					<tr class="">
+						<td>POST JSON</td>
+						<td>ky</td>
+						<td>1.504 ms</td>
+						<td class="metric-highlight">665</td>
+						<td>96.4%</td>
+						<td>2.551 ms</td>
+					</tr>
+					<tr class="">
+						<td>POST JSON</td>
+						<td>ofetch</td>
+						<td>1.388 ms</td>
+						<td class="metric-highlight">720</td>
+						<td>104.4%</td>
+						<td>1.895 ms</td>
+					</tr>
+					<tr class="">
+						<td>POST JSON</td>
+						<td>got</td>
+						<td>276.27 us</td>
+						<td class="metric-highlight">3,620</td>
+						<td>524.8%</td>
+						<td>407.01 us</td>
+					</tr>
+					<tr class="">
+						<td>GET text</td>
+						<td>native fetch</td>
+						<td>1.232 ms</td>
+						<td class="metric-highlight">811</td>
+						<td>100.0%</td>
+						<td>1.377 ms</td>
+					</tr>
+					<tr class="luminara-row">
+						<td>GET text</td>
+						<td><span class="client-mark">Luminara</span></td>
+						<td>1.305 ms</td>
+						<td class="metric-highlight">766</td>
+						<td>94.4%</td>
+						<td>2.347 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET text</td>
+						<td>axios</td>
+						<td>237.17 us</td>
+						<td class="metric-highlight">4,216</td>
+						<td>519.6%</td>
+						<td>396.33 us</td>
+					</tr>
+					<tr class="">
+						<td>GET text</td>
+						<td>ky</td>
+						<td>1.302 ms</td>
+						<td class="metric-highlight">768</td>
+						<td>94.6%</td>
+						<td>2.343 ms</td>
+					</tr>
+					<tr class="">
+						<td>GET text</td>
+						<td>ofetch</td>
+						<td>1.269 ms</td>
+						<td class="metric-highlight">788</td>
+						<td>97.1%</td>
+						<td>1.475 ms</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
 		<div class="section">
 			<h2>Benchmark Results</h2>
 			<table>
@@ -213,580 +449,140 @@
 				<tbody>
 					
 					<tr>
-						<td>createLuminara() - cold start</td>
-						<td><span class="category-badge">core</span></td>
-						<td>7.45 us</td>
-						<td class="metric-highlight">134,214</td>
-						<td>15.00 us</td>
-						<td>134,214</td>
+						<td>Compare - native fetch GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.535 ms</td>
+						<td class="metric-highlight">652</td>
+						<td>2.383 ms</td>
+						<td>196</td>
 					</tr>
 					<tr>
-						<td>createLuminara() - warm start</td>
-						<td><span class="category-badge">core</span></td>
-						<td>7.33 us</td>
-						<td class="metric-highlight">136,400</td>
-						<td>12.80 us</td>
-						<td>136,400</td>
+						<td>Compare - luminara GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.416 ms</td>
+						<td class="metric-highlight">706</td>
+						<td>2.167 ms</td>
+						<td>212</td>
 					</tr>
 					<tr>
-						<td>api.use() - register 1 plugin</td>
-						<td><span class="category-badge">core</span></td>
-						<td>156 ns</td>
-						<td class="metric-highlight">6,430,423</td>
-						<td>1.30 us</td>
-						<td>6,602,699</td>
+						<td>Compare - axios GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>310.41 us</td>
+						<td class="metric-highlight">3,222</td>
+						<td>1.036 ms</td>
+						<td>967</td>
 					</tr>
 					<tr>
-						<td>api.use() - register 10 plugins</td>
-						<td><span class="category-badge">core</span></td>
-						<td>1.30 us</td>
-						<td class="metric-highlight">772,094</td>
-						<td>4.60 us</td>
-						<td>772,095</td>
+						<td>Compare - ky GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.370 ms</td>
+						<td class="metric-highlight">730</td>
+						<td>2.443 ms</td>
+						<td>219</td>
 					</tr>
 					<tr>
-						<td>api.updateConfig() - simple</td>
-						<td><span class="category-badge">core</span></td>
-						<td>744 ns</td>
-						<td class="metric-highlight">1,344,031</td>
-						<td>400 ns</td>
-						<td>1,344,031</td>
+						<td>Compare - ofetch GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.306 ms</td>
+						<td class="metric-highlight">766</td>
+						<td>2.405 ms</td>
+						<td>230</td>
 					</tr>
 					<tr>
-						<td>api.updateConfig() - complex</td>
-						<td><span class="category-badge">core</span></td>
-						<td>402 ns</td>
-						<td class="metric-highlight">2,488,829</td>
-						<td>400 ns</td>
-						<td>2,504,581</td>
+						<td>Compare - got GET JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>292.70 us</td>
+						<td class="metric-highlight">3,416</td>
+						<td>653.41 us</td>
+						<td>1,025</td>
 					</tr>
 					<tr>
-						<td>PluginPipeline - empty (onRequest)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>29.73 us</td>
-						<td class="metric-highlight">33,631</td>
-						<td>50.30 us</td>
-						<td>33,631</td>
+						<td>Compare - native fetch POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.450 ms</td>
+						<td class="metric-highlight">690</td>
+						<td>2.513 ms</td>
+						<td>207</td>
 					</tr>
 					<tr>
-						<td>PluginPipeline - empty (onResponse)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>25.86 us</td>
-						<td class="metric-highlight">38,671</td>
-						<td>30.70 us</td>
-						<td>38,671</td>
+						<td>Compare - luminara POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.411 ms</td>
+						<td class="metric-highlight">709</td>
+						<td>2.452 ms</td>
+						<td>213</td>
 					</tr>
 					<tr>
-						<td>PluginPipeline - 1 plugin (onRequest)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>38.22 us</td>
-						<td class="metric-highlight">26,167</td>
-						<td>54.10 us</td>
-						<td>26,167</td>
+						<td>Compare - axios POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>298.58 us</td>
+						<td class="metric-highlight">3,349</td>
+						<td>470.57 us</td>
+						<td>1,005</td>
 					</tr>
 					<tr>
-						<td>PluginPipeline - 1 plugin (onResponse)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>40.08 us</td>
-						<td class="metric-highlight">24,950</td>
-						<td>52.40 us</td>
-						<td>24,951</td>
-					</tr>
-					<tr>
-						<td>PluginPipeline - 5 plugins (onRequest L→R)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>73.52 us</td>
-						<td class="metric-highlight">13,602</td>
-						<td>111.20 us</td>
-						<td>13,737</td>
-					</tr>
-					<tr>
-						<td>PluginPipeline - 5 plugins (onResponse R→L)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>69.79 us</td>
-						<td class="metric-highlight">14,329</td>
-						<td>82.40 us</td>
-						<td>14,329</td>
-					</tr>
-					<tr>
-						<td>PluginPipeline - 10 plugins (onRequest)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>118.93 us</td>
-						<td class="metric-highlight">8,408</td>
-						<td>213.70 us</td>
-						<td>8,496</td>
-					</tr>
-					<tr>
-						<td>PluginPipeline - 10 plugins (onResponse)</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>103.84 us</td>
-						<td class="metric-highlight">9,630</td>
-						<td>147.40 us</td>
-						<td>9,632</td>
-					</tr>
-					<tr>
-						<td>ContextBuilder - simple request</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>481 ns</td>
-						<td class="metric-highlight">2,077,576</td>
-						<td>800 ns</td>
-						<td>2,077,576</td>
-					</tr>
-					<tr>
-						<td>ContextBuilder - complex request</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>958 ns</td>
-						<td class="metric-highlight">1,044,242</td>
-						<td>1000 ns</td>
-						<td>1,044,242</td>
-					</tr>
-					<tr>
-						<td>SignalManager - create AbortController</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>89 ns</td>
-						<td class="metric-highlight">11,193,953</td>
-						<td>200 ns</td>
-						<td>11,193,954</td>
-					</tr>
-					<tr>
-						<td>SignalManager - merge user signal</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>599 ns</td>
-						<td class="metric-highlight">1,668,701</td>
-						<td>900 ns</td>
-						<td>1,668,701</td>
-					</tr>
-					<tr>
-						<td>Full request with __benchmark flag</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>2.096 ms</td>
-						<td class="metric-highlight">477</td>
-						<td>7.738 ms</td>
-						<td>478</td>
-					</tr>
-					<tr>
-						<td>Full request without __benchmark flag</td>
-						<td><span class="category-badge">orchestration</span></td>
-						<td>2.089 ms</td>
-						<td class="metric-highlight">479</td>
-						<td>8.057 ms</td>
-						<td>479</td>
-					</tr>
-					<tr>
-						<td>Pre-Flight - URL building (simple path)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>1.51 us</td>
-						<td class="metric-highlight">660,611</td>
-						<td>2.60 us</td>
-						<td>660,612</td>
-					</tr>
-					<tr>
-						<td>Pre-Flight - URL building (10 query params)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>5.18 us</td>
-						<td class="metric-highlight">193,228</td>
-						<td>7.90 us</td>
-						<td>193,264</td>
-					</tr>
-					<tr>
-						<td>Pre-Flight - Headers preparation</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>1.23 us</td>
-						<td class="metric-highlight">814,964</td>
-						<td>1.80 us</td>
-						<td>818,725</td>
-					</tr>
-					<tr>
-						<td>In-Flight - Native fetch (GET JSON 1KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.091 ms</td>
-						<td class="metric-highlight">478</td>
-						<td>4.991 ms</td>
-						<td>479</td>
-					</tr>
-					<tr>
-						<td>In-Flight - Native fetch (GET JSON 10KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.216 ms</td>
-						<td class="metric-highlight">451</td>
-						<td>7.539 ms</td>
-						<td>455</td>
-					</tr>
-					<tr>
-						<td>In-Flight - Native fetch (GET JSON 100KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>3.444 ms</td>
-						<td class="metric-highlight">290</td>
-						<td>7.530 ms</td>
-						<td>291</td>
-					</tr>
-					<tr>
-						<td>In-Flight - Request with timeout (no timeout)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.410 ms</td>
-						<td class="metric-highlight">415</td>
-						<td>4.384 ms</td>
-						<td>415</td>
-					</tr>
-					<tr>
-						<td>Post-Flight - JSON parse (1KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>1.36 us</td>
-						<td class="metric-highlight">732,921</td>
-						<td>2.10 us</td>
-						<td>732,921</td>
-					</tr>
-					<tr>
-						<td>Post-Flight - JSON parse (100KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>60.30 us</td>
-						<td class="metric-highlight">16,584</td>
-						<td>66.80 us</td>
-						<td>16,585</td>
-					</tr>
-					<tr>
-						<td>Post-Flight - Text response (1KB)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>90 ns</td>
-						<td class="metric-highlight">11,067,801</td>
-						<td>100 ns</td>
-						<td>11,067,801</td>
-					</tr>
-					<tr>
-						<td>Typed Request - getText()</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.164 ms</td>
-						<td class="metric-highlight">462</td>
-						<td>4.315 ms</td>
-						<td>463</td>
-					</tr>
-					<tr>
-						<td>Typed Request - getBlob()</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>12.464 ms</td>
-						<td class="metric-highlight">80</td>
-						<td>36.621 ms</td>
-						<td>81</td>
-					</tr>
-					<tr>
-						<td>HTTP Verb - GET</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.521 ms</td>
-						<td class="metric-highlight">397</td>
-						<td>8.296 ms</td>
-						<td>397</td>
-					</tr>
-					<tr>
-						<td>HTTP Verb - POST with JSON body</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>3.016 ms</td>
-						<td class="metric-highlight">332</td>
-						<td>9.158 ms</td>
-						<td>332</td>
-					</tr>
-					<tr>
-						<td>HTTP Verb - PUT with JSON body</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>3.105 ms</td>
-						<td class="metric-highlight">322</td>
-						<td>9.859 ms</td>
-						<td>323</td>
-					</tr>
-					<tr>
-						<td>HTTP Verb - PATCH with JSON body</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>3.278 ms</td>
-						<td class="metric-highlight">305</td>
-						<td>9.805 ms</td>
-						<td>306</td>
-					</tr>
-					<tr>
-						<td>HTTP Verb - DELETE</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.432 ms</td>
-						<td class="metric-highlight">411</td>
-						<td>4.681 ms</td>
-						<td>412</td>
-					</tr>
-					<tr>
-						<td>Config - Minimal (no options)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.480 ms</td>
-						<td class="metric-highlight">403</td>
-						<td>8.457 ms</td>
-						<td>404</td>
-					</tr>
-					<tr>
-						<td>Config - With headers</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>2.457 ms</td>
-						<td class="metric-highlight">407</td>
-						<td>4.592 ms</td>
-						<td>408</td>
-					</tr>
-					<tr>
-						<td>Config - Complex (all options)</td>
-						<td><span class="category-badge">driver</span></td>
-						<td>3.238 ms</td>
-						<td class="metric-highlight">309</td>
-						<td>10.068 ms</td>
-						<td>309</td>
-					</tr>
-					<tr>
-						<td>Retry - Linear backoff (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.219 ms</td>
-						<td class="metric-highlight">451</td>
-						<td>7.986 ms</td>
-						<td>451</td>
-					</tr>
-					<tr>
-						<td>Retry - Exponential backoff (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.362 ms</td>
-						<td class="metric-highlight">423</td>
-						<td>7.955 ms</td>
-						<td>424</td>
-					</tr>
-					<tr>
-						<td>Retry - Fibonacci backoff (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.436 ms</td>
-						<td class="metric-highlight">411</td>
-						<td>4.012 ms</td>
-						<td>411</td>
-					</tr>
-					<tr>
-						<td>Retry - Custom backoff handler (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.433 ms</td>
-						<td class="metric-highlight">411</td>
-						<td>3.771 ms</td>
-						<td>411</td>
-					</tr>
-					<tr>
-						<td>Rate Limit - tokens available</td>
-						<td><span class="category-badge">features</span></td>
-						<td>5.052 ms</td>
-						<td class="metric-highlight">198</td>
-						<td>34.923 ms</td>
-						<td>198</td>
-					</tr>
-					<tr>
-						<td>Rate Limit - endpoint scoped</td>
-						<td><span class="category-badge">features</span></td>
-						<td>5.108 ms</td>
-						<td class="metric-highlight">196</td>
-						<td>33.488 ms</td>
+						<td>Compare - ky POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.504 ms</td>
+						<td class="metric-highlight">665</td>
+						<td>2.551 ms</td>
 						<td>200</td>
 					</tr>
 					<tr>
-						<td>Stats - collection enabled</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.429 ms</td>
-						<td class="metric-highlight">412</td>
-						<td>8.138 ms</td>
-						<td>414</td>
+						<td>Compare - ofetch POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.388 ms</td>
+						<td class="metric-highlight">720</td>
+						<td>1.895 ms</td>
+						<td>217</td>
 					</tr>
 					<tr>
-						<td>Stats - query simple</td>
-						<td><span class="category-badge">features</span></td>
-						<td>59.31 us</td>
-						<td class="metric-highlight">16,860</td>
-						<td>87.90 us</td>
-						<td>16,861</td>
+						<td>Compare - got POST JSON</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>276.27 us</td>
+						<td class="metric-highlight">3,620</td>
+						<td>407.01 us</td>
+						<td>1,086</td>
 					</tr>
 					<tr>
-						<td>Stats - query complex with groupBy</td>
-						<td><span class="category-badge">features</span></td>
-						<td>84.03 us</td>
-						<td class="metric-highlight">11,901</td>
-						<td>169.30 us</td>
-						<td>11,901</td>
+						<td>Compare - native fetch GET text</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.232 ms</td>
+						<td class="metric-highlight">811</td>
+						<td>1.377 ms</td>
+						<td>244</td>
 					</tr>
 					<tr>
-						<td>Stats - reset all</td>
-						<td><span class="category-badge">features</span></td>
-						<td>1.87 us</td>
-						<td class="metric-highlight">533,734</td>
-						<td>2.90 us</td>
-						<td>533,734</td>
+						<td>Compare - luminara GET text</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.305 ms</td>
+						<td class="metric-highlight">766</td>
+						<td>2.347 ms</td>
+						<td>230</td>
 					</tr>
 					<tr>
-						<td>Deduplication - key generation (url)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>95 ns</td>
-						<td class="metric-highlight">10,477,485</td>
-						<td>200 ns</td>
-						<td>10,477,485</td>
+						<td>Compare - axios GET text</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>237.17 us</td>
+						<td class="metric-highlight">4,216</td>
+						<td>396.33 us</td>
+						<td>1,265</td>
 					</tr>
 					<tr>
-						<td>Deduplication - key generation (url+method)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>98 ns</td>
-						<td class="metric-highlight">10,162,355</td>
-						<td>200 ns</td>
-						<td>10,162,355</td>
+						<td>Compare - ky GET text</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.302 ms</td>
+						<td class="metric-highlight">768</td>
+						<td>2.343 ms</td>
+						<td>231</td>
 					</tr>
 					<tr>
-						<td>Deduplication - key generation (url+method+body)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>384 ns</td>
-						<td class="metric-highlight">2,601,717</td>
-						<td>800 ns</td>
-						<td>2,601,718</td>
-					</tr>
-					<tr>
-						<td>Hedging - Race policy (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>3.032 ms</td>
-						<td class="metric-highlight">330</td>
-						<td>8.548 ms</td>
-						<td>330</td>
-					</tr>
-					<tr>
-						<td>Hedging - Cancel-and-retry policy (success first try)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>2.842 ms</td>
-						<td class="metric-highlight">352</td>
-						<td>9.577 ms</td>
-						<td>352</td>
-					</tr>
-					<tr>
-						<td>Hedging - Exponential backoff with jitter</td>
-						<td><span class="category-badge">features</span></td>
-						<td>3.818 ms</td>
-						<td class="metric-highlight">262</td>
-						<td>10.846 ms</td>
-						<td>262</td>
-					</tr>
-					<tr>
-						<td>Hedging - Overhead when not triggered</td>
-						<td><span class="category-badge">features</span></td>
-						<td>3.370 ms</td>
-						<td class="metric-highlight">297</td>
-						<td>10.061 ms</td>
-						<td>297</td>
-					</tr>
-					<tr>
-						<td>Debouncing - key generation (url)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>91 ns</td>
-						<td class="metric-highlight">10,952,723</td>
-						<td>200 ns</td>
-						<td>10,952,723</td>
-					</tr>
-					<tr>
-						<td>Debouncing - key generation (method+url)</td>
-						<td><span class="category-badge">features</span></td>
-						<td>90 ns</td>
-						<td class="metric-highlight">11,056,737</td>
-						<td>200 ns</td>
-						<td>11,056,738</td>
-					</tr>
-					<tr>
-						<td>All features ON - full overhead</td>
-						<td><span class="category-badge">features</span></td>
-						<td>5.095 ms</td>
-						<td class="metric-highlight">196</td>
-						<td>31.909 ms</td>
-						<td>199</td>
-					</tr>
-					<tr>
-						<td>Scenario - Bare minimum GET</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.354 ms</td>
-						<td class="metric-highlight">425</td>
-						<td>4.267 ms</td>
-						<td>425</td>
-					</tr>
-					<tr>
-						<td>Scenario - GET with retry (success first attempt)</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.505 ms</td>
-						<td class="metric-highlight">399</td>
-						<td>4.669 ms</td>
-						<td>400</td>
-					</tr>
-					<tr>
-						<td>Scenario - GET with stats collection</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.511 ms</td>
-						<td class="metric-highlight">398</td>
-						<td>8.449 ms</td>
-						<td>399</td>
-					</tr>
-					<tr>
-						<td>Scenario - GET with 1 plugin</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.622 ms</td>
-						<td class="metric-highlight">381</td>
-						<td>8.208 ms</td>
-						<td>382</td>
-					</tr>
-					<tr>
-						<td>Scenario - GET with 3 plugins</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.607 ms</td>
-						<td class="metric-highlight">384</td>
-						<td>8.360 ms</td>
-						<td>384</td>
-					</tr>
-					<tr>
-						<td>Scenario - ALL features enabled</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>2.668 ms</td>
-						<td class="metric-highlight">375</td>
-						<td>8.146 ms</td>
-						<td>375</td>
-					</tr>
-					<tr>
-						<td>Scenario - 10 concurrent requests</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>25.171 ms</td>
-						<td class="metric-highlight">40</td>
-						<td>35.073 ms</td>
-						<td>40</td>
-					</tr>
-					<tr>
-						<td>Scenario - 50 concurrent requests</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>129.972 ms</td>
-						<td class="metric-highlight">8</td>
-						<td>154.481 ms</td>
-						<td>10</td>
-					</tr>
-					<tr>
-						<td>Scenario - 10 sequential requests</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>27.144 ms</td>
-						<td class="metric-highlight">37</td>
-						<td>36.937 ms</td>
-						<td>37</td>
-					</tr>
-					<tr>
-						<td>Scenario - Mixed HTTP methods (GET/POST/PUT)</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>10.251 ms</td>
-						<td class="metric-highlight">98</td>
-						<td>24.844 ms</td>
-						<td>98</td>
-					</tr>
-					<tr>
-						<td>Scenario - Large payload (100KB)</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>3.751 ms</td>
-						<td class="metric-highlight">267</td>
-						<td>8.484 ms</td>
-						<td>270</td>
-					</tr>
-					<tr>
-						<td>Scenario - Very large payload (1MB blob)</td>
-						<td><span class="category-badge">integrated</span></td>
-						<td>12.197 ms</td>
-						<td class="metric-highlight">82</td>
-						<td>27.982 ms</td>
-						<td>82</td>
+						<td>Compare - ofetch GET text</td>
+						<td><span class="category-badge">comparison</span></td>
+						<td>1.269 ms</td>
+						<td class="metric-highlight">788</td>
+						<td>1.475 ms</td>
+						<td>237</td>
 					</tr>
 				</tbody>
 			</table>
@@ -807,28 +603,8 @@
 				<tbody>
 					
 					<tr>
-						<td>Typed Request - getJson()</td>
-						<td><span class="category-badge">driver</span></td>
-						<td class="warning">No valid samples</td>
-					</tr>
-					<tr>
-						<td>Config - With query params</td>
-						<td><span class="category-badge">driver</span></td>
-						<td class="warning">No valid samples</td>
-					</tr>
-					<tr>
-						<td>Deduplication - cache miss (first request)</td>
-						<td><span class="category-badge">features</span></td>
-						<td class="warning">No valid samples</td>
-					</tr>
-					<tr>
-						<td>Debouncing - first request</td>
-						<td><span class="category-badge">features</span></td>
-						<td class="warning">No valid samples</td>
-					</tr>
-					<tr>
-						<td>All features OFF - baseline</td>
-						<td><span class="category-badge">features</span></td>
+						<td>Compare - got GET text</td>
+						<td><span class="category-badge">comparison</span></td>
 						<td class="warning">No valid samples</td>
 					</tr>
 				</tbody>
@@ -848,7 +624,7 @@
 	</div>
 
 	<script>
-		const validBenchmarks = [{"category":"core","name":"createLuminara() - cold start","result":{"mean":0.007450792763795013,"p75":0.006699999999909778,"p99":0.015000000000100044,"p995":0.021100000000046748,"min":0.005499999999983629,"max":0.636199999999917,"sd":0.01427990997168273,"hz":134213.90605026792,"sampleCount":134214}},{"category":"core","name":"createLuminara() - warm start","result":{"mean":0.0073313900293259905,"p75":0.006600000000617001,"p99":0.012800000000424916,"p995":0.025399999999535794,"min":0.005599999999958527,"max":5.289300000000367,"sd":0.022890168438559795,"hz":136399.7817603403,"sampleCount":136400}},{"category":"core","name":"api.use() - register 1 plugin","result":{"mean":0.00015551076915666081,"p75":0.00010000000111176632,"p99":0.0012999999962630682,"p995":0.0014999999984866008,"min":0,"max":33.58929999999964,"sd":0.01616318604560373,"hz":6430422.828097549,"sampleCount":6602699}},{"category":"core","name":"api.use() - register 10 plugins","result":{"mean":0.0012951788316252313,"p75":0.0015999999959603883,"p99":0.004600000000209548,"p995":0.011200000000826549,"min":0.00019999999494757503,"max":82.4780000000028,"sd":0.10809431831120582,"hz":772094.1506935906,"sampleCount":772095}},{"category":"core","name":"api.updateConfig() - simple","result":{"mean":0.0007440306064341079,"p75":0.00019999999494757503,"p99":0.0004000000044470653,"p995":0.0005000000091968104,"min":0.0000999999901978299,"max":24.853000000002794,"sd":0.07476123802270358,"hz":1344030.7311989067,"sampleCount":1344031}},{"category":"core","name":"api.updateConfig() - complex","result":{"mean":0.00040179531027008814,"p75":0.00029999999969732016,"p99":0.0004000000044470653,"p995":0.0005999999993946403,"min":0.0000999999901978299,"max":11.932199999995646,"sd":0.033836346696641,"hz":2488829.447331769,"sampleCount":2504581}},{"category":"orchestration","name":"PluginPipeline - empty (onRequest)","result":{"mean":0.029734637685469748,"p75":0.02609999998821877,"p99":0.05029999998805579,"p995":0.05730000000039581,"min":0.014899999994668178,"max":20.058499999999185,"sd":0.19400600466017562,"hz":33630.81166745355,"sampleCount":33631}},{"category":"orchestration","name":"PluginPipeline - empty (onResponse)","result":{"mean":0.025859452819949582,"p75":0.02509999999892898,"p99":0.030700000002980232,"p995":0.03809999999066349,"min":0.01789999999164138,"max":13.778099999995902,"sd":0.15722106287610557,"hz":38670.578490684,"sampleCount":38671}},{"category":"orchestration","name":"PluginPipeline - 1 plugin (onRequest)","result":{"mean":0.03821659724087551,"p75":0.03779999999096617,"p99":0.05409999999392312,"p995":0.062300000005052425,"min":0.026199999992968515,"max":12.588799999997718,"sd":0.18652133853867375,"hz":26166.64151695916,"sampleCount":26167}},{"category":"orchestration","name":"PluginPipeline - 1 plugin (onResponse)","result":{"mean":0.04007950382760534,"p75":0.03770000000076834,"p99":0.052400000000488944,"p995":0.06570000000647269,"min":0.03290000000561122,"max":11.109400000001187,"sd":0.14718925895543813,"hz":24950.408675250004,"sampleCount":24951}},{"category":"orchestration","name":"PluginPipeline - 5 plugins (onRequest L→R)","result":{"mean":0.0735209798355835,"p75":0.06710000000020955,"p99":0.11119999999937136,"p995":0.13439999999536667,"min":0.05019999999785796,"max":12.55449999999837,"sd":0.2718814429428264,"hz":13601.559748473439,"sampleCount":13737}},{"category":"orchestration","name":"PluginPipeline - 5 plugins (onResponse R→L)","result":{"mean":0.06978962244397702,"p75":0.06400000001303852,"p99":0.08239999999932479,"p995":0.10929999999643769,"min":0.05010000000766013,"max":13.550799999997253,"sd":0.27335419683656026,"hz":14328.777903946118,"sampleCount":14329}},{"category":"orchestration","name":"PluginPipeline - 10 plugins (onRequest)","result":{"mean":0.1189290489642575,"p75":0.10510000000067521,"p99":0.21369999999296851,"p995":0.45029999999678694,"min":0.09410000000207219,"max":14.360599999999977,"sd":0.367640528390851,"hz":8408.37464613491,"sampleCount":8496}},{"category":"orchestration","name":"PluginPipeline - 10 plugins (onResponse)","result":{"mean":0.10383957641191278,"p75":0.09450000000651926,"p99":0.1474000000016531,"p995":0.3776999999972759,"min":0.08779999999387655,"max":13.10580000000482,"sd":0.31833340623645356,"hz":9630.239592206937,"sampleCount":9632}},{"category":"orchestration","name":"ContextBuilder - simple request","result":{"mean":0.00048133021366617777,"p75":0.0004000000044470653,"p99":0.0008000000088941306,"p995":0.0010000000038417056,"min":0.00029999998514540493,"max":9.330000000001746,"sd":0.02707233119069083,"hz":2077575.7922679272,"sampleCount":2077576}},{"category":"orchestration","name":"ContextBuilder - complex request","result":{"mean":0.000957632617727276,"p75":0.0004000000189989805,"p99":0.0009999999892897904,"p995":0.0012000000278931111,"min":0.00029999998514540493,"max":10.10209999998915,"sd":0.06577439113317335,"hz":1044241.7911508416,"sampleCount":1044242}},{"category":"orchestration","name":"SignalManager - create AbortController","result":{"mean":0.00008933394759081543,"p75":0.00010000000474974513,"p99":0.0001999999803956598,"p995":0.00020000000949949026,"min":0,"max":0.36069999999017455,"sd":0.00014697077914776766,"hz":11193952.880940543,"sampleCount":11193954}},{"category":"orchestration","name":"SignalManager - merge user signal","result":{"mean":0.0005992685927318783,"p75":0.0004999999946448952,"p99":0.0008999999845400453,"p995":0.0010999999940395355,"min":0.00029999998514540493,"max":6.787099999986822,"sd":0.027873654953831473,"hz":1668700.833196201,"sampleCount":1668701}},{"category":"orchestration","name":"Full request with __benchmark flag","result":{"mean":2.0957817991637886,"p75":1.9878000000026077,"p99":7.738299999997253,"p995":7.891600000002654,"min":1.6910999999963678,"max":39.21720000001369,"sd":1.8206057987980684,"hz":477.14890949000386,"sampleCount":478}},{"category":"orchestration","name":"Full request without __benchmark flag","result":{"mean":2.0886321503134098,"p75":2.002199999988079,"p99":8.057100000005448,"p995":8.276299999997718,"min":1.8647000000055414,"max":8.644900000013877,"sd":0.7305354600125812,"hz":478.78224983271707,"sampleCount":479}},{"category":"driver","name":"Pre-Flight - URL building (simple path)","result":{"mean":0.0015137499772878472,"p75":0.001500000013038516,"p99":0.0026000000070780516,"p995":0.0029999999969732016,"min":0.0012999999744351953,"max":0.10640000001876615,"sd":0.0005049910720607948,"hz":660611.0751470849,"sampleCount":660612}},{"category":"driver","name":"Pre-Flight - URL building (10 query params)","result":{"mean":0.005175220941316961,"p75":0.004199999995762482,"p99":0.00789999999688007,"p995":0.008400000020628795,"min":0.0037999999476596713,"max":5.207800000003772,"sd":0.06075269763873742,"hz":193228.46528471605,"sampleCount":193264}},{"category":"driver","name":"Pre-Flight - Headers preparation","result":{"mean":0.0012270481541516978,"p75":0.0010999999940395355,"p99":0.0018000000272877514,"p995":0.002199999988079071,"min":0.0008999999845400453,"max":6.213799999968614,"sd":0.02691072625728377,"hz":814963.9414040239,"sampleCount":818725}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 1KB)","result":{"mean":2.0914855949910716,"p75":2.06150000001071,"p99":4.991099999984726,"p995":7.939099999959581,"min":1.6872000000439584,"max":8.96860000002198,"sd":0.6432127885234232,"hz":478.1290401401349,"sampleCount":479}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 10KB)","result":{"mean":2.2163696703306592,"p75":2.1282999999821186,"p99":7.538800000038464,"p995":8.489700000034645,"min":1.9649999999674037,"max":10.198999999964144,"sd":0.7940048191994297,"hz":451.188271246651,"sampleCount":455}},{"category":"driver","name":"In-Flight - Native fetch (GET JSON 100KB)","result":{"mean":3.4435494845339796,"p75":3.482999999949243,"p99":7.5297999999602325,"p995":7.613099999958649,"min":2.8214000000152737,"max":8.48599999997532,"sd":0.8540123657481538,"hz":290.3980339156739,"sampleCount":291}},{"category":"driver","name":"In-Flight - Request with timeout (no timeout)","result":{"mean":2.4103857831314137,"p75":2.369799999985844,"p99":4.3844999999855645,"p995":8.728099999949336,"min":2.0676000000094064,"max":9.871799999964423,"sd":0.7413585194497011,"hz":414.8713483950549,"sampleCount":415}},{"category":"driver","name":"Post-Flight - JSON parse (1KB)","result":{"mean":0.0013644040762646142,"p75":0.0013000000035390258,"p99":0.002099999983329326,"p995":0.0023999999975785613,"min":0.0011999999987892807,"max":6.391100000008009,"sd":0.013723620489624888,"hz":732920.7068464216,"sampleCount":732921}},{"category":"driver","name":"Post-Flight - JSON parse (100KB)","result":{"mean":0.06029747362055709,"p75":0.04389999998966232,"p99":0.06680000002961606,"p995":2.105299999995623,"min":0.04139999998733401,"max":2.5473000000347383,"sd":0.1853864937371059,"hz":16584.44276277393,"sampleCount":16585}},{"category":"driver","name":"Post-Flight - Text response (1KB)","result":{"mean":0.00009035218469351643,"p75":0.00010000000474974513,"p99":0.00010000000474974513,"p995":0.00020000000949949026,"min":0,"max":3.5473999999812804,"sd":0.0010758774978893763,"hz":11067800.998859067,"sampleCount":11067801}},{"category":"driver","name":"Typed Request - getText()","result":{"mean":2.163850323973826,"p75":2.1177000000025146,"p99":4.314899999997579,"p995":7.978600000031292,"min":1.9442999999737367,"max":8.44059999997262,"sd":0.6040752177473586,"hz":462.1391733618337,"sampleCount":463}},{"category":"driver","name":"Typed Request - getBlob()","result":{"mean":12.46353580246688,"p75":11.175700000021607,"p99":36.62070000002859,"p995":36.62070000002859,"min":9.772100000001956,"max":36.62070000002859,"sd":5.146589934931883,"hz":80.23405363043705,"sampleCount":81}},{"category":"driver","name":"HTTP Verb - GET","result":{"mean":2.5207375314851146,"p75":2.4479999999748543,"p99":8.29590000002645,"p995":9.68580000003567,"min":2.1273999999975786,"max":9.740500000014435,"sd":0.8538960099356393,"hz":396.70929143140154,"sampleCount":397}},{"category":"driver","name":"HTTP Verb - POST with JSON body","result":{"mean":3.0155138554218426,"p75":2.9610000000102445,"p99":9.158400000014808,"p995":9.252900000021327,"min":2.668999999994412,"max":9.527100000006612,"sd":0.8013335951304685,"hz":331.61843982312234,"sampleCount":332}},{"category":"driver","name":"HTTP Verb - PUT with JSON body","result":{"mean":3.105160061920014,"p75":3.040900000021793,"p99":9.858900000050198,"p995":9.96850000001723,"min":2.7597999999998137,"max":10.532900000049267,"sd":0.8821892072443874,"hz":322.04459031386284,"sampleCount":323}},{"category":"driver","name":"HTTP Verb - PATCH with JSON body","result":{"mean":3.2778039215694887,"p75":3.222200000018347,"p99":9.804500000027474,"p995":10.738000000012107,"min":2.8950000000186265,"max":10.769399999990128,"sd":0.9555058110761511,"hz":305.08231240420776,"sampleCount":306}},{"category":"driver","name":"HTTP Verb - DELETE","result":{"mean":2.4317791262146784,"p75":2.4047000000136904,"p99":4.681400000001304,"p995":8.426000000035856,"min":2.1865999999572523,"max":8.706200000015087,"sd":0.6342593251854594,"hz":411.22155759129566,"sampleCount":412}},{"category":"driver","name":"Config - Minimal (no options)","result":{"mean":2.4804032178215873,"p75":2.4323999999905936,"p99":8.457400000013877,"p995":8.676399999996647,"min":2.1912000000011176,"max":9.804699999978766,"sd":0.7411911446227883,"hz":403.16025749968566,"sampleCount":404}},{"category":"driver","name":"Config - With headers","result":{"mean":2.4574740196082585,"p75":2.4323000000440516,"p99":4.591899999999441,"p995":8.702999999979511,"min":2.1871999999857508,"max":8.837800000037532,"sd":0.6824823212949161,"hz":406.92190111511667,"sampleCount":408}},{"category":"driver","name":"Config - Complex (all options)","result":{"mean":3.237545307442353,"p75":3.158899999980349,"p99":10.068399999989197,"p995":10.426399999996647,"min":2.944100000022445,"max":10.693200000037905,"sd":0.9177528376389076,"hz":308.8759862916006,"sampleCount":309}},{"category":"features","name":"Retry - Linear backoff (success first try)","result":{"mean":2.218643458979953,"p75":2.183599999989383,"p99":7.985700000019278,"p995":8.167900000000373,"min":1.897800000035204,"max":8.556199999991804,"sd":0.6890960887172745,"hz":450.72586852678063,"sampleCount":451}},{"category":"features","name":"Retry - Exponential backoff (success first try)","result":{"mean":2.362004245283112,"p75":2.307299999985844,"p99":7.955000000016298,"p995":8.17070000001695,"min":2.0755999999819323,"max":8.810300000011921,"sd":0.6859732353402994,"hz":423.3692644697762,"sampleCount":424}},{"category":"features","name":"Retry - Fibonacci backoff (success first try)","result":{"mean":2.4359019464728764,"p75":2.3915000000270084,"p99":4.011899999983143,"p995":8.218399999954272,"min":2.214800000016112,"max":8.980299999995623,"sd":0.6283347135400275,"hz":410.52555561523087,"sampleCount":411}},{"category":"features","name":"Retry - Custom backoff handler (success first try)","result":{"mean":2.433254987835729,"p75":2.3898000000044703,"p99":3.7714000000269152,"p995":8.228799999982584,"min":2.183100000023842,"max":9.5337999999756,"sd":0.6618367072504103,"hz":410.972136088974,"sampleCount":411}},{"category":"features","name":"Rate Limit - tokens available","result":{"mean":5.052392929295287,"p75":2.7919000000110827,"p99":34.92260000004899,"p995":36.06669999996666,"min":2.304200000013225,"max":36.06669999996666,"sd":7.188202877640079,"hz":197.92601525540513,"sampleCount":198}},{"category":"features","name":"Rate Limit - endpoint scoped","result":{"mean":5.107969499999599,"p75":2.7949000000371598,"p99":33.488300000026356,"p995":36.7675000000163,"min":2.305099999997765,"max":49.148099999991246,"sd":7.410793465238552,"hz":195.77250803867926,"sampleCount":200}},{"category":"features","name":"Stats - collection enabled","result":{"mean":2.4290502415449753,"p75":2.3642000000108965,"p99":8.13780000002589,"p995":8.341199999966193,"min":2.199999999953434,"max":11.776199999963865,"sd":0.7701366137965687,"hz":411.6835390625593,"sampleCount":414}},{"category":"features","name":"Stats - query simple","result":{"mean":0.05931107882115138,"p75":0.04769999999552965,"p99":0.08789999998407438,"p995":1.9646000000066124,"min":0.044200000003911555,"max":2.965100000030361,"sd":0.15603051789815733,"hz":16860.25646263211,"sampleCount":16861}},{"category":"features","name":"Stats - query complex with groupBy","result":{"mean":0.08402667843044868,"p75":0.06560000003082678,"p99":0.1693000000086613,"p995":2.055999999982305,"min":0.061599999957252294,"max":2.6000000000349246,"sd":0.1905264479534619,"hz":11900.982148517616,"sampleCount":11901}},{"category":"features","name":"Stats - reset all","result":{"mean":0.0018735928383988335,"p75":0.0016000000177882612,"p99":0.002899999963119626,"p995":0.0032000000355765224,"min":0.00139999995008111,"max":9.653300000005402,"sd":0.04124417351020047,"hz":533733.8932479038,"sampleCount":533734}},{"category":"features","name":"Deduplication - key generation (url)","result":{"mean":0.00009544275177462511,"p75":0.00010000000474974513,"p99":0.00020000000949949026,"p995":0.00020000000949949026,"min":0,"max":2.8003000000026077,"sd":0.0010444886443360599,"hz":10477484.999189483,"sampleCount":10477485}},{"category":"features","name":"Deduplication - key generation (url+method)","result":{"mean":0.00009840238803419313,"p75":0.00010000006295740604,"p99":0.00020000000949949026,"p995":0.00020000000949949026,"min":0,"max":1.7994000000180677,"sd":0.0007104870371216306,"hz":10162354.999479458,"sampleCount":10162355}},{"category":"features","name":"Deduplication - key generation (url+method+body)","result":{"mean":0.0003843615257250985,"p75":0.0004000000189989805,"p99":0.0007999999215826392,"p995":0.0008999999845400453,"min":0.00019999989308416843,"max":3.6705000000074506,"sd":0.002313824362005328,"hz":2601717.2195200827,"sampleCount":2601718}},{"category":"features","name":"Hedging - Race policy (success first try)","result":{"mean":3.0319375757526634,"p75":3.004899999941699,"p99":8.548300000024028,"p995":9.04660000000149,"min":2.4147000000812113,"max":12.570399999967776,"sd":1.0072903567373426,"hz":329.822093963051,"sampleCount":330}},{"category":"features","name":"Hedging - Cancel-and-retry policy (success first try)","result":{"mean":2.8424698863683178,"p75":2.8312000000150874,"p99":9.576899999985471,"p995":9.738600000040606,"min":2.3256999999284744,"max":10.628400000045076,"sd":0.9015683120598296,"hz":351.8067173888868,"sampleCount":352}},{"category":"features","name":"Hedging - Exponential backoff with jitter","result":{"mean":3.8184828244230555,"p75":3.861200000043027,"p99":10.8456999999471,"p995":12.96950000000652,"min":2.6950000000651926,"max":20.4130999998888,"sd":1.5866764409407965,"hz":261.88411627885023,"sampleCount":262}},{"category":"features","name":"Hedging - Overhead when not triggered","result":{"mean":3.3704764309793127,"p75":3.301300000050105,"p99":10.060800000093877,"p995":11.614000000059605,"min":2.7537000000011176,"max":14.730199999990873,"sd":1.1902008926465468,"hz":296.6939601798206,"sampleCount":297}},{"category":"features","name":"Debouncing - key generation (url)","result":{"mean":0.00009130149644564177,"p75":0.00010000006295740604,"p99":0.00020000000949949026,"p995":0.00020000000949949026,"min":0,"max":0.25459999998565763,"sd":0.0001359246007999711,"hz":10952722.999401994,"sampleCount":10952723}},{"category":"features","name":"Debouncing - key generation (method+url)","result":{"mean":0.00009044259706686197,"p75":0.00010000006295740604,"p99":0.00019999989308416843,"p995":0.00020000000949949026,"min":0,"max":2.6945999999297783,"sd":0.0008202270282771482,"hz":11056736.896450737,"sampleCount":11056738}},{"category":"features","name":"All features ON - full overhead","result":{"mean":5.094635175882099,"p75":3.007800000021234,"p99":31.9087999999756,"p995":42.119899999932386,"min":2.468599999905564,"max":42.119899999932386,"sd":6.830092694752762,"hz":196.2849086297641,"sampleCount":199}},{"category":"integrated","name":"Scenario - Bare minimum GET","result":{"mean":2.3536164705888094,"p75":2.2929000000003725,"p99":4.266899999929592,"p995":8.232700000051409,"min":2.027200000011362,"max":13.488000000012107,"sd":0.7790464213180524,"hz":424.8780599966773,"sampleCount":425}},{"category":"integrated","name":"Scenario - GET with retry (success first attempt)","result":{"mean":2.5052654999977677,"p75":2.444099999964237,"p99":4.668599999975413,"p995":8.199200000031851,"min":2.234500000020489,"max":11.177000000025146,"sd":0.7117559470272298,"hz":399.1592907022793,"sampleCount":400}},{"category":"integrated","name":"Scenario - GET with stats collection","result":{"mean":2.5110401002460283,"p75":2.477199999964796,"p99":8.448600000003353,"p995":8.786899999948218,"min":2.2605999999213964,"max":8.80089999991469,"sd":0.6562556875380946,"hz":398.2413502285453,"sampleCount":399}},{"category":"integrated","name":"Scenario - GET with 1 plugin","result":{"mean":2.622440575918241,"p75":2.593600000021979,"p99":8.20809999993071,"p995":8.554699999978766,"min":2.327900000032969,"max":8.649199999985285,"sd":0.6807390008625733,"hz":381.32417915698716,"sampleCount":382}},{"category":"integrated","name":"Scenario - GET with 3 plugins","result":{"mean":2.606675520830322,"p75":2.5786999999545515,"p99":8.359699999913573,"p995":8.67319999996107,"min":2.342199999955483,"max":9.17000000004191,"sd":0.6541194838769319,"hz":383.63041046300356,"sampleCount":384}},{"category":"integrated","name":"Scenario - ALL features enabled","result":{"mean":2.6678290666698787,"p75":2.6256999999750406,"p99":8.145799999940209,"p995":8.263999999966472,"min":2.362099999911152,"max":8.285499999998137,"sd":0.6441005206288031,"hz":374.83660872180667,"sampleCount":375}},{"category":"integrated","name":"Scenario - 10 concurrent requests","result":{"mean":25.171335000000546,"p75":25.158800000092015,"p99":35.07270000001881,"p995":35.07270000001881,"min":22.64179999998305,"max":35.07270000001881,"sd":3.033221908699217,"hz":39.72772997538582,"sampleCount":40}},{"category":"integrated","name":"Scenario - 50 concurrent requests","result":{"mean":129.97171000001254,"p75":137.5985000000801,"p99":154.48140000004787,"p995":154.48140000004787,"min":112.91969999996945,"max":154.48140000004787,"sd":13.157435107756152,"hz":7.69398202116371,"sampleCount":10}},{"category":"integrated","name":"Scenario - 10 sequential requests","result":{"mean":27.143564864864096,"p75":27.51320000004489,"p99":36.93700000003446,"p995":36.93700000003446,"min":24.340099999913946,"max":36.93700000003446,"sd":3.016107597200792,"hz":36.84114466830578,"sampleCount":37}},{"category":"integrated","name":"Scenario - Mixed HTTP methods (GET/POST/PUT)","result":{"mean":10.251110204084473,"p75":9.876400000066496,"p99":24.844400000059977,"p995":24.844400000059977,"min":8.418999999994412,"max":24.844400000059977,"sd":3.013406997141755,"hz":97.5504096718771,"sampleCount":98}},{"category":"integrated","name":"Scenario - Large payload (100KB)","result":{"mean":3.7513685185151795,"p75":3.5700000000651926,"p99":8.484399999957532,"p995":15.663300000014715,"min":3.1118999999016523,"max":19.076699999975972,"sd":1.4901646586298034,"hz":266.5693852961712,"sampleCount":270}},{"category":"integrated","name":"Scenario - Very large payload (1MB blob)","result":{"mean":12.196514634147185,"p75":12.145699999993667,"p99":27.98160000005737,"p995":27.98160000005737,"min":10.215199999976903,"max":27.98160000005737,"sd":2.6792660274308004,"hz":81.9906366692867,"sampleCount":82}}];
+		const validBenchmarks = [{"category":"comparison","name":"Compare - native fetch GET JSON","result":{"mean":1.5349154948979604,"p75":1.4368289999999888,"p99":2.38293299999998,"p995":24.90532399999995,"min":0.3257669999999848,"max":24.90532399999995,"sd":1.6958341717215892,"hz":651.5016646349504,"sampleCount":196}},{"category":"comparison","name":"Compare - luminara GET JSON","result":{"mean":1.415744504716982,"p75":1.4542989999999918,"p99":2.1666040000000066,"p995":2.501561000000038,"min":0.331698000000074,"max":3.4948139999999057,"sd":0.28958151146462197,"hz":706.342137771467,"sampleCount":212}},{"category":"comparison","name":"Compare - axios GET JSON","result":{"mean":0.31040581282316465,"p75":0.3041880000000674,"p99":1.0361320000001797,"p995":1.602388000000019,"min":0.21798800000010488,"max":7.206135999999901,"sd":0.28027191800509793,"hz":3221.589154226602,"sampleCount":967}},{"category":"comparison","name":"Compare - ky GET JSON","result":{"mean":1.3700624840182596,"p75":1.3763000000001284,"p99":2.4428709999999683,"p995":2.4512620000000425,"min":0.2729279999998653,"max":2.872368999999935,"sd":0.2237447816272711,"hz":729.8937177427832,"sampleCount":219}},{"category":"comparison","name":"Compare - ofetch GET JSON","result":{"mean":1.3058758347826063,"p75":1.2954909999998563,"p99":2.4053120000000945,"p995":2.408821999999873,"min":0.21390900000005786,"max":2.9724379999997836,"sd":0.2564737834711116,"hz":765.769588014831,"sampleCount":230}},{"category":"comparison","name":"Compare - got GET JSON","result":{"mean":0.29270496097560794,"p75":0.28924800000004325,"p99":0.6534059999999045,"p995":1.0058420000000297,"min":0.2233579999997346,"max":6.494891000000052,"sd":0.28802767890387737,"hz":3416.4094679739073,"sampleCount":1025}},{"category":"comparison","name":"Compare - native fetch POST JSON","result":{"mean":1.4498492415458986,"p75":1.4386089999998148,"p99":2.513071999999738,"p995":2.5236110000000735,"min":0.35638699999981327,"max":3.19466599999987,"sd":0.2237238266136927,"hz":689.726884247463,"sampleCount":207}},{"category":"comparison","name":"Compare - luminara POST JSON","result":{"mean":1.4114001924882518,"p75":1.4442090000002281,"p99":2.4519609999997556,"p995":2.4735410000002958,"min":0.3241570000000138,"max":4.334048000000166,"sd":0.30853894640750945,"hz":708.5162700998596,"sampleCount":213}},{"category":"comparison","name":"Compare - axios POST JSON","result":{"mean":0.2985826129353185,"p75":0.32566799999995055,"p99":0.4705659999999625,"p995":0.5121159999998781,"min":0.24358899999970163,"max":5.623677999999927,"sd":0.21436706259528043,"hz":3349.1568386020804,"sampleCount":1005}},{"category":"comparison","name":"Compare - ky POST JSON","result":{"mean":1.5036096499999985,"p75":1.5034990000003745,"p99":2.551121000000421,"p995":2.565270000000055,"min":0.36579699999992954,"max":12.796344999999747,"sd":0.8420181933023628,"hz":665.066229124029,"sampleCount":200}},{"category":"comparison","name":"Compare - ofetch POST JSON","result":{"mean":1.3884255990783396,"p75":1.390440000000126,"p99":1.8948059999997895,"p995":2.4503219999996873,"min":0.2885679999999411,"max":6.479951999999685,"sd":0.39694101783504815,"hz":720.2402495775192,"sampleCount":217}},{"category":"comparison","name":"Compare - got POST JSON","result":{"mean":0.276267068139968,"p75":0.26686800000015864,"p99":0.40700699999979406,"p995":0.4487260000000788,"min":0.2286180000000968,"max":7.2826960000002146,"sd":0.2937379976403842,"hz":3619.6858595298077,"sampleCount":1086}},{"category":"comparison","name":"Compare - native fetch GET text","result":{"mean":1.232373766393473,"p75":1.2798609999999826,"p99":1.3767599999996492,"p995":1.4093990000001213,"min":0.18999799999983225,"max":1.4935789999999542,"sd":0.19317561309758224,"hz":811.4421349023745,"sampleCount":244}},{"category":"comparison","name":"Compare - luminara GET text","result":{"mean":1.3050478000000112,"p75":1.295919999999569,"p99":2.346693000000414,"p995":2.35330200000044,"min":0.22455799999988812,"max":2.3806219999996756,"sd":0.15865212945292664,"hz":766.2554582291863,"sampleCount":230}},{"category":"comparison","name":"Compare - axios GET text","result":{"mean":0.23716650513834028,"p75":0.2231389999997191,"p99":0.3963270000003831,"p995":0.5215360000001965,"min":0.2027379999999539,"max":5.926476000000548,"sd":0.2549104162110076,"hz":4216.4470038325835,"sampleCount":1265}},{"category":"comparison","name":"Compare - ky GET text","result":{"mean":1.3024180606061004,"p75":1.2967509999998583,"p99":2.3428030000004583,"p995":2.3869119999999384,"min":0.223468000000139,"max":2.388523000000532,"sd":0.17593517127058644,"hz":767.8026205615073,"sampleCount":231}},{"category":"comparison","name":"Compare - ofetch GET text","result":{"mean":1.2689902109704454,"p75":1.2764799999995375,"p99":1.4753189999992173,"p995":2.3053229999995892,"min":0.19170799999938026,"max":2.3150520000008328,"sd":0.13827101926286722,"hz":788.0281434442759,"sampleCount":237}}];
 		const opsCtx = document.getElementById('opsChart').getContext('2d');
 		const sortedResults = [...validBenchmarks].sort((a, b) => b.result.hz - a.result.hz).slice(0, 20);
 

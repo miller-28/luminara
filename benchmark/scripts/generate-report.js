@@ -106,12 +106,80 @@ class HTMLReportGenerator {
 		];
 	}
 
+	getClientComparison(validBenchmarks) {
+		const comparisons = validBenchmarks
+			.filter(bench => bench.category === 'comparison' && bench.name.startsWith('Compare - '))
+			.map(bench => {
+				const label = bench.name.replace('Compare - ', '');
+				const match = label.match(/^(native fetch|luminara|axios|ky|ofetch|got) (.+)$/);
+
+				return {
+					...bench,
+					client: match?.[1] || 'unknown',
+					scenario: match?.[2] || label
+				};
+			});
+
+		const baselineByScenario = new Map(
+			comparisons
+				.filter(bench => bench.client === 'native fetch')
+				.map(bench => [bench.scenario, bench.result.hz])
+		);
+
+		return comparisons.map(bench => {
+			const baseline = baselineByScenario.get(bench.scenario);
+			const relativeToFetch = baseline ? bench.result.hz / baseline : null;
+
+			return {
+				...bench,
+				relativeToFetch,
+				relativeLabel: relativeToFetch ? `${(relativeToFetch * 100).toFixed(1)}%` : 'baseline'
+			};
+		});
+	}
+
+	renderClientComparison(comparisons) {
+		if (comparisons.length === 0) {
+			return '';
+		}
+
+		return `
+		<div class="section">
+			<h2>Client Comparison</h2>
+			<p class="note">These scenarios compare Luminara with native fetch, Axios, Ky, ofetch, and Got against the same local mock server. Retries are disabled where libraries enable them by default, so this measures simple request overhead plus parsing.</p>
+			<table>
+				<thead>
+					<tr>
+						<th>Scenario</th>
+						<th>Client</th>
+						<th>Mean</th>
+						<th>Ops/sec</th>
+						<th>vs native fetch</th>
+						<th>P99</th>
+					</tr>
+				</thead>
+				<tbody>
+					${comparisons.map(bench => `
+					<tr class="${bench.client === 'luminara' ? 'luminara-row' : ''}">
+						<td>${escapeHTML(bench.scenario)}</td>
+						<td>${bench.client === 'luminara' ? '<span class="client-mark">Luminara</span>' : escapeHTML(bench.client)}</td>
+						<td>${formatDuration(bench.result.mean)}</td>
+						<td class="metric-highlight">${formatOps(bench.result.hz)}</td>
+						<td>${bench.relativeLabel}</td>
+						<td>${formatDuration(bench.result.p99)}</td>
+					</tr>`).join('')}
+				</tbody>
+			</table>
+		</div>`;
+	}
+
 	generateHTML() {
 		const report = this.latestReport;
 		const allBenchmarks = this.getBenchmarks(report);
 		const validBenchmarks = allBenchmarks.filter(bench => hasMetric(bench.result));
 		const failedBenchmarks = allBenchmarks.filter(bench => !hasMetric(bench.result));
 		const fastest = [...validBenchmarks].sort((a, b) => b.result.hz - a.result.hz).slice(0, 4);
+		const clientComparisons = this.getClientComparison(validBenchmarks);
 		const microOps = validBenchmarks.filter(bench => bench.result.mean < 0.001).length;
 		const networkBound = validBenchmarks.filter(bench => {
 			const name = bench.name.toLowerCase();
@@ -128,33 +196,53 @@ class HTMLReportGenerator {
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 	<style>
 		:root {
-			--primary: #6366f1;
-			--secondary: #8b5cf6;
-			--success: #10b981;
-			--warning: #f59e0b;
-			--bg-dark: #1e1e1e;
-			--bg-light: #2d2d2d;
-			--text: #e4e4e7;
-			--text-dim: #a1a1aa;
-			--border: #3f3f46;
+			--violet: #7c3aed;
+			--blue: #2563eb;
+			--cyan: #06b6d4;
+			--green: #10b981;
+			--amber: #f59e0b;
+			--rose: #fb7185;
+			--ink: #101114;
+			--panel: #181a20;
+			--panel-soft: #20232b;
+			--text: #f4f7fb;
+			--text-dim: #aab2c0;
+			--border: #343946;
+			--luminara: #c4b5fd;
 		}
 
 		* { margin: 0; padding: 0; box-sizing: border-box; }
 
 		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-			background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background:
+				radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.24), transparent 34%),
+				radial-gradient(circle at 82% 12%, rgba(6, 182, 212, 0.16), transparent 30%),
+				linear-gradient(135deg, #0f1117 0%, #171922 48%, #101114 100%);
 			color: var(--text);
-			padding: 40px;
+			padding: 36px;
 			line-height: 1.6;
 		}
 
 		.container { max-width: 1400px; margin: 0 auto; }
-		header { text-align: center; margin-bottom: 40px; }
+		header {
+			position: relative;
+			overflow: hidden;
+			margin-bottom: 28px;
+			padding: 44px;
+			border: 1px solid rgba(196, 181, 253, 0.28);
+			border-radius: 18px;
+			background:
+				linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(37, 99, 235, 0.10)),
+				rgba(16, 17, 20, 0.82);
+			box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+		}
 
 		h1 {
-			font-size: 3rem;
-			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			font-size: clamp(2.3rem, 5vw, 4.6rem);
+			line-height: 1;
+			letter-spacing: 0;
+			background: linear-gradient(135deg, #ffffff, var(--luminara) 48%, #67e8f9);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			margin-bottom: 10px;
@@ -162,6 +250,15 @@ class HTMLReportGenerator {
 
 		.subtitle, .note, footer { color: var(--text-dim); }
 		.subtitle { font-size: 1.1rem; }
+		.kicker {
+			display: inline-flex;
+			margin-bottom: 14px;
+			color: #67e8f9;
+			font-size: 0.78rem;
+			font-weight: 800;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+		}
 
 		.summary-grid, .highlight-grid {
 			display: grid;
@@ -171,15 +268,16 @@ class HTMLReportGenerator {
 		}
 
 		.summary-card, .highlight-card, .section {
-			background: var(--bg-light);
+			background: rgba(24, 26, 32, 0.88);
 			border: 1px solid var(--border);
-			border-radius: 10px;
+			border-radius: 12px;
+			box-shadow: 0 12px 34px rgba(0, 0, 0, 0.20);
 		}
 
 		.summary-card, .highlight-card { padding: 24px; }
 		.summary-label, .highlight-label { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 8px; }
-		.summary-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
-		.highlight-value { font-size: 1.5rem; font-weight: 700; color: var(--success); }
+		.summary-value { font-size: 2rem; font-weight: 800; color: var(--luminara); }
+		.highlight-value { font-size: 1.5rem; font-weight: 800; color: var(--green); }
 		.highlight-name { margin-top: 8px; color: var(--text-dim); font-size: 0.9rem; }
 
 		.section { padding: 30px; margin-bottom: 30px; }
@@ -187,7 +285,7 @@ class HTMLReportGenerator {
 		.note { margin-bottom: 18px; }
 
 		table { width: 100%; border-collapse: collapse; }
-		thead { background: var(--bg-dark); }
+		thead { background: #11131a; }
 		th {
 			padding: 14px;
 			text-align: left;
@@ -199,15 +297,28 @@ class HTMLReportGenerator {
 		td { padding: 14px; border-bottom: 1px solid var(--border); }
 		tbody tr:hover { background: rgba(99, 102, 241, 0.1); }
 
-		.metric-highlight { color: var(--success); font-weight: 600; }
-		.warning { color: var(--warning); font-weight: 600; }
+		.metric-highlight { color: var(--green); font-weight: 700; }
+		.warning { color: var(--amber); font-weight: 700; }
+		.luminara-row {
+			background: linear-gradient(90deg, rgba(124, 58, 237, 0.22), rgba(6, 182, 212, 0.08));
+			box-shadow: inset 4px 0 0 var(--luminara);
+		}
+		.client-mark {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			border-radius: 999px;
+			background: rgba(196, 181, 253, 0.16);
+			color: #ddd6fe;
+			font-weight: 800;
+		}
 
 		.category-badge {
 			display: inline-block;
 			padding: 4px 12px;
 			border-radius: 20px;
-			background: rgba(99, 102, 241, 0.2);
-			color: var(--primary);
+			background: rgba(124, 58, 237, 0.20);
+			color: var(--luminara);
 			font-size: 0.85rem;
 			font-weight: 600;
 		}
@@ -222,14 +333,50 @@ class HTMLReportGenerator {
 		.env-value { text-align: right; }
 		.chart-container { height: 420px; margin-top: 20px; }
 		footer { text-align: center; margin-top: 50px; font-size: 0.9rem; }
+		.lens {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+			gap: 16px;
+			margin-bottom: 30px;
+		}
+		.lens-card {
+			padding: 18px 20px;
+			border: 1px solid rgba(196, 181, 253, 0.24);
+			border-radius: 12px;
+			background: rgba(16, 17, 20, 0.58);
+		}
+		.lens-card strong { display: block; margin-bottom: 6px; color: #ffffff; }
+		.lens-card span { color: var(--text-dim); }
+		@media (max-width: 720px) {
+			body { padding: 18px; }
+			header { padding: 28px 22px; }
+			.section { padding: 20px; overflow-x: auto; }
+			table { min-width: 760px; }
+		}
 	</style>
 </head>
 <body>
 	<div class="container">
 		<header>
+			<span class="kicker">Luminara performance lab</span>
 			<h1>Luminara Benchmark Report</h1>
 			<p class="subtitle">Report published ${formatDate(generatedAt)} from benchmark data captured ${formatDate(report.meta.timestamp)}</p>
 		</header>
+
+		<div class="lens">
+			<div class="lens-card">
+				<strong>Built for the fetch era</strong>
+				<span>Luminara is compared against native fetch, Ky, and ofetch as its closest browser-style peers.</span>
+			</div>
+			<div class="lens-card">
+				<strong>Distinctive feature surface</strong>
+				<span>Retries, hedging, rate limits, deduplication, stats, and plugins are part of the benchmark story.</span>
+			</div>
+			<div class="lens-card">
+				<strong>Honest measurement</strong>
+				<span>Failed tasks are marked separately and network-style tests are framed as end-to-end local scenarios.</span>
+			</div>
+		</div>
 
 		<div class="summary-grid">
 			<div class="summary-card">
@@ -274,6 +421,8 @@ class HTMLReportGenerator {
 				</div>`).join('')}
 			</div>
 		</div>
+
+		${this.renderClientComparison(clientComparisons)}
 
 		<div class="section">
 			<h2>Benchmark Results</h2>
