@@ -125,15 +125,39 @@ class HTMLReportGenerator {
 				.filter(bench => bench.client === 'native fetch')
 				.map(bench => [bench.scenario, bench.result.hz])
 		);
+		const fastestByScenario = new Map();
+		for (const bench of comparisons) {
+			const fastest = fastestByScenario.get(bench.scenario);
+			if (!fastest || bench.result.hz > fastest.result.hz) {
+				fastestByScenario.set(bench.scenario, bench);
+			}
+		}
+		const rankByScenario = new Map();
+		for (const scenario of new Set(comparisons.map(bench => bench.scenario))) {
+			const ranked = comparisons
+				.filter(bench => bench.scenario === scenario)
+				.sort((a, b) => b.result.hz - a.result.hz);
+
+			ranked.forEach((bench, index) => {
+				rankByScenario.set(`${scenario}:${bench.client}`, index + 1);
+			});
+		}
 
 		return comparisons.map(bench => {
 			const baseline = baselineByScenario.get(bench.scenario);
+			const fastest = fastestByScenario.get(bench.scenario);
 			const relativeToFetch = baseline ? bench.result.hz / baseline : null;
+			const score = fastest ? (bench.result.hz / fastest.result.hz) * 100 : null;
+			const rank = rankByScenario.get(`${bench.scenario}:${bench.client}`);
 
 			return {
 				...bench,
 				relativeToFetch,
-				relativeLabel: relativeToFetch ? `${(relativeToFetch * 100).toFixed(1)}%` : 'baseline'
+				relativeLabel: relativeToFetch ? `${(relativeToFetch * 100).toFixed(1)}%` : 'baseline',
+				score,
+				scoreLabel: score ? score.toFixed(1) : 'n/a',
+				rank,
+				rankLabel: rank === 1 ? 'Winner' : rank === 2 ? 'Runner-up' : `#${rank}`
 			};
 		});
 	}
@@ -152,6 +176,8 @@ class HTMLReportGenerator {
 					<tr>
 						<th>Scenario</th>
 						<th>Client</th>
+						<th>Rank</th>
+						<th>Score</th>
 						<th>Mean</th>
 						<th>Ops/sec</th>
 						<th>vs native fetch</th>
@@ -163,6 +189,13 @@ class HTMLReportGenerator {
 					<tr class="${bench.client === 'luminara' ? 'luminara-row' : ''}">
 						<td>${escapeHTML(bench.scenario)}</td>
 						<td>${bench.client === 'luminara' ? '<span class="client-mark">Luminara</span>' : escapeHTML(bench.client)}</td>
+						<td><span class="${bench.rank === 1 ? 'rank-winner' : bench.rank === 2 ? 'rank-runner' : 'rank'}">${bench.rankLabel}</span></td>
+						<td>
+							<div class="score">
+								<span>${bench.scoreLabel}</span>
+								<div class="score-track"><div class="score-fill" style="width: ${bench.scoreLabel}%"></div></div>
+							</div>
+						</td>
 						<td>${formatDuration(bench.result.mean)}</td>
 						<td class="metric-highlight">${formatOps(bench.result.hz)}</td>
 						<td>${bench.relativeLabel}</td>
@@ -311,6 +344,35 @@ class HTMLReportGenerator {
 			background: rgba(196, 181, 253, 0.16);
 			color: #ddd6fe;
 			font-weight: 800;
+		}
+		.rank, .rank-winner, .rank-runner {
+			display: inline-flex;
+			padding: 4px 9px;
+			border-radius: 999px;
+			font-size: 0.78rem;
+			font-weight: 800;
+			white-space: nowrap;
+		}
+		.rank { color: var(--text-dim); background: rgba(255, 255, 255, 0.06); }
+		.rank-winner { color: #062016; background: var(--green); }
+		.rank-runner { color: #201504; background: var(--amber); }
+		.score {
+			display: grid;
+			grid-template-columns: 48px 96px;
+			align-items: center;
+			gap: 10px;
+			font-weight: 800;
+		}
+		.score-track {
+			height: 8px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.10);
+			overflow: hidden;
+		}
+		.score-fill {
+			height: 100%;
+			border-radius: inherit;
+			background: linear-gradient(90deg, var(--violet), var(--cyan));
 		}
 
 		.category-badge {
