@@ -1,9 +1,9 @@
 export default {
 	// Tinybench settings
 	tinybench: {
-		time: 1000,          // Run each benchmark for 1000ms
+		time: 300,           // Keep production report generation light enough for small servers
 		warmup: true,        // Enable warmup phase
-		warmupTime: 100,     // Warmup for 100ms
+		warmupTime: 50,      // Warmup for 50ms
 		iterations: undefined // Auto-calculate optimal iterations
 	},
 	
@@ -20,7 +20,7 @@ export default {
 	},
 	
 	// Memory profiling
-	enableMemoryProfiling: true,
+	enableMemoryProfiling: false,
 	forceGCBetweenSuites: true,
 	
 	// Output settings
