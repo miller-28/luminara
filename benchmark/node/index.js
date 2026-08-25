@@ -18,6 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Main benchmark entry point
  */
 async function main() {
+	const packageJsonPath = path.resolve(__dirname, '../../../package.json');
+	const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 	const program = new Command();
 	
 	program
@@ -113,7 +115,7 @@ async function main() {
 						arch: process.arch
 					},
 					luminara: {
-						version: '0.10.0' // TODO: Get from package.json
+						version: packageJson.version
 					},
 					tinybench: {
 						version: '2.9.0' // TODO: Get from package.json
