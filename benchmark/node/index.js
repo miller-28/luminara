@@ -8,6 +8,7 @@ import { orchestrationBenchmarks } from './suites/orchestration.bench.js';
 import { driverBenchmarks } from './suites/driver.bench.js';
 import { featureBenchmarks } from './suites/features.bench.js';
 import { integratedBenchmarks } from './suites/integrated.bench.js';
+import { comparisonBenchmarks } from './suites/comparison.bench.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,7 +19,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Main benchmark entry point
  */
 async function main() {
-	const packageJsonPath = path.resolve(__dirname, '../../../package.json');
+	const packageJsonPath = path.resolve(__dirname, '../../package.json');
 	const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 	const program = new Command();
 	
@@ -26,7 +27,7 @@ async function main() {
 		.name('luminara-benchmark')
 		.description('Performance benchmarks for Luminara HTTP client')
 		.version('0.1.0')
-		.option('-c, --category <category>', 'Run specific category (core, orchestration, driver, features, integrated)')
+		.option('-c, --category <category>', 'Run specific category (core, orchestration, driver, features, integrated, comparison)')
 		.option('-m, --memory', 'Enable memory profiling')
 		.option('--save-baseline', 'Save results as baseline for comparison')
 		.option('--compare', 'Compare with baseline')
@@ -67,6 +68,7 @@ async function main() {
 		runner.registerSuite('driver', driverBenchmarks);
 		runner.registerSuite('features', featureBenchmarks);
 		runner.registerSuite('integrated', integratedBenchmarks);
+		runner.registerSuite('comparison', comparisonBenchmarks);
 		
 		// Load baseline if comparing
 		let baseline = null;

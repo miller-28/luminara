@@ -111,7 +111,7 @@ class HTMLReportGenerator {
 			.filter(bench => bench.category === 'comparison' && bench.name.startsWith('Compare - '))
 			.map(bench => {
 				const label = bench.name.replace('Compare - ', '');
-				const match = label.match(/^(native fetch|luminara|axios|ky|ofetch|got) (.+)$/);
+				const match = label.match(/^(native fetch|luminara|ky|ofetch) (.+)$/);
 
 				return {
 					...bench,
@@ -169,8 +169,8 @@ class HTMLReportGenerator {
 
 		return `
 		<div class="section">
-			<h2>Client Comparison</h2>
-			<p class="note">These scenarios compare Luminara with native fetch, Axios, Ky, ofetch, and Got against the same local mock server. Retries are disabled where libraries enable them by default, so this measures simple request overhead plus parsing.</p>
+			<h2>Fetch-Family Comparison</h2>
+			<p class="note">These scenarios compare Luminara with native fetch, Ky, and ofetch against the same local mock server. They are all Fetch API family clients, so the score reflects peers with the same browser-style request foundation.</p>
 			<table>
 				<thead>
 					<tr>
