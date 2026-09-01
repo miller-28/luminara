@@ -221,24 +221,7 @@ class SandboxUI {
 		window.addEventListener('scroll', toggleStickyNav);
 		toggleStickyNav(); // Check initial position
 
-		// Track when user views the features list
-		const featuresList = document.querySelector('.features-list');
-		if (featuresList && typeof IntersectionObserver !== 'undefined') {
-			let hasTrackedFeaturesView = false;
-			const featuresObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting && !hasTrackedFeaturesView && typeof gtag === 'function') {
-						gtag('event', 'view_item', {
-							content_type: 'section',
-							item_id: 'features_list'
-						});
-						hasTrackedFeaturesView = true;
-						featuresObserver.disconnect();
-					}
-				});
-			}, { threshold: 0.3 });
-			featuresObserver.observe(featuresList);
-		}
+
 	}
 
 	renderExamples() {
@@ -294,14 +277,6 @@ class SandboxUI {
 		docsBtn.innerHTML = '📖 Full Documentation';
 		docsBtn.title = 'View full documentation on GitHub';
 		docsBtn.onclick = () => {
-			// Track Documentation button click
-			if (typeof gtag === 'function') {
-				gtag('event', 'button_click', {
-					button_type: 'feature_documentation',
-					button_id: featureKey,
-					feature_title: feature.title
-				});
-			}
 			// Use custom docUrl if provided, otherwise use default pattern
 			const docUrl = feature.docUrl || `https://github.com/miller-28/luminara/tree/master/docs/features/${docFilename}.md`;
 			window.open(docUrl, '_blank', 'noopener,noreferrer');
@@ -312,14 +287,6 @@ class SandboxUI {
 		runFeatureBtn.className = 'btn btn-small';
 		runFeatureBtn.textContent = `▶ Run All ${feature.examples.length}`;
 		runFeatureBtn.onclick = () => {
-			// Track feature group run button click
-			if (typeof gtag === 'function') {
-				gtag('event', 'button_click', {
-					button_type: 'feature_group_run',
-					button_id: featureKey,
-					feature_title: feature.title
-				});
-			}
 			this.handleRunFeature(featureKey);
 		};
 		headerButtonContainer.appendChild(runFeatureBtn);
@@ -369,14 +336,6 @@ class SandboxUI {
 		stopBtn.textContent = '⏹ Stop';
 		stopBtn.style.display = 'none';
 		stopBtn.onclick = () => {
-			// Track Stop button click
-			if (typeof gtag === 'function') {
-				gtag('event', 'button_click', {
-					button_type: 'example_stop',
-					button_id: example.id,
-					example_title: example.title
-				});
-			}
 			this.handleStopTest(example.id);
 		};
 		this.stopButtonElements.set(example.id, stopBtn);
@@ -390,14 +349,6 @@ class SandboxUI {
 			codeBtn.className = 'example-code-btn';
 			codeBtn.innerHTML = '📄 Code';
 			codeBtn.onclick = () => {
-				// Track Code button click
-				if (typeof gtag === 'function') {
-					gtag('event', 'button_click', {
-						button_type: 'example_code',
-						button_id: example.id,
-						example_title: example.title
-					});
-				}
 				this.handleShowCode(example.title, example.code);
 			};
 			buttonContainer.appendChild(codeBtn);
@@ -465,15 +416,6 @@ class SandboxUI {
 			}
 		};
 
-		// Track example run in Google Analytics
-		if (typeof gtag === 'function') {
-			gtag('event', 'button_click', {
-				button_type: 'example_run',
-				button_id: example.id,
-				example_title: example.title
-			});
-		}
-
 		// Run example
 		const result = await this.examplesController.runExample(testId, updateOutput, onStatusChange);
 
@@ -505,25 +447,10 @@ class SandboxUI {
 	}
 
 	async handleRunAll() {
-		// Track Run All button click
-		if (typeof gtag === 'function') {
-			gtag('event', 'button_click', {
-				button_type: 'global_control',
-				button_id: 'run_all_examples'
-			});
-		}
 		await this.examplesController.runAll((exampleId) => this.handleRunTest(exampleId));
 	}
 
 	handleClearAll() {
-		// Track Clear All button click
-		if (typeof gtag === 'function') {
-			gtag('event', 'button_click', {
-				button_type: 'global_control',
-				button_id: 'clear_all'
-			});
-		}
-
 		// Stop all running examples
 		this.examplesController.stopAll();
 
@@ -546,15 +473,6 @@ class SandboxUI {
 	}
 
 	handleVerboseToggle(isVerbose) {
-		// Track Verbose toggle
-		if (typeof gtag === 'function') {
-			gtag('event', 'button_click', {
-				button_type: 'global_control',
-				button_id: 'verbose_toggle',
-				button_state: isVerbose ? 'enabled' : 'disabled'
-			});
-		}
-
 		// Save to localStorage
 		this.saveVerboseState(isVerbose);
 
@@ -611,31 +529,7 @@ class ScrollToTop {
 }
 
 // Footer Scroll Tracker
-class FooterScrollTracker {
-	constructor() {
-		this.init();
-	}
 
-	init() {
-		const footer = document.querySelector('.footer');
-		if (footer && typeof IntersectionObserver !== 'undefined') {
-			let hasTrackedFooter = false;
-			const footerObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting && !hasTrackedFooter && typeof gtag === 'function') {
-						gtag('event', 'view_item', {
-							content_type: 'section',
-							item_id: 'footer'
-						});
-						hasTrackedFooter = true;
-						footerObserver.disconnect();
-					}
-				});
-			}, { threshold: 0.5 });
-			footerObserver.observe(footer);
-		}
-	}
-}
 
 // Scroll to Bottom Button Manager
 class ScrollToBottom {
@@ -681,6 +575,3 @@ new ScrollToTop();
 
 // Initialize scroll to bottom button
 new ScrollToBottom();
-
-// Initialize footer scroll tracker
-new FooterScrollTracker();
