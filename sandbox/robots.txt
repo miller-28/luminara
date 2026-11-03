@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://luminara.website/sitemap.xml
+Sitemap: https://luminara.miller28.com/sitemap.xml

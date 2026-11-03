@@ -1,6 +1,6 @@
 # 🌌 Luminara
 
-[![Website](https://img.shields.io/badge/Website-luminara.website-blue?style=flat-square&logo=web)](https://luminara.website)
+[![Website](https://img.shields.io/badge/Website-luminara.miller28.com-blue?style=flat-square&logo=web)](https://luminara.miller28.com/)
 [![GitHub](https://img.shields.io/badge/GitHub-miller--28%2Fluminara-black?style=flat-square&logo=github)](https://github.com/miller-28/luminara)
 [![npm](https://img.shields.io/npm/v/luminara?style=flat-square&logo=npm)](https://www.npmjs.com/package/luminara)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](./LICENSE)
@@ -13,10 +13,10 @@ Its domain-driven architecture and type-safe foundation make it ideal for enterp
 
 ## 🔗 Links
 
-- 🎨 **Interactive Sandbox And Documentation Website**: [luminara.website](https://luminara.website/)
+- 🎨 **Interactive Sandbox And Documentation Website**: [luminara.miller28.com](https://luminara.miller28.com/)
 - 📦 **npm Package**: [npmjs.com/package/luminara](https://www.npmjs.com/package/luminara)
 - 🐙 **GitHub Repository**: [github.com/miller-28/luminara](https://github.com/miller-28/luminara)
-- ⚡ **Performance Benchmarks**: [luminara.website/benchmark](https://luminara.website/benchmark/)
+- ⚡ **Performance Benchmarks**: [luminara.miller28.com/benchmark](https://luminara.miller28.com/benchmark/)
 
 ## ✨ Features
 
